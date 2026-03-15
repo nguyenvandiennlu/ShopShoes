@@ -1,0 +1,454 @@
+:root {
+    --primary: #ff5a5f;      /* Màu đỏ san hô */
+    --primary-hover: #e34a4f;
+    --bg-body: #f4f7f6;
+    --text-dark: #2d3436;
+    --text-light: #636e72;
+    --white: #ffffff;
+    --border: #e0e0e0;
+}
+
+body {
+    background-color: var(--bg-body);
+    color: var(--text-dark);
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    font-size: 16px; /* Tăng cỡ chữ cơ bản */
+}
+
+/* --- KHUNG BAO NGOÀI --- */
+.checkout-container {
+    max-width: 1400px; /* Mở rộng để chứa đủ 3 cột */
+    margin: 40px auto;
+    padding: 0 20px;
+}
+
+.checkout-main-content {
+    display: flex;
+    gap: 30px; /* Khoảng cách thoáng giữa 3 cột */
+    align-items: flex-start;
+}
+
+/* --- CẤU HÌNH CHUNG CHO 3 CỘT (ĐỂ ĐỀU NHAU) --- */
+.col-info,
+.col-products,
+.col-summary {
+    background: var(--white);
+    padding: 30px;
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+}
+
+/* Tỉ lệ chia cột: 4 - 4 - 3 */
+.col-info { flex: 4; }
+.col-products { flex: 4; }
+.col-summary {
+    flex: 3;
+    position: sticky; /* Cột thanh toán chạy theo khi cuộn */
+    top: 20px;
+}
+
+/* --- XỬ LÝ TIÊU ĐỀ (CĂN THẲNG HÀNG) --- */
+.col-info h2,
+.col-products h3,
+.col-summary h3 {
+    margin-top: 0;
+    margin-bottom: 25px;
+    font-size: 1.4rem;
+    font-weight: 700;
+    color: var(--text-dark);
+    border-bottom: 2px solid #f0f0f0; /* Gạch chân mờ để gióng hàng */
+    padding-bottom: 15px;
+    line-height: 1.2;
+}
+
+/* --- CỘT 1: FORM NHẬP LIỆU --- */
+.form-group {
+    margin-bottom: 20px;
+}
+
+.form-group label {
+    display: block;
+    font-weight: 600;
+    margin-bottom: 8px;
+    font-size: 1rem;
+}
+
+.form-group input {
+    width: 100%;
+    padding: 14px 15px; /* Ô nhập cao, thoáng */
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    font-size: 1.05rem;
+    box-sizing: border-box;
+    transition: border-color 0.3s;
+}
+
+.form-group input:focus {
+    border-color: var(--primary);
+    outline: none;
+    background-color: #fffafb;
+}
+
+/* --- CỘT 2: DANH SÁCH SẢN PHẨM --- */
+.order-items-list {
+    /* Chiều cao ~4.5 sản phẩm (mỗi sp ~100px) */
+    max-height: 480px;
+    overflow-y: auto; /* Tự động hiện thanh cuộn */
+    padding-right: 10px;
+}
+
+/* Thanh cuộn đẹp */
+.order-items-list::-webkit-scrollbar { width: 6px; }
+.order-items-list::-webkit-scrollbar-thumb { background: #ccc; border-radius: 10px; }
+.order-items-list::-webkit-scrollbar-track { background: #f1f1f1; }
+
+.order-item {
+    display: flex;
+    gap: 15px;
+    padding: 20px 0; /* Giãn cách giữa các sản phẩm */
+    border-bottom: 1px solid #f5f5f5;
+    align-items: center;
+}
+
+.item-image {
+    width: 80px;
+    height: 80px;
+    object-fit: cover;
+    border-radius: 8px;
+    border: 1px solid #eee;
+}
+
+.item-info { flex: 1; }
+
+.item-name {
+    font-weight: 600;
+    font-size: 1.1rem;
+    margin: 0 0 5px 0;
+    line-height: 1.4;
+}
+
+.item-variant { font-size: 0.95rem; color: var(--text-light); }
+.item-qty { font-size: 0.95rem; font-weight: 500; margin-top: 5px; }
+
+.item-price {
+    font-weight: 700;
+    color: var(--primary);
+    font-size: 1.1rem;
+    white-space: nowrap; /* Giá tiền không bị xuống dòng */
+}
+
+/* --- CỘT 3: TỔNG KẾT & THANH TOÁN --- */
+.payment-method {
+    margin-bottom: 20px;
+}
+
+/* Style hộp chọn thanh toán */
+.payment-method label {
+    display: flex;
+    align-items: center;
+    padding: 15px;
+    border: 2px solid var(--primary); /* Viền màu đỏ chủ đạo */
+    background-color: #fff5f5;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 600;
+}
+
+.payment-method input[type="radio"] {
+    accent-color: var(--primary); /* Đổi màu nút radio mặc định */
+    transform: scale(1.2);
+    margin-right: 10px;
+}
+
+.summary-row {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 15px;
+    font-size: 1.05rem;
+    color: var(--text-light);
+}
+
+.summary-row.total {
+    border-top: 2px solid #eee;
+    padding-top: 15px;
+    margin-top: 15px;
+    font-size: 1.3rem;
+    font-weight: 800;
+    color: #000;
+}
+
+/* NÚT BẤM */
+.checkout-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    margin-top: 25px;
+}
+
+.btn-main {
+    width: 100%;
+    padding: 18px;
+    background: var(--primary);
+    color: var(--white);
+    border: none;
+    border-radius: 8px;
+    font-size: 1.2rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: background 0.3s;
+    box-shadow: 0 4px 15px rgba(255, 90, 95, 0.4);
+}
+
+.btn-main:hover {
+    background: var(--primary-hover);
+    transform: translateY(-2px);
+}
+
+.btn-back {
+    text-align: center;
+    text-decoration: none;
+    color: var(--text-light);
+    font-weight: 500;
+    font-size: 1rem;
+}
+.btn-back:hover { color: var(--primary); }
+
+/* --- RESPONSIVE (Dành cho Mobile/Tablet) --- */
+@media (max-width: 1100px) {
+    .checkout-main-content {
+        flex-wrap: wrap; /* Cho phép xuống dòng nếu màn hình nhỏ */
+    }
+
+    .col-info { flex: 100%; min-width: 100%; order: 1; }
+    .col-products { flex: 100%; min-width: 100%; order: 2; max-height: none; }
+    .col-summary { flex: 100%; min-width: 100%; order: 3; position: static; }
+}
+/* --- CỘT 3: THANH TOÁN & TỔNG TIỀN (TỐI ƯU MÀU SẮC) --- */
+.col-summary {
+    flex: 3;
+    position: sticky;
+    top: 20px;
+}
+
+.payment-box {
+    background: var(--white);
+    padding: 30px;
+    border-radius: 12px;
+    box-shadow: 0 5px 20px rgba(0,0,0,0.08); /* Đổ bóng đậm hơn để nổi bật */
+    border: 1px solid #f0f0f0;
+}
+
+/* Phần chọn phương thức thanh toán */
+.payment-method-container {
+    margin-bottom: 25px;
+    padding-bottom: 20px;
+    border-bottom: 2px dashed #eee; /* Ngăn cách rõ ràng với phần tiền */
+}
+
+.payment-method-container label {
+    display: flex;
+    align-items: center;
+    padding: 15px;
+    background: #fff9f9; /* Màu nền nhẹ cho vùng chọn */
+    border: 1.5px solid var(--primary);
+    border-radius: 10px;
+    cursor: pointer;
+    font-weight: 700;
+    font-size: 1.1rem; /* Tăng cỡ chữ */
+    color: var(--text-dark);
+}
+
+.payment-method-container input[type="radio"] {
+    accent-color: var(--primary);
+    transform: scale(1.3);
+    margin-right: 12px;
+}
+
+/* Phần chi tiết giá tiền - Nới rộng khoảng cách */
+.summary-details {
+    margin-bottom: 25px;
+}
+
+.summary-row {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 18px; /* Tăng khoảng cách dòng */
+    font-size: 1.15rem; /* Tăng cỡ chữ Tạm tính/Phí vận chuyển */
+    color: var(--text-light);
+}
+
+.summary-row span:last-child {
+    font-weight: 600;
+    color: var(--text-dark);
+}
+
+/* Tổng cộng - Điểm nhấn màu sắc */
+.summary-row.total {
+    margin-top: 10px;
+    padding-top: 20px;
+    border-top: 2px solid #333;
+    font-size: 1.4rem; /* Chữ to nhất */
+    color: #000;
+}
+
+.summary-row.total strong:last-child {
+    color: var(--primary); /* Màu đỏ cho con số tổng cuối cùng */
+    font-size: 1.6rem;
+}
+
+/* Nút Đặt hàng - To và rực rỡ */
+.btn-submit {
+    width: 100%;
+    padding: 20px;
+    background: linear-gradient(135deg, var(--primary), #ff7675); /* Hiệu ứng gradient */
+    color: white;
+    border: none;
+    border-radius: 10px;
+    font-size: 1.3rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    cursor: pointer;
+    box-shadow: 0 6px 20px rgba(255, 90, 95, 0.3);
+    transition: all 0.3s ease;
+}
+
+.btn-submit:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 25px rgba(255, 90, 95, 0.4);
+}
+
+.btn-link {
+    display: block;
+    text-align: center;
+    margin-top: 20px;
+    color: var(--text-light);
+    text-decoration: none;
+    font-size: 1rem;
+    font-weight: 500;
+}
+
+.btn-link:hover {
+    color: var(--primary);
+    text-decoration: underline;
+}
+/* --- CỘT 3: THANH TOÁN (GỌN GÀNG & SANG TRỌNG) --- */
+.col-summary {
+    flex: 3;
+    position: sticky;
+    top: 20px;
+}
+
+.payment-box {
+    background: var(--white);
+    padding: 20px; /* Giảm padding từ 30px xuống 20px để bớt "mập" */
+    border-radius: 12px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.06);
+    border: 1px solid #f0f0f0;
+}
+
+/* Ô phương thức thanh toán (Gọn hơn) */
+.payment-method-container {
+    margin-bottom: 30px; /* Tăng khoảng cách dưới để không sát phần tính tiền */
+}
+
+.payment-method-container label {
+    display: flex;
+    align-items: center;
+    padding: 12px 15px; /* Giảm padding cho ô COD bớt dày */
+    background: #fff;
+    border: 1.5px solid #eee; /* Mặc định để viền nhẹ */
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 1rem; /* Cỡ chữ vừa phải */
+    transition: all 0.2s;
+}
+
+/* Hiệu ứng khi chọn COD: Viền đỏ san hô mỏng và sang */
+.payment-method-container input[type="radio"]:checked + span,
+.payment-method-container label:has(input:checked) {
+    border-color: var(--primary);
+    background-color: #fffafb;
+}
+
+/* Phần chi tiết giá (Chữ rõ ràng hơn) */
+.summary-details {
+    margin-top: 10px;
+}
+
+.summary-row {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 12px; /* Khoảng cách dòng vừa đủ */
+    font-size: 1.1rem; /* Tăng cỡ chữ lên cho rõ */
+    color: #555;
+}
+
+.summary-row span:last-child {
+    font-weight: 600;
+    color: #333;
+}
+
+/* Tổng cộng (Điểm nhấn mạnh mẽ) */
+.summary-row.total {
+    margin-top: 15px;
+    padding-top: 15px;
+    border-top: 1px solid #eee;
+    font-size: 1.2rem;
+}
+
+.summary-row.total strong:last-child {
+    color: var(--primary);
+    font-size: 1.5rem; /* Tổng tiền to hẳn lên */
+    font-weight: 800;
+}
+
+/* NÚT ĐẶT HÀNG (Dáng chuẩn chuyên nghiệp) */
+.btn-submit {
+    width: 100%;
+    padding: 16px; /* Giảm độ dày nút cho cân đối */
+    background: var(--primary);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 1.1rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    cursor: pointer;
+    margin-top: 20px;
+    transition: 0.3s;
+}
+
+.btn-submit:hover {
+    background: var(--primary-hover);
+    box-shadow: 0 5px 15px rgba(255, 90, 95, 0.3);
+}
+.col-info h2 {
+    font-size: 1.5rem; /* từ 1.4 → 1.5 */
+}
+
+.form-group input {
+    font-size: 1.1rem;        /* tăng nhẹ cho cân chữ label */
+    padding: 14px 16px;       /* giữ chiều cao thoáng */
+    line-height: 1.5;
+}
+
+.form-group label {
+    font-size: 1.1rem;        /* tăng nhẹ từ 1rem → 1.1 */
+    font-weight: 600;
+    margin-bottom: 8px;
+    line-height: 1.4;         /* giữ cân với input */
+}
+.checkout-alert {
+    background: #fff1f0;
+    color: #cf1322;
+    border-left: 5px solid #ff4d4f;
+    padding: 14px 16px;
+    margin-bottom: 16px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 500;
+}
+

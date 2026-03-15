@@ -1,0 +1,224 @@
+/* Collection Page Styles */
+
+/* ===== Animated Banner with Image ===== */
+.collection-banner {
+    position: relative;
+    height: 400px;
+    background-size: cover;
+    background-position: center;
+    background-attachment: fixed;
+    margin-bottom: 40px;
+    overflow: hidden;
+}
+
+.collection-banner::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(135deg, rgba(102, 126, 234, 0.7) 0%, rgba(118, 75, 162, 0.7) 100%);
+    z-index: 1;
+}
+
+.banner-overlay {
+    position: relative;
+    z-index: 2;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    text-align: center;
+    color: white;
+}
+
+.banner-content {
+    padding: 20px;
+}
+
+.banner-title {
+    font-size: 3.5rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    margin-bottom: 15px;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+    letter-spacing: 3px;
+}
+
+.banner-slogan {
+    font-size: 1.3rem;
+    margin-bottom: 15px;
+    opacity: 0.95;
+    max-width: 600px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.banner-count {
+    font-size: 1.1rem;
+    opacity: 0.85;
+    background: rgba(255, 255, 255, 0.2);
+    padding: 8px 20px;
+    border-radius: 30px;
+    display: inline-block;
+}
+
+/* ===== Fade Up Animation ===== */
+@keyframes fadeUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.animate-fade-up {
+    animation: fadeUp 0.8s ease-out forwards;
+}
+
+.delay-1 {
+    animation-delay: 0.2s;
+    opacity: 0;
+}
+
+.delay-2 {
+    animation-delay: 0.4s;
+    opacity: 0;
+}
+
+/* ===== Default Header (fallback) ===== */
+.collection-header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    padding: 60px 20px;
+    text-align: center;
+    color: white;
+    margin-bottom: 40px;
+}
+
+.collection-header h1 {
+    font-size: 2.5rem;
+    margin-bottom: 10px;
+    text-transform: uppercase;
+}
+
+.collection-header .product-count {
+    font-size: 1.1rem;
+    opacity: 0.9;
+}
+
+/* Content Section */
+.collection-content {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 0 20px 60px;
+}
+
+/* Product Grid */
+.collection-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 30px;
+    margin-bottom: 40px;
+}
+
+/* Pagination */
+.collection-pagination {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.collection-pagination a,
+.collection-pagination span {
+    padding: 10px 16px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    text-decoration: none;
+    color: #333;
+    transition: all 0.3s;
+}
+
+.collection-pagination a:hover {
+    background: #667eea;
+    color: white;
+    border-color: #667eea;
+}
+
+.collection-pagination .active {
+    background: #667eea;
+    color: white;
+    border-color: #667eea;
+}
+
+.collection-pagination .disabled {
+    opacity: 0.5;
+    pointer-events: none;
+}
+
+/* Empty State */
+.empty-collection {
+    text-align: center;
+    padding: 60px 20px;
+    color: #666;
+}
+
+.empty-collection i {
+    font-size: 4rem;
+    margin-bottom: 20px;
+    color: #ddd;
+}
+
+.back-link {
+    display: inline-block;
+    margin-top: 20px;
+    padding: 12px 24px;
+    background: #667eea;
+    color: white;
+    text-decoration: none;
+    border-radius: 8px;
+    transition: background 0.3s;
+}
+
+.back-link:hover {
+    background: #5a6fd6;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .collection-banner {
+        height: 300px;
+        background-attachment: scroll;
+    }
+
+    .banner-title {
+        font-size: 2rem;
+        letter-spacing: 1px;
+    }
+
+    .banner-slogan {
+        font-size: 1rem;
+    }
+
+    .collection-header {
+        padding: 40px 15px;
+    }
+
+    .collection-header h1 {
+        font-size: 1.8rem;
+    }
+
+    .collection-grid {
+        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+        gap: 20px;
+    }
+
+    .collection-content {
+        padding: 0 15px 40px;
+    }
+}

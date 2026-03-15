@@ -1,0 +1,128 @@
+section {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: 15px auto;
+  max-width: 1200px;
+  padding: 60px 20px;
+}
+
+.containers {
+  width: 100%;
+  max-width: 500px;
+  margin: 0 auto;
+  border-radius: 8px;
+  padding: 50px 40px;
+  animation: fadeIn 0.5s ease-in;
+  border: 1px solid #f0f0f0;
+  background: #ffffff;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.heading-bar {
+  margin-top: 10px;
+  text-align: center;
+  margin-bottom: 30px;
+}
+
+.heading-bar h1 {
+  font-family: "Josefin Sans", sans-serif;
+  font-size: 28px;
+  font-weight: 600;
+  color: #1c1c1c;
+  margin-bottom: 10px;
+  text-transform: uppercase;
+}
+
+.heading-bar p {
+  font-family: "Roboto", sans-serif;
+  font-size: 14px;
+  color: #757575;
+}
+
+.as {
+  color: #fa8072;
+  text-decoration: none;
+  font-weight: 500;
+  transition: all 0.3s ease;
+}
+
+.as:hover {
+  text-decoration: underline;
+}
+
+.page-auth {
+  font-size: 15px;
+}
+
+fieldset.form-auth {
+  border: none;
+  margin-bottom: 20px;
+  display: flex;
+  flex-direction: column;
+}
+
+label {
+  font-family: "Roboto", sans-serif;
+  font-size: 15px;
+  font-weight: 500;
+  color: #757575;
+  margin-bottom: 8px;
+}
+
+small {
+  margin-top: 8px;
+  font-size: 13px;
+  color: #757575;
+  font-family: "Roboto", sans-serif;
+}
+INPUT {
+  padding: 15px;
+}
+.wrap-social-auth button {
+  width: 100%;
+  max-width: 400px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  background-color: #ffffff;
+  border: 1px solid #f0f0f0;
+  border-radius: 6px;
+  padding: 10px 15px;
+  cursor: pointer;
+  font-family: "Roboto", sans-serif;
+  font-size: 15px;
+  font-weight: 500;
+  color: #1c1c1c;
+  transition: all 0.3s ease;
+}
+
+.wrap-social-auth button:hover {
+  border-color: #fa8072;
+  color: #fa8072;
+  box-shadow: none;
+  transform: none;
+}
+
+.btn-primary {
+  color: #ffffff;
+  padding: 14px 172px;
+  align-items: center;
+  gap: 5px;
+  border: 1px solid #ff6f61;
+  font-size: 13px;
+  background-color: #ff6f61;
+  border-radius: 6px;
+}

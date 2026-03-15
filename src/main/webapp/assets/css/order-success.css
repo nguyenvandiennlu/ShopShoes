@@ -1,0 +1,72 @@
+/* =========================
+   MESSAGE BOX (SUCCESS / ERROR)
+   ========================= */
+
+.message-box {
+    max-width: 600px;
+    margin: 60px auto;
+    padding: 40px 30px;
+    text-align: center;
+    border-radius: 12px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+    animation: fadeIn 0.4s ease-in-out;
+}
+
+.message-box h2 {
+    margin-bottom: 12px;
+    font-size: 26px;
+}
+
+.message-box p {
+    font-size: 16px;
+    margin-bottom: 25px;
+    color: #555;
+}
+
+/* SUCCESS */
+.message-box.success {
+    background: #f0fff4;
+    border: 2px solid #38a169;
+    color: #276749;
+}
+
+.message-box.success h2 {
+    color: #2f855a;
+}
+
+/* ERROR */
+.message-box.error {
+    background: #fff5f5;
+    border: 2px solid #e53e3e;
+    color: #9b2c2c;
+    font-weight: 500;
+}
+
+/* BUTTON */
+.btn-primary {
+    display: inline-block;
+    padding: 12px 26px;
+    background: #2f855a;
+    color: #fff;
+    text-decoration: none;
+    border-radius: 8px;
+    font-weight: 600;
+    transition: 0.2s ease;
+}
+
+.btn-primary:hover {
+    background: #276749;
+    transform: translateY(-2px);
+}
+
+/* ANIMATION */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
