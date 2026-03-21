@@ -76,7 +76,15 @@ public class ProductDTO implements Serializable {
         return isNew;
     }
 
+    public boolean getIsNew() {
+        return isNew;
+    }
+
     public void setNew(boolean aNew) {
         isNew = aNew;
+    }
+
+    public void setIsNew(boolean isNew) {
+        this.isNew = isNew;
     }
 }
