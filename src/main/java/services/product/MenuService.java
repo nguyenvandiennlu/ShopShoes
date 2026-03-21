@@ -1,19 +1,20 @@
 package services.product;
 
 import DTO.MenuDTO;
+import dao.product.BannerDao;
 import dao.product.BrandDao;
 
 public class MenuService {
-    // BannerDao bannerDao = new BannerDao(); // TODO: BannerDao not found
+    BannerDao bannerDao = new BannerDao(); // TODO: BannerDao not found
     ProductService productService = new ProductService();
     BrandDao brandDao = new BrandDao();
 
     public MenuDTO buildMenuPage(String brandId) {
         MenuDTO dto = new MenuDTO();
-        // dto.setBannerSpecialP(bannerDao.findByPosition("menu_special-product")); // TODO: BannerDao not found
+        dto.setBannerSpecialP(bannerDao.findByPosition("menu_special-product")); // TODO: BannerDao not found
         dto.setSpecialProduct(productService.findTopCheapestProductsInPromotion(9));
-        // dto.setBannerCollection(bannerDao.findByPositions("menu_collection")); // TODO: BannerDao not found
-        // dto.setBannerSlider(bannerDao.findByPositions("products_slide")); // TODO: BannerDao not found
+        dto.setBannerCollection(bannerDao.findByPositions("menu_collection")); // TODO: BannerDao not found
+        dto.setBannerSlider(bannerDao.findByPositions("products_slide")); // TODO: BannerDao not found
         dto.setBrandList(brandDao.findAllActive());
 
         if ("all".equalsIgnoreCase(brandId)) {
