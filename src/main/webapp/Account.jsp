@@ -4,7 +4,7 @@
             <%@ page import="model.user.User" %>
 
                 <% User user=(User) session.getAttribute("currentUser"); if (user==null) {
-                    response.sendRedirect("login.jsp"); return; } %>
+                    response.sendRedirect("Login.jsp"); return; } %>
 
                     <!DOCTYPE html>
                     <html lang="en">
@@ -25,7 +25,7 @@
                     </head>
 
                     <body id="top">
-                        <jsp:include page="header.jsp" />
+                        <jsp:include page="Header.jsp" />
 
                         <main class="TaiKhoanPage">
                             <div class="container account-dashboard">
@@ -315,7 +315,7 @@
 
                         </main>
 
-                        <jsp:include page="footer.jsp" />
+                        <jsp:include page="Footer.jsp" />
 
                         <script type="module"
                             src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.esm.js"></script>

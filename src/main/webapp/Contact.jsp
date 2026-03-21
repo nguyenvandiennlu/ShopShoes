@@ -19,7 +19,7 @@
 </head>
 
 <body>
-<jsp:include page="header.jsp" />
+<jsp:include page="Header.jsp" />
 
 <div class="container">
     <div class="breadcrumb-container">
@@ -64,7 +64,7 @@
     </div>
 </div>
 
-<jsp:include page="footer.jsp" />
+<jsp:include page="Footer.jsp" />
 
 <script type="module" src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.esm.js"></script>
 <script nomodule src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.js"></script>

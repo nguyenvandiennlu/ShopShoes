@@ -42,6 +42,6 @@ public class CartViewController extends HttpServlet {
                 promotionService.formatVND(total)
         );
 
-        request.getRequestDispatcher("/carts.jsp").forward(request, response);
+        request.getRequestDispatcher("/Carts.jsp").forward(request, response);
     }
 }

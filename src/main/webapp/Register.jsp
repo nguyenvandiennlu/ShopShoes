@@ -31,13 +31,13 @@
     />
   </head>
   <body>
-  <jsp:include page="header.jsp" />
+  <jsp:include page="Header.jsp" />
     <div class="container">
       <div class="breadcrumb-container">
         <nav aria-label="breadcrumb">
           <ol class="breadcrumb">
             <li class="breadcrumb-item">
-              <a href="${pageContext.request.contextPath}/menu.jsp"
+              <a href="${pageContext.request.contextPath}/Home.jsp"
                 >Trang Chủ</a
               >
             </li>
@@ -57,7 +57,7 @@
                 Bạn đã có tài khoản ?
                 <a
                   class="as"
-                  href="${pageContext.request.contextPath}/login.jsp"
+                  href="${pageContext.request.contextPath}/Login.jsp"
                   >Đăng nhập tại đây</a
                 >
               </p>
@@ -179,7 +179,7 @@
         </div>
       </section>
     </main>
-  <jsp:include page="footer.jsp" />
+  <jsp:include page="Footer.jsp" />
 
     <script
       type="module"

@@ -29,7 +29,7 @@
             </head>
 
             <body>
-                <jsp:include page="header.jsp" />
+                <jsp:include page="Header.jsp" />
                 <div class="banner-slide">
                     <div class="swiper-container">
                         <div class="swiper-wrapper">
@@ -204,7 +204,7 @@
                             </select>
                         </div>
                         <div id="productsContainer">
-                            <jsp:include page="/products_fragment.jsp" />
+                            <jsp:include page="/ProductsFragment.jsp" />
                         </div>
 
                     </main>
@@ -214,7 +214,7 @@
                     <i class="fas fa-check-circle"></i> <span></span>
                 </div>
 
-                <jsp:include page="footer.jsp" />
+                <jsp:include page="Footer.jsp" />
 
                 <script type="module" src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.esm.js"></script>
                 <script nomodule src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.js"></script>

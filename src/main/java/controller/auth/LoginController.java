@@ -25,7 +25,7 @@ public class LoginController extends HttpServlet {
     protected void doGet(HttpServletRequest req, HttpServletResponse resp)
             throws ServletException, IOException {
 
-        req.getRequestDispatcher("/login.jsp").forward(req, resp);
+        req.getRequestDispatcher("/Login.jsp").forward(req, resp);
     }
 
     @Override
@@ -40,13 +40,13 @@ public class LoginController extends HttpServlet {
                 email.isBlank() || password.isBlank()) {
 
             req.setAttribute("error", "Vui lòng nhập email và mật khẩu");
-            req.getRequestDispatcher("/login.jsp").forward(req, resp);
+            req.getRequestDispatcher("/Login.jsp").forward(req, resp);
             return;
         }
         User u = userService.getUserDao().findByEmail(email);
         if (u != null && !u.isActive()) {
             req.setAttribute("error", "Tài khoản chưa được kích hoạt. Vui lòng kiểm tra email hoặc liên hệ admin.");
-            req.getRequestDispatcher("/login.jsp").forward(req, resp);
+            req.getRequestDispatcher("/Login.jsp").forward(req, resp);
             return;
         }
         // 2. Login
@@ -54,7 +54,7 @@ public class LoginController extends HttpServlet {
 
         if (user == null) {
             req.setAttribute("error", "Sai email hoặc mật khẩu");
-            req.getRequestDispatcher("/login.jsp").forward(req, resp);
+            req.getRequestDispatcher("/Login.jsp").forward(req, resp);
             return;
         }
 

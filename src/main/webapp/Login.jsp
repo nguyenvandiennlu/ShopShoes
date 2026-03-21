@@ -3,7 +3,7 @@
 <%
     User currentUser = (User) session.getAttribute("currentUser");
     if (currentUser != null ) {
-        response.sendRedirect(request.getContextPath() + "/menu.jsp");
+        response.sendRedirect(request.getContextPath() + "/Home.jsp");
         return;
     }
 %>
@@ -42,7 +42,7 @@
   </head>
 
   <body>
-  <jsp:include page="header.jsp" />
+  <jsp:include page="Header.jsp" />
     <div class="container">
       <div class="breadcrumb-container">
         <nav aria-label="breadcrumb">
@@ -152,7 +152,7 @@
         </div>
       </section>
     </main>
-    <jsp:include page="footer.jsp" />
+    <jsp:include page="Footer.jsp" />
     <script
       type="module"
       src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.esm.js"

@@ -13,7 +13,7 @@
 
 <body>
 
-<jsp:include page="header.jsp"/>
+<jsp:include page="Header.jsp"/>
 
 <c:if test="${not empty errorMessage}">
   <div class="checkout-alert">
@@ -102,6 +102,6 @@
   </form>
 </div>
 
-<jsp:include page="footer.jsp"/>
+<jsp:include page="Footer.jsp"/>
 </body>
 </html>

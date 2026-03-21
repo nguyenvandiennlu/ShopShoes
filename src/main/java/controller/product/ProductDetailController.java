@@ -71,7 +71,7 @@ public class ProductDetailController extends HttpServlet {
         req.setAttribute("product", dto);
         req.setAttribute("isInWishlist", isInWishlist);
 
-        req.getRequestDispatcher("/chitietsanpham.jsp")
+        req.getRequestDispatcher("/ProductDetail.jsp")
                 .forward(req, resp);
     }
 }

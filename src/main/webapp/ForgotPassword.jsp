@@ -15,13 +15,13 @@
       <link rel="icon" href="/Nhom18_LTW/assets/favicon_io/favicon.ico" />
   </head>
   <body>
-  <jsp:include page="header.jsp" />
+  <jsp:include page="Header.jsp" />
 
     <div class="container">
       <div class="breadcrumb-container">
         <nav aria-label="breadcrumb">
           <ol class="breadcrumb">
-            <li class="breadcrumb-item"><a href="${pageContext.request.contextPath}/menu.jsp">Trang Chủ</a></li>
+            <li class="breadcrumb-item"><a href="${pageContext.request.contextPath}/Home.jsp">Trang Chủ</a></li>
 
             <li class="breadcrumb-item active" aria-current="page">
               Quên mật khẩu
@@ -72,7 +72,7 @@
                       </button>
                   </form>
 
-                  <p>Quay lại <a class="as" href="${pageContext.request.contextPath}/login.jsp">Đăng nhập</a></p>
+                  <p>Quay lại <a class="as" href="${pageContext.request.contextPath}/Login.jsp">Đăng nhập</a></p>
               </div>
             </div>
           </div>
@@ -80,7 +80,7 @@
       </section>
     </main>
 
-  <jsp:include page="footer.jsp" />
+  <jsp:include page="Footer.jsp" />
   </body>
     <script
       type="module"

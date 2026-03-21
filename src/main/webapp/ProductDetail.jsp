@@ -23,7 +23,7 @@
     </head>
 
     <body id="top">
-      <jsp:include page="header.jsp" />
+      <jsp:include page="Header.jsp" />
 
       <main>
         <div class="container">
@@ -240,7 +240,7 @@
         </div>
       </main>
 
-      <jsp:include page="footer.jsp" />
+      <jsp:include page="Footer.jsp" />
 
       <script src="${pageContext.request.contextPath}/assets/script/reponsive.js"></script>
       <script src="${pageContext.request.contextPath}/assets/script/chitietsanpham.js"></script>

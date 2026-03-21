@@ -41,7 +41,7 @@ public class AccountController extends HttpServlet {
         java.util.List<model.Order.Order> orderHistory = accountServices.getOrderHistory(currentUser.getId());
         req.setAttribute("orderHistory", orderHistory);
 
-        req.getRequestDispatcher("/account.jsp").forward(req, resp);
+        req.getRequestDispatcher("/Account.jsp").forward(req, resp);
     }
 
     @Override
@@ -122,12 +122,12 @@ public class AccountController extends HttpServlet {
     private User requireLogin(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         HttpSession session = req.getSession(false);
         if (session == null) {
-            resp.sendRedirect(req.getContextPath() + "/login.jsp");
+            resp.sendRedirect(req.getContextPath() + "/Login.jsp");
             return null;
         }
         Object u = session.getAttribute("currentUser");
         if (!(u instanceof User)) {
-            resp.sendRedirect(req.getContextPath() + "/login.jsp");
+            resp.sendRedirect(req.getContextPath() + "/Login.jsp");
             return null;
         }
         return (User) u;

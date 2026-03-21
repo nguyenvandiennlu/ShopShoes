@@ -33,7 +33,7 @@
         rel="stylesheet"
 />
 
-<jsp:include page="header.jsp"/>
+<jsp:include page="Header.jsp"/>
 
 <div class="message-box success">
     <h2>${successMessage}</h2>
@@ -44,7 +44,7 @@
     </a>
 </div>
 
-<jsp:include page="footer.jsp"/>
+<jsp:include page="Footer.jsp"/>
 
 </body>
 </html>

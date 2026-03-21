@@ -38,6 +38,6 @@ public class MenuFilterController extends HttpServlet {
         }
 
         req.setAttribute("menu", homePage);
-        req.getRequestDispatcher("/menu.jsp").forward(req, resp);
+        req.getRequestDispatcher("/Home.jsp").forward(req, resp);
     }
 }

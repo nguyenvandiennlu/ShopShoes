@@ -38,7 +38,7 @@
 - #HEADER
 -->
 
-    <jsp:include page="header.jsp" />
+    <jsp:include page="Header.jsp" />
     <div class="container">
       <div class="breadcrumb-container">
         <nav aria-label="breadcrumb">
@@ -139,7 +139,7 @@
     <!--
 - #FOOTER
 -->
-    <jsp:include page="footer.jsp" />
+    <jsp:include page="Footer.jsp" />
     <!-
 - ionicon link
 -->

@@ -37,7 +37,7 @@
       <!--
 - #HEADER
 -->
-      <jsp:include page="header.jsp" />
+      <jsp:include page="Header.jsp" />
       <main>
         <article>
           <!-- HERO SLIDER  -->
@@ -263,7 +263,7 @@
       <!--
 - #FOOTER
 -->
-      <jsp:include page="footer.jsp" />
+      <jsp:include page="Footer.jsp" />
       <!--
 - ionicon link
 -->

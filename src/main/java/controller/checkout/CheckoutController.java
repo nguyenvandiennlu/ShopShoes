@@ -73,7 +73,7 @@ public class CheckoutController extends HttpServlet {
 
         } catch (RuntimeException e) {
             req.setAttribute("errorMessage", e.getMessage());
-            req.getRequestDispatcher("/checkout.jsp").forward(req, resp);
+            req.getRequestDispatcher("/Checkout.jsp").forward(req, resp);
         }
     }
 }

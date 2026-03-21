@@ -92,6 +92,6 @@ public class CollectionController extends HttpServlet {
         // req.setAttribute("banner", banner); // TODO: BannerDao not found
 
         // Forward đến JSP
-        req.getRequestDispatcher("/collection.jsp").forward(req, resp);
+        req.getRequestDispatcher("/Collection.jsp").forward(req, resp);
     }
 }

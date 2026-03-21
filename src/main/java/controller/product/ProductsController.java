@@ -141,9 +141,9 @@ public class ProductsController extends HttpServlet {
         boolean isAjax = "1".equals(req.getParameter("ajax"));
         resp.setCharacterEncoding("UTF-8");
         if (isAjax) {
-            req.getRequestDispatcher("/products_fragment.jsp").forward(req, resp);
+            req.getRequestDispatcher("/ProductsFragment.jsp").forward(req, resp);
         } else {
-            req.getRequestDispatcher("/products.jsp").forward(req, resp);
+            req.getRequestDispatcher("/Products.jsp").forward(req, resp);
         }
     }
 }

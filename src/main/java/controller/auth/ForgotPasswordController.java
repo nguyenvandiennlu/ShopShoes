@@ -36,7 +36,7 @@ public class ForgotPasswordController extends HttpServlet {
 
             if (result != null && !result.matches("\\d{6}")) {
                 req.setAttribute("msg", result);
-                req.getRequestDispatcher("/forgotpass.jsp").forward(req, resp);
+                req.getRequestDispatcher("/ForgotPassword.jsp").forward(req, resp);
                 return;
             }
             String html = "<!DOCTYPE html>" +
@@ -84,7 +84,7 @@ public class ForgotPasswordController extends HttpServlet {
                     "Mã OTP đặt lại mật khẩu",
                     html);
 
-            resp.sendRedirect(req.getContextPath() + "/verify-otp.jsp");
+            resp.sendRedirect(req.getContextPath() + "/VerifyOtp.jsp");
             return;
         }
 
@@ -92,10 +92,10 @@ public class ForgotPasswordController extends HttpServlet {
             String err = service.verifyOtp(req.getParameter("otp"), session);
             if (err != null) {
                 req.setAttribute("msg", err);
-                req.getRequestDispatcher("/verify-otp.jsp").forward(req, resp);
+                req.getRequestDispatcher("/VerifyOtp.jsp").forward(req, resp);
                 return;
             }
-            resp.sendRedirect(req.getContextPath() + "/reset-password.jsp");
+            resp.sendRedirect(req.getContextPath() + "/ResetPassword.jsp");
             return;
         }
 
@@ -107,11 +107,11 @@ public class ForgotPasswordController extends HttpServlet {
 
             if (err != null) {
                 req.setAttribute("msg", err);
-                req.getRequestDispatcher("/reset-password.jsp").forward(req, resp);
+                req.getRequestDispatcher("/ResetPassword.jsp").forward(req, resp);
                 return;
             }
 
-            resp.sendRedirect(req.getContextPath() + "/login.jsp");
+            resp.sendRedirect(req.getContextPath() + "/Login.jsp");
         }
 
     }
@@ -119,7 +119,7 @@ public class ForgotPasswordController extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp)
             throws ServletException, IOException {
-        req.getRequestDispatcher("/forgotpass.jsp").forward(req, resp);
+        req.getRequestDispatcher("/ForgotPassword.jsp").forward(req, resp);
     }
 
 }

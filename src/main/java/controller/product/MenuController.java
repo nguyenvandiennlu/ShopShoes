@@ -23,6 +23,6 @@ public class MenuController extends HttpServlet {
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         MenuDTO homePage = homeService.buildMenuPage("all");
         req.setAttribute("menu", homePage);
-        req.getRequestDispatcher("/menu.jsp").forward(req, resp);
+        req.getRequestDispatcher("/Home.jsp").forward(req, resp);
     }
 }

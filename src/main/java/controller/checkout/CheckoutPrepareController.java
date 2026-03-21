@@ -74,7 +74,7 @@ public class CheckoutPrepareController extends HttpServlet {
         req.setAttribute("shippingFee", shippingFee);
         req.setAttribute("grandTotal", grandTotal);
 
-        req.getRequestDispatcher("/checkout.jsp").forward(req, resp);
+        req.getRequestDispatcher("/Checkout.jsp").forward(req, resp);
     }
 }
 
