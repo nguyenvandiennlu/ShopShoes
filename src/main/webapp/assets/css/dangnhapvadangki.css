@@ -56,6 +56,7 @@ section {
   text-decoration: none;
   font-weight: 500;
   transition: all 0.3s ease;
+  display: inline;
 }
 
 .as:hover {
@@ -75,6 +76,7 @@ fieldset.form-auth {
   margin-bottom: 20px;
   display: flex;
   flex-direction: column;
+  justify-content: center;
 }
 
 label {
@@ -90,7 +92,7 @@ input[type="password"],
 input[type="email"] {
   background: #ffffff;
   padding: 12px 15px;
-  border: 1px solid #f0f0f0;
+  border: 1px solid #bfbfbf;
   border-radius: 6px;
   outline: none;
   transition: all 0.3s ease;
@@ -111,11 +113,12 @@ small {
   font-size: 13px;
   color: #757575;
   font-family: "Roboto", sans-serif;
+  align-self: center;
 }
 
 .social-auth {
   text-align: center;
-  margin-top: 25px;
+  margin-top: 15px;
   font-family: "Roboto", sans-serif;
   font-size: 13px;
   color: #757575;
@@ -138,7 +141,7 @@ small {
   justify-content: center;
   gap: 10px;
   background-color: #ffffff;
-  border: 1px solid #f0f0f0;
+  border: 1px solid #bfbfbf;
   border-radius: 6px;
   padding: 10px 15px;
   cursor: pointer;
@@ -172,11 +175,15 @@ small {
   font-size: 16px;
 }
 
-
 .auth-error {
     color: #d32f2f;
     background: #fdecea;
     padding: 10px;
     margin-bottom: 15px;
     border-radius: 6px;
+}
+
+#login-submit{
+  display: flex;
+  flex-direction: column;
 }

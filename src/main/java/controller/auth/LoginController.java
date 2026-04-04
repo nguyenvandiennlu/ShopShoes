@@ -63,15 +63,10 @@ public class LoginController extends HttpServlet {
         session.setAttribute("currentUser", user);
         session.setMaxInactiveInterval(30 * 60);
 
-
-
-
-
         if ("ADMIN".equalsIgnoreCase(user.getRole())) {
             resp.sendRedirect(req.getContextPath() + "/admin/dashboard");
         } else {
             resp.sendRedirect(req.getContextPath() + "/menu");
-
         }
     }
 }
