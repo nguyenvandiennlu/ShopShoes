@@ -67,8 +67,6 @@ public class RegisterService {
         if (!password.equals(confirmPassword)) {
             return "Mật khẩu xác nhận không khớp";
         }
-
-        // Hợp lệ tất cả
         return null;
     }
 
