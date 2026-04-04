@@ -1,5 +1,4 @@
 // File: assets/script/auth.js
-
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
 import {
   getAuth,
@@ -26,16 +25,12 @@ provider.setCustomParameters({
   prompt: "select_account",
 });
 
-console.log("Firebase đã được khởi tạo");
-
 document.addEventListener("DOMContentLoaded", function () {
   const googleBtn = document.getElementById("google-login-btn");
 
   if (googleBtn) {
     googleBtn.addEventListener("click", (e) => {
       e.preventDefault();
-
-      console.log("Bắt đầu đăng nhập Google...");
 
       signInWithPopup(auth, provider)
         .then((result) => {
@@ -95,5 +90,53 @@ document.addEventListener("DOMContentLoaded", function () {
     console.log("Đã gắn sự kiện click vào nút Google Login");
   } else {
     console.warn(" Không tìm thấy nút #google-login-btn");
+  }
+});
+
+// Đây là đoạn code hỗ trợ gửi request bằng fetch dành cho chức năng đăng nhập bình thường
+
+document.addEventListener("DOMContentLoaded", function () {
+  const form = document.querySelector(".page-auth");
+
+  if (!form) return;
+  form.addEventListener("submit", async function (e) {
+    e.preventDefault();
+    const formData = new URLSearchParams(new FormData(form));
+
+    try {
+      const response = await fetch(form.action, {
+        method: "POST",
+        headers: {
+          "X-Requested-With": "XMLHttpRequest",
+        },
+        body: formData,
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        window.location.href = data.redirect;
+      } else {
+        showError(data.message);
+      }
+    } catch (err) {
+      console.error(err);
+      showError("Lỗi server");
+    }
+  });
+
+  function showError(message) {
+    const errorEl = document.getElementById("login-error");
+
+    errorEl.innerText = message;
+    errorEl.style.visibility = "visible";
+  }
+
+  document.getElementById("email").addEventListener("input", clearError);
+  document.getElementById("password").addEventListener("input", clearError);
+
+  function clearError() {
+    const errorEl = document.getElementById("login-error");
+    errorEl.innerText = "";
   }
 });
