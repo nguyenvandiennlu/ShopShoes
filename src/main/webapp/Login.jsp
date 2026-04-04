@@ -120,8 +120,8 @@
                                         placeholder="Mật khẩu"
                                         required
                                 />
-
                             </fieldset>
+                            <p id="login-error" class="auth-error-message"></p>
                             <input type="hidden" name="redirect" value="${param.redirect}" />
                             <div id="login-submit">
                                 <button type="submit" id="btn-primary" class="btn-primary">

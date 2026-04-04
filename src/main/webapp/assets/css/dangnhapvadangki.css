@@ -238,3 +238,12 @@ small {
   display: flex;
   flex-direction: column;
 }
+
+.auth-error-message {
+  min-height: 15px;
+  margin-bottom: 15px;
+  margin-top: -15px;
+  font-size: 13px;
+  font-family: "Roboto", sans-serif;
+  color: #d32f2f;
+}
