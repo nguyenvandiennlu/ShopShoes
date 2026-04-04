@@ -149,24 +149,48 @@
                     </fieldset>
                   <fieldset class="form-auth">
                     <label>Mật khẩu</label>
-                    <input
-                      type="password"
-                      id="password"
-                      name="password"
-                      placeholder="Tạo mật khẩu"
-                      required
-                    />
+                    <div class="password-field">
+                      <input
+                        type="password"
+                        id="password"
+                        name="password"
+                        placeholder="Tạo mật khẩu"
+                        required
+                      />
+                      <button
+                        type="button"
+                        class="password-toggle"
+                        data-password-toggle
+                        data-target="password"
+                        aria-label="Hiện mật khẩu"
+                        aria-pressed="false"
+                      >
+                        <ion-icon name="eye-outline"></ion-icon>
+                      </button>
+                    </div>
                   </fieldset>
 
                   <fieldset class="form-auth">
                     <label>Xác nhận mật khẩu</label>
-                    <input
-                      type="password"
-                      id="confirmPassword"
-                      name="confirmPassword"
-                      placeholder="Nhập lại mật khẩu"
-                      required
-                    />
+                    <div class="password-field">
+                      <input
+                        type="password"
+                        id="confirmPassword"
+                        name="confirmPassword"
+                        placeholder="Nhập lại mật khẩu"
+                        required
+                      />
+                      <button
+                        type="button"
+                        class="password-toggle"
+                        data-password-toggle
+                        data-target="confirmPassword"
+                        aria-label="Hiện mật khẩu xác nhận"
+                        aria-pressed="false"
+                      >
+                        <ion-icon name="eye-outline"></ion-icon>
+                      </button>
+                    </div>
                   </fieldset>
 
                   <div>
@@ -191,6 +215,7 @@
     ></script>
 
   <script src="${pageContext.request.contextPath}/assets/script/reponsive.js"></script>
+  <script src="${pageContext.request.contextPath}/assets/script/register.js"></script>
 
   </body>
 </html>
