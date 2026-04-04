@@ -70,6 +70,7 @@
                   id="register"
                   action="${pageContext.request.contextPath}/register"
                   method="post"
+                  novalidate
                 >
                   <% if (request.getAttribute("error") != null) { %>
                   <div
@@ -112,6 +113,7 @@
                       required
                       autocomplete="name"
                     />
+                    <small id="fullNameFeedback" class="field-feedback" aria-live="polite"></small>
                   </fieldset>
 
                   <fieldset class="form-auth">
@@ -124,6 +126,7 @@
                       required
                       autocomplete="email"
                     />
+                    <small id="emailFeedback" class="field-feedback" aria-live="polite"></small>
                   </fieldset>
                   <fieldset class="form-auth">
                     <label>Số điện thoại</label>
@@ -135,6 +138,7 @@
                       required
                       autocomplete="tel"
                     />
+                    <small id="phoneFeedback" class="field-feedback" aria-live="polite"></small>
                   </fieldset>
                     <fieldset class="form-auth">
                         <label for="address">Địa chỉ</label>
@@ -146,6 +150,7 @@
                                 required
                                 autocomplete="street-address"
                         />
+                      <small id="addressFeedback" class="field-feedback" aria-live="polite"></small>
                     </fieldset>
                   <fieldset class="form-auth">
                     <label>Mật khẩu</label>
@@ -168,6 +173,18 @@
                         <ion-icon name="eye-outline"></ion-icon>
                       </button>
                     </div>
+                    <div class="password-rules" aria-live="polite">
+                      <p class="rule-title">Mật khẩu hợp lệ cần có đầy đủ:</p>
+                      <ul>
+                        <li data-rule="minLength">Tối thiểu 8 ký tự.</li>
+                        <li data-rule="hasUpper">Ít nhất 1 chữ hoa (A-Z).</li>
+                        <li data-rule="hasLower">Ít nhất 1 chữ thường (a-z).</li>
+                        <li data-rule="hasDigit">Ít nhất 1 chữ số (0-9).</li>
+                        <li data-rule="hasSpecial">Ít nhất 1 ký tự đặc biệt (ví dụ: !@#$...).</li>
+                        <li data-rule="noSpace">Không chứa khoảng trắng.</li>
+                      </ul>
+                    </div>
+                    <small id="passwordFeedback" class="field-feedback" aria-live="polite"></small>
                   </fieldset>
 
                   <fieldset class="form-auth">
@@ -191,6 +208,7 @@
                         <ion-icon name="eye-outline"></ion-icon>
                       </button>
                     </div>
+                    <small id="confirmPasswordFeedback" class="field-feedback" aria-live="polite"></small>
                   </fieldset>
 
                   <div>

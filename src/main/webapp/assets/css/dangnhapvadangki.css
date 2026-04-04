@@ -167,6 +167,63 @@ small {
   align-self: center;
 }
 
+.rule-hint {
+  color: #666;
+}
+
+.field-feedback {
+  margin-top: 6px;
+  min-height: 18px;
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.field-feedback.is-valid {
+  color: #1f7a3e;
+}
+
+.field-feedback.is-invalid {
+  color: #c62828;
+}
+
+.input-valid {
+  border-color: #8bcf9f !important;
+}
+
+.input-invalid {
+  border-color: #ef9a9a !important;
+}
+
+.password-rules {
+  margin-top: 10px;
+  padding: 10px 12px;
+  border: 1px solid #f0f0f0;
+  border-radius: 6px;
+  background: #fafafa;
+}
+
+.password-rules .rule-title {
+  margin: 0 0 8px;
+  font-size: 13px;
+  color: #333;
+  font-weight: 600;
+}
+
+.password-rules ul {
+  margin: 0;
+  padding-left: 18px;
+}
+
+.password-rules li {
+  margin: 4px 0;
+  color: #8a8a8a;
+  font-size: 13px;
+}
+
+.password-rules li.rule-ok {
+  color: #1f7a3e;
+}
+
 .social-auth {
   text-align: center;
   margin-top: 15px;
