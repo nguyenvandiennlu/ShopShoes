@@ -1,5 +1,7 @@
 package controller.auth;
 
+import java.io.IOException;
+
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
@@ -10,8 +12,6 @@ import services.common.EmailServices;
 import services.user.UserServices;
 
 import java.nio.charset.StandardCharsets;
-
-import java.io.IOException;
 
 @WebServlet("/register")
 public class RegisterController extends HttpServlet {
@@ -41,6 +41,7 @@ public class RegisterController extends HttpServlet {
 
         req.setCharacterEncoding("UTF-8");
         resp.setContentType("text/html;charset=UTF-8");
+
         String fullName = req.getParameter("fullName");
         String email = req.getParameter("email");
         String phone = req.getParameter("phone");

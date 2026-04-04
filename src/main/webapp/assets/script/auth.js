@@ -118,6 +118,18 @@ document.addEventListener("DOMContentLoaded", function () {
         window.location.href = data.redirect;
       } else {
         showError(data.message);
+        // Nếu server yêu cầu hiển thị reCAPTCHA
+        if (data.showRecaptcha && !document.getElementById("recaptcha-container")) {
+          renderRecaptcha();
+        }
+        // Reset reCAPTCHA nếu đã có widget
+        if (typeof grecaptcha !== "undefined" && document.querySelector(".g-recaptcha iframe")) {
+          try {
+            grecaptcha.reset();
+          } catch (e) {
+            console.log("reCAPTCHA reset skipped");
+          }
+        }
       }
     } catch (err) {
       console.error(err);
@@ -130,6 +142,30 @@ document.addEventListener("DOMContentLoaded", function () {
 
     errorEl.innerText = message;
     errorEl.style.visibility = "visible";
+  }
+
+  // Hàm render reCAPTCHA động khi cần
+  function renderRecaptcha() {
+    const passwordFieldset = document.querySelector('fieldset.form-auth:has(#password)');
+    if (!passwordFieldset) return;
+    
+    const recaptchaFieldset = document.createElement("fieldset");
+    recaptchaFieldset.className = "form-auth";
+    recaptchaFieldset.id = "recaptcha-container";
+    
+    const recaptchaDiv = document.createElement("div");
+    recaptchaDiv.className = "g-recaptcha";
+    recaptchaDiv.setAttribute("data-sitekey", window.RECAPTCHA_SITE_KEY);
+    
+    recaptchaFieldset.appendChild(recaptchaDiv);
+    passwordFieldset.after(recaptchaFieldset);
+    
+    // Render reCAPTCHA widget
+    if (typeof grecaptcha !== "undefined") {
+      grecaptcha.render(recaptchaDiv, {
+        sitekey: window.RECAPTCHA_SITE_KEY
+      });
+    }
   }
 
   document.getElementById("email").addEventListener("input", clearError);
