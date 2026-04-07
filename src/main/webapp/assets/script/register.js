@@ -60,6 +60,7 @@ document.addEventListener("DOMContentLoaded", function () {
   function renderFieldFeedback(fieldName, result, forceRender) {
     var feedback = feedbacks[fieldName];
     var input = fields[fieldName];
+    var rulesWrapper = document.querySelector(".password-rules");
 
     if (!feedback || !result) {
       return;
@@ -71,6 +72,9 @@ document.addEventListener("DOMContentLoaded", function () {
       if (input) {
         input.classList.remove("input-valid", "input-invalid");
       }
+      if (fieldName === "password" && rulesWrapper) {
+        rulesWrapper.classList.remove("is-collapsed");
+      }
       return;
     }
 
@@ -78,6 +82,10 @@ document.addEventListener("DOMContentLoaded", function () {
     feedback.classList.remove("is-valid", "is-invalid");
     feedback.classList.add(result.valid ? "is-valid" : "is-invalid");
     markInputState(input, result.valid);
+
+    if (fieldName === "password" && rulesWrapper) {
+      rulesWrapper.classList.toggle("is-collapsed", !!result.valid);
+    }
   }
 
   function renderPasswordRules(passwordResult, forceRender) {
@@ -90,14 +98,38 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     var rules = passwordResult.rules;
+    var rulesWrapper = document.querySelector(".password-rules");
     var ruleNodes = document.querySelectorAll(".password-rules li[data-rule]");
+    var remainingInvalidRules = 0;
+
     ruleNodes.forEach(function (ruleNode) {
       var key = ruleNode.getAttribute("data-rule");
       if (!Object.prototype.hasOwnProperty.call(rules, key)) {
         return;
       }
-      ruleNode.classList.toggle("rule-ok", !!rules[key]);
+
+      var isRuleOk = !!rules[key];
+      ruleNode.classList.toggle("rule-ok", isRuleOk);
+      ruleNode.classList.toggle("rule-visible", !isRuleOk);
+      ruleNode.hidden = isRuleOk;
+      ruleNode.setAttribute("aria-hidden", String(isRuleOk));
+
+      if (!isRuleOk) {
+        remainingInvalidRules += 1;
+      }
     });
+
+    if (rulesWrapper) {
+      rulesWrapper.classList.toggle("is-collapsed", remainingInvalidRules === 0);
+      
+      // Hide/show the rule title based on whether all rules are valid
+      var ruleTitle = rulesWrapper.querySelector(".rule-title");
+      if (ruleTitle) {
+        var allRulesValid = remainingInvalidRules === 0;
+        ruleTitle.hidden = allRulesValid;
+        ruleTitle.setAttribute("aria-hidden", String(allRulesValid));
+      }
+    }
   }
 
   function postValidation(forceRender) {
