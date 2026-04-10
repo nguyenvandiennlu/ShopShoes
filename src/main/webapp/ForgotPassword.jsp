@@ -1,4 +1,4 @@
-﻿<%@ page contentType="text/html;charset=UTF-8" language="java" %>
+<%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <!DOCTYPE html>
 <html lang="en">
   <head>
@@ -12,7 +12,7 @@
       <!--
     - favicon
   -->
-      <link rel="icon" href="/Nhom18_LTW/assets/favicon_io/favicon.ico" />
+      <link rel="icon" href="${pageContext.request.contextPath}/assets/favicon_io/favicon.ico" />
   </head>
   <body>
   <jsp:include page="Header.jsp" />

@@ -9,6 +9,8 @@ import org.jdbi.v3.core.Jdbi;
 
 import dao.JDBIConnector;
 import model.Order.Order;
+import enums.OrderStatus;
+import enums.PaymentStatus;
 
 public class OrderDao {
 
@@ -26,12 +28,14 @@ public class OrderDao {
                      order_status, payment_status)
                     VALUES
                     (:user_id, :sub_total, :shipping_fee, :grand_total,
-                     'NEW', 'UNPAID')
+                     :order_status, :payment_status)
                 """)
                 .bind("user_id", userId)
                 .bind("sub_total", subTotal)
                 .bind("shipping_fee", shippingFee)
                 .bind("grand_total", grandTotal)
+                .bind("order_status", OrderStatus.NEW.name())
+                .bind("payment_status", PaymentStatus.UNPAID.name())
                 .executeAndReturnGeneratedKeys("id")
                 .mapTo(Integer.class)
                 .one();
@@ -47,6 +51,8 @@ public class OrderDao {
                     o.grand_total,
                     o.order_status,
                     o.payment_status,
+                    o.shipping_status,
+                    o.orders_id,
                     o.created_at
                 FROM orders o
                 WHERE 1 = 1
@@ -101,10 +107,11 @@ public class OrderDao {
         String sql = """
                 SELECT COALESCE(SUM(grand_total), 0)
                 FROM orders
-                WHERE order_status = 'COMPLETED'
+                WHERE order_status = :status
                 """;
 
         return jdbi.withHandle(handle -> handle.createQuery(sql)
+                .bind("status", enums.OrderStatus.COMPLETED.name())
                 .mapTo(BigDecimal.class)
                 .one());
     }
@@ -126,11 +133,12 @@ public class OrderDao {
         String sql = """
                     SELECT COALESCE(SUM(grand_total), 0)
                     FROM orders
-                    WHERE order_status = 'COMPLETED'
+                    WHERE order_status = :status
                       AND DATE(created_at) = CURRENT_DATE
                 """;
 
         return jdbi.withHandle(handle -> handle.createQuery(sql)
+                .bind("status", enums.OrderStatus.COMPLETED.name())
                 .mapTo(BigDecimal.class)
                 .one());
     }
