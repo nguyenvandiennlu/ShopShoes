@@ -233,7 +233,7 @@
     ></script>
 
   <script src="${pageContext.request.contextPath}/assets/script/reponsive.js"></script>
-  <script src="${pageContext.request.contextPath}/assets/script/register.js"></script>
+  <script src="${pageContext.request.contextPath}/assets/script/register.js?v=20260406-4"></script>
 
   </body>
 </html>
