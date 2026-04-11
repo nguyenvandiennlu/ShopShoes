@@ -10,6 +10,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import services.auth.RegisterService;
 import services.common.EmailServices;
 import services.user.UserServices;
+import utils.EmailTemplateBuilder;
 
 import java.nio.charset.StandardCharsets;
 
@@ -103,10 +104,7 @@ public class RegisterController extends HttpServlet {
             return;
         }
         EmailServices emailService = new EmailServices();
-        String emailContent = "<p>Xin chào " + fullName + ",</p>" +
-                "<p>Cảm ơn bạn đã đăng ký. Vui lòng click link dưới để kích hoạt tài khoản:</p>" +
-                "<p><a href='" + result.activationLink + "'>Kích hoạt tài khoản</a></p>" +
-                "<p>Link có hiệu lực trong 2 phút.</p>";
+        String emailContent = EmailTemplateBuilder.buildActivationEmail(fullName, result.activationLink);
         try {
             emailService.send(email, "Kích hoạt tài khoản ShopShoes", emailContent);
             req.setAttribute("success", result.message);

@@ -4,6 +4,7 @@ import org.jdbi.v3.core.mapper.reflect.ColumnName;
 
 import java.io.Serializable;
 import java.time.LocalDateTime;
+import enums.Role;
 
 public class User implements Serializable {
 
@@ -18,14 +19,13 @@ public class User implements Serializable {
 
     private String address;
     // 'user', 'admin'
-    private String role;
+    private Role role;
 
     @ColumnName("full_name")
     private String fullName;
 
     @ColumnName("is_active")
     private boolean isActive;
-
 
     @ColumnName("created_at")
     private LocalDateTime createdAt;
@@ -57,7 +57,7 @@ public class User implements Serializable {
         return address;
     }
 
-    public String getRole() {
+    public Role getRole() {
         return role;
     }
 
@@ -97,7 +97,7 @@ public class User implements Serializable {
         this.address = address;
     }
 
-    public void setRole(String role) {
+    public void setRole(Role role) {
         this.role = role;
     }
 

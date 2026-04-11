@@ -1,8 +1,7 @@
 package controller.auth;
 
-import java.io.IOException;
-
-import dao.user.UserDao;
+import JavaMail.IJavaMail;
+import JavaMail.JavaMailService;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
@@ -10,116 +9,158 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import services.auth.ForgotPasswordService;
-import services.common.EmailServices;
+import utils.RecaptchaVerifier;
+import utils.EmailTemplateBuilder;
+
+import java.io.IOException;
 
 @WebServlet("/forgot-password")
 public class ForgotPasswordController extends HttpServlet {
 
-    private ForgotPasswordService service;
-    private EmailServices emailService;
+    private ForgotPasswordService forgotPasswordService;
+    private IJavaMail javaMail;
 
     @Override
     public void init() {
-        service = new ForgotPasswordService(new UserDao());
-        emailService = new EmailServices();
+        forgotPasswordService = new ForgotPasswordService();
+        javaMail = new JavaMailService();
     }
 
     @Override
-    protected void doPost(HttpServletRequest req, HttpServletResponse resp)
-            throws ServletException, IOException {
+    protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        req.getRequestDispatcher("/ForgotPassword.jsp").forward(req, resp);
+    }
+
+    @Override
+    protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        req.setCharacterEncoding("UTF-8");
+        resp.setContentType("application/json");
+        resp.setCharacterEncoding("UTF-8");
 
         HttpSession session = req.getSession();
         String action = req.getParameter("action");
 
-        if ("send-otp".equals(action)) {
-            String result = service.sendOtp(req.getParameter("email"), session);
-
-            if (result != null && !result.matches("\\d{6}")) {
-                req.setAttribute("msg", result);
-                req.getRequestDispatcher("/ForgotPassword.jsp").forward(req, resp);
+        try {
+            if (action == null || action.isBlank()) {
+                sendJson(resp, false, "Yêu cầu không hợp lệ", null);
                 return;
             }
-            String html = "<!DOCTYPE html>" +
-                    "<html lang='vi'>" +
-                    "<head>" +
-                    "  <meta charset='UTF-8'>" +
-                    "  <title>Xác nhận OTP</title>" +
-                    "</head>" +
-                    "<body style='font-family: Arial, sans-serif; background-color: #f4f4f4; padding: 20px;'>" +
 
-                    "  <div style='max-width: 500px; margin: 0 auto; background: #ffffff; padding: 24px; border-radius: 6px;'>"
-                    +
+            switch (action) {
+                case "send-otp":
+                    handleSendOtp(req, resp, session);
+                    break;
 
-                    "    <h2 style='color: #333; margin-top: 0;'>Đặt lại mật khẩu</h2>" +
+                case "verify-otp":
+                    handleVerifyOtp(req, resp, session);
+                    break;
 
-                    "    <p style='color: #555;'>Chúng tôi nhận được yêu cầu đặt lại mật khẩu cho tài khoản của bạn.</p>"
-                    +
+                case "reset-password":
+                    handleResetPassword(req, resp, session);
+                    break;
 
-                    "    <p style='color: #555;'>Mã xác thực của bạn là:</p>" +
+                default:
+                    sendJson(resp, false, "Action không được hỗ trợ", null);
+                    break;
+            }
 
-                    "    <div style='text-align: center; margin: 20px 0;'>" +
-                    "      <span style='font-size: 28px; font-weight: bold; letter-spacing: 4px; color: #000;'>" +
-                    result +
-                    "      </span>" +
-                    "    </div>" +
+        } catch (Exception e) {
+            System.err.println("[ForgotPasswordController] Exception: " + e.getMessage());
+            e.printStackTrace();
 
-                    "    <p style='color: #555;'>Mã OTP có hiệu lực trong <strong>5 phút</strong>.</p>" +
+            if (!resp.isCommitted()) {
+                sendJson(resp, false, "Đã xảy ra lỗi hệ thống, vui lòng thử lại", null);
+            }
+        }
+    }
 
-                    "    <p style='color: #888; font-size: 13px;'>" +
-                    "      Nếu bạn không yêu cầu đặt lại mật khẩu, vui lòng bỏ qua email này." +
-                    "    </p>" +
+    private void handleSendOtp(HttpServletRequest req, HttpServletResponse resp, HttpSession session) throws IOException {
+        String recaptchaResponse = req.getParameter("g-recaptcha-response");
 
-                    "    <hr style='border: none; border-top: 1px solid #eee; margin: 24px 0;'/>" +
-
-                    "    <p style='font-size: 13px; color: #888;'>" +
-                    "      BHD Sport Shoes" +
-                    "    </p>" +
-
-                    "  </div>" +
-                    "</body>" +
-                    "</html>";
-
-            emailService.send(
-                    req.getParameter("email"),
-                    "Mã OTP đặt lại mật khẩu",
-                    html);
-
-            resp.sendRedirect(req.getContextPath() + "/VerifyOtp.jsp");
+        if (!RecaptchaVerifier.verify(recaptchaResponse)) {
+            sendJson(resp, false, "Vui lòng xác nhận bạn không phải robot", null);
             return;
         }
 
-        if ("verify-otp".equals(action)) {
-            String err = service.verifyOtp(req.getParameter("otp"), session);
-            if (err != null) {
-                req.setAttribute("msg", err);
-                req.getRequestDispatcher("/VerifyOtp.jsp").forward(req, resp);
-                return;
-            }
-            resp.sendRedirect(req.getContextPath() + "/ResetPassword.jsp");
+        String email = req.getParameter("email");
+        if (email != null) {
+            email = email.trim();
+        }
+
+        String result = forgotPasswordService.sendOtp(email, session);
+
+        if (result == null) {
+            sendJson(resp, false, "Không thể tạo OTP", null);
             return;
         }
 
-        if ("reset-password".equals(action)) {
-            String err = service.resetPassword(
-                    req.getParameter("password"),
-                    req.getParameter("confirmPassword"),
-                    session);
-
-            if (err != null) {
-                req.setAttribute("msg", err);
-                req.getRequestDispatcher("/ResetPassword.jsp").forward(req, resp);
-                return;
-            }
-
-            resp.sendRedirect(req.getContextPath() + "/Login.jsp");
+        if (!result.matches("\\d{6}")) {
+            sendJson(resp, false, result, null);
+            return;
         }
 
+        String html = EmailTemplateBuilder.buildForgotPasswordOtpEmail(result);
+
+        boolean sent = javaMail.send(email, "Mã OTP đặt lại mật khẩu", html);
+        if (!sent) {
+            sendJson(resp, false, "Không thể gửi email OTP", null);
+            return;
+        }
+
+        sendJson(resp, true, "OTP đã được gửi tới email của bạn", null);
     }
 
-    @Override
-    protected void doGet(HttpServletRequest req, HttpServletResponse resp)
-            throws ServletException, IOException {
-        req.getRequestDispatcher("/ForgotPassword.jsp").forward(req, resp);
+    private void handleVerifyOtp(HttpServletRequest req, HttpServletResponse resp, HttpSession session) throws IOException {
+        String otp = req.getParameter("otp");
+        if (otp != null) {
+            otp = otp.trim();
+        }
+
+        String error = forgotPasswordService.verifyOtp(otp, session);
+
+        if (error != null) {
+            sendJson(resp, false, error, null);
+            return;
+        }
+
+        sendJson(resp, true, "Xác thực OTP thành công", null);
     }
 
+    private void handleResetPassword(HttpServletRequest req, HttpServletResponse resp, HttpSession session) throws IOException {
+        String password = req.getParameter("password");
+        String confirmPassword = req.getParameter("confirmPassword");
+
+        String error = forgotPasswordService.resetPassword(password, confirmPassword, session);
+
+        if (error != null) {
+            sendJson(resp, false, error, null);
+            return;
+        }
+
+        sendJson(resp, true, "Đổi mật khẩu thành công", req.getContextPath() + "/Login.jsp");
+    }
+
+    private void sendJson(HttpServletResponse resp, boolean success, String message, String redirect) throws IOException {
+        StringBuilder json = new StringBuilder("{");
+        json.append("\"success\":").append(success);
+
+        if (message != null) {
+            json.append(",\"message\":\"").append(escapeJson(message)).append("\"");
+        }
+
+        if (redirect != null) {
+            json.append(",\"redirect\":\"").append(escapeJson(redirect)).append("\"");
+        }
+
+        json.append("}");
+        resp.getWriter().write(json.toString());
+    }
+
+    private String escapeJson(String str) {
+        if (str == null) return "";
+        return str.replace("\\", "\\\\")
+                .replace("\"", "\\\"")
+                .replace("\n", "\\n")
+                .replace("\r", "\\r");
+    }
 }

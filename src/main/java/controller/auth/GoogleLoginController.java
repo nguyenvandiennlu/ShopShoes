@@ -10,6 +10,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import model.user.User;
 import services.user.UserServices;
+import enums.Role;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -59,10 +60,10 @@ public class GoogleLoginController extends HttpServlet {
                 jsonResponse.addProperty("success", true);
 
                 // Điều hướng dựa trên role
-                if ("ADMIN".equalsIgnoreCase(user.getRole())) {
-                    jsonResponse.addProperty("redirect", req.getContextPath() + "/admin/overview");
+                if (Role.ADMIN.equals(user.getRole())) {
+                    resp.sendRedirect(req.getContextPath() + "/admin/dashboard");
                 } else {
-                    jsonResponse.addProperty("redirect", req.getContextPath() + "/menu");
+                    resp.sendRedirect(req.getContextPath() + "/Home.jsp");
                 }
 
                 resp.getWriter().write(gson.toJson(jsonResponse));

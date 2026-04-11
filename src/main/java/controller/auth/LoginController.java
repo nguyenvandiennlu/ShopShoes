@@ -1,5 +1,6 @@
 package controller.auth;
 
+import enums.Role;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
@@ -94,10 +95,21 @@ public class LoginController extends HttpServlet {
             session.setAttribute("currentUser", user);
             session.setMaxInactiveInterval(30 * 60);
 
-            String redirectUrl = switch (user.getRole().toUpperCase()) {
-                case "ADMIN" -> req.getContextPath() + "/admin/dashboard";
-                default -> req.getContextPath() + "/menu";
-            };
+            Role role = user.getRole();
+            String redirectUrl;
+
+            if (role == null) {
+                redirectUrl = req.getContextPath() + "/menu";
+            } else {
+                switch (role) {
+                    case ADMIN:
+                        redirectUrl = req.getContextPath() + "/admin/dashboard";
+                        break;
+                    default:
+                        redirectUrl = req.getContextPath() + "/menu";
+                        break;
+                }
+            }
             if (isAjax) {
                 sendJson(resp, true, null, redirectUrl, false);
             } else {
@@ -106,11 +118,14 @@ public class LoginController extends HttpServlet {
         } catch (Exception e) {
             System.err.println("[LoginController] Exception: " + e.getMessage());
             e.printStackTrace();
-            if (isAjax) {
-                sendJson(resp, false, "Lỗi server: " + e.getMessage(), null, false);
-            } else {
-                req.setAttribute("error", "Đã xảy ra lỗi, vui lòng thử lại");
-                req.getRequestDispatcher("/Login.jsp").forward(req, resp);
+
+            if (!resp.isCommitted()) {
+                if (isAjax) {
+                    sendJson(resp, false, "Đã xảy ra lỗi hệ thống, vui lòng thử lại", null, false);
+                } else {
+                    req.setAttribute("error", "Đã xảy ra lỗi, vui lòng thử lại");
+                    req.getRequestDispatcher("/Login.jsp").forward(req, resp);
+                }
             }
         }
     }

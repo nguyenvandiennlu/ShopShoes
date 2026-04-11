@@ -69,7 +69,7 @@ public class UserDao {
                     .bind("phoneNumber", user.getPhoneNumber())
                     .bind("address", user.getAddress())
                     .bind("fullName", user.getFullName())
-                    .bind("role", user.getRole())
+                    .bind("role", user.getRole() != null ? user.getRole().name() : null)
                     .bind("isActive", user.isActive())
                     .bind("createdAt", user.getCreatedAt())
                     .bind("firebaseUID", user.getFirebaseUID())
@@ -136,7 +136,7 @@ public class UserDao {
                     .bind("phoneNumber", user.getPhoneNumber())
                     .bind("address", user.getAddress())
                     .bind("fullName", user.getFullName())
-                    .bind("role", user.getRole())
+                    .bind("role", user.getRole() != null ? user.getRole().name() : null)
                     .bind("isActive", user.isActive())
                     .bind("firebaseUID", user.getFirebaseUID());
 
