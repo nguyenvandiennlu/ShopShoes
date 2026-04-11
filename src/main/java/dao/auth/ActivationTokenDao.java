@@ -40,4 +40,48 @@ public class ActivationTokenDao {
                                 .bind("token", token)
                                 .execute());
         }
+        public boolean isValidToken(String email, String token, TokenType tokenType) {
+                String sql = "SELECT COUNT(*) FROM activation_token " +
+                        "WHERE email = :email " +
+                        "AND token = :token " +
+                        "AND token_type = :tokenType " +
+                        "AND is_used = 0 " +
+                        "AND expires_at > NOW()";
+
+                Integer count = jdbi.withHandle(h -> h.createQuery(sql)
+                        .bind("email", email)
+                        .bind("token", token)
+                        .bind("tokenType", tokenType.name())
+                        .mapTo(Integer.class)
+                        .one());
+
+                return count != null && count > 0;
+        }
+
+        public void markTokenAsUsed(String email, String token, TokenType tokenType) {
+                String sql = "UPDATE activation_token " +
+                        "SET is_used = 1 " +
+                        "WHERE email = :email " +
+                        "AND token = :token " +
+                        "AND token_type = :tokenType";
+
+                jdbi.useHandle(h -> h.createUpdate(sql)
+                        .bind("email", email)
+                        .bind("token", token)
+                        .bind("tokenType", tokenType.name())
+                        .execute());
+        }
+
+        public void invalidateAllTokensByEmail(String email, TokenType tokenType) {
+                String sql = "UPDATE activation_token " +
+                        "SET is_used = 1 " +
+                        "WHERE email = :email " +
+                        "AND token_type = :tokenType " +
+                        "AND is_used = 0";
+
+                jdbi.useHandle(h -> h.createUpdate(sql)
+                        .bind("email", email)
+                        .bind("tokenType", tokenType.name())
+                        .execute());
+        }
 }
