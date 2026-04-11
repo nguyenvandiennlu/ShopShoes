@@ -9,38 +9,25 @@ import org.mindrot.jbcrypt.BCrypt;
 
 import java.security.SecureRandom;
 import java.time.LocalDateTime;
-
 public class ForgotPasswordService {
-
     private final UserDao userDao;
     private final ActivationTokenDao tokenDao;
-    private static final long OTP_EXPIRE = 2 * 60 * 1000;
     private static final SecureRandom RANDOM = new SecureRandom();
-
     public ForgotPasswordService() {
         this.userDao = new UserDao();
         this.tokenDao = new ActivationTokenDao();
     }
-
-    public ForgotPasswordService(UserDao userDao, ActivationTokenDao tokenDao) {
-        this.userDao = userDao;
-        this.tokenDao = tokenDao;
-    }
-
     public String sendOtp(String email, HttpSession session) {
         if (email == null || email.isBlank()) {
             return "Vui lòng nhập email";
         }
-
         email = email.trim();
 
         User user = userDao.findByEmail(email);
         if (user == null) {
             return "Email không tồn tại";
         }
-
         String otp = generateOtp();
-
         tokenDao.invalidateAllTokensByEmail(email, TokenType.FORGOT_PASSWORD);
         tokenDao.saveToken(
                 email,
@@ -48,42 +35,43 @@ public class ForgotPasswordService {
                 TokenType.FORGOT_PASSWORD,
                 LocalDateTime.now().plusMinutes(2)
         );
-
         session.setAttribute("resetEmail", email);
         session.removeAttribute("otpVerified");
-
+        session.removeAttribute("verifiedOtp");
         return otp;
     }
-
     public String verifyOtp(String inputOtp, HttpSession session) {
         String email = (String) session.getAttribute("resetEmail");
 
         if (email == null || email.isBlank()) {
             return "Phiên làm việc đã hết hạn";
         }
-
         if (inputOtp == null || inputOtp.isBlank()) {
             return "Vui lòng nhập mã OTP";
         }
-
         inputOtp = inputOtp.trim();
-
         boolean valid = tokenDao.isValidToken(email, inputOtp, TokenType.FORGOT_PASSWORD);
         if (!valid) {
             return "Mã OTP không đúng hoặc đã hết hạn";
         }
-
-        tokenDao.markTokenAsUsed(email, inputOtp, TokenType.FORGOT_PASSWORD);
         session.setAttribute("otpVerified", true);
+        session.setAttribute("verifiedOtp", inputOtp);
         return null;
     }
-
     public String resetPassword(String password, String confirmPassword, HttpSession session) {
         String email = (String) session.getAttribute("resetEmail");
         Boolean verified = (Boolean) session.getAttribute("otpVerified");
-
+        String verifiedOtp = (String) session.getAttribute("verifiedOtp");
         if (email == null || verified == null || !verified) {
             return "Bạn chưa xác thực OTP";
+        }
+
+        if (verifiedOtp == null) {
+            return "OTP không hợp lệ";
+        }
+        boolean valid = tokenDao.isValidToken(email, verifiedOtp, TokenType.FORGOT_PASSWORD);
+        if (!valid) {
+            return "OTP đã hết hạn, vui lòng yêu cầu mã mới";
         }
 
         if (password == null || confirmPassword == null) {
@@ -103,24 +91,22 @@ public class ForgotPasswordService {
         if (!password.matches(passwordRegex)) {
             return "Mật khẩu phải có ít nhất 8 ký tự, gồm chữ hoa, chữ thường, số và ký tự đặc biệt";
         }
-
         String hashed = BCrypt.hashpw(password, BCrypt.gensalt(12));
         boolean updated = userDao.updatePassword(email, hashed);
 
         if (!updated) {
             return "Không thể đổi mật khẩu";
         }
-
+        tokenDao.markTokenAsUsed(email, verifiedOtp, TokenType.FORGOT_PASSWORD);
         clearResetSession(session);
         return null;
     }
-
     private String generateOtp() {
         return String.valueOf(100000 + RANDOM.nextInt(900000));
     }
-
     private void clearResetSession(HttpSession session) {
         session.removeAttribute("resetEmail");
         session.removeAttribute("otpVerified");
+        session.removeAttribute("verifiedOtp");
     }
 }
