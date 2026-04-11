@@ -1,38 +1,35 @@
-use sportshoes;
--- Bảng lưu trữ remember tokens cho chức năng "Ghi nhớ tài khoản"
-CREATE TABLE IF NOT EXISTS remember_tokens (
-    id INT PRIMARY KEY AUTO_INCREMENT,
-    user_id INT NOT NULL,
-    token_hash VARCHAR(255) NOT NULL UNIQUE,
-    expires_at DATETIME NOT NULL,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    is_active TINYINT(1) DEFAULT 1,
+DROP TABLE IF EXISTS `remember_token`;
 
-    -- Foreign Key constraint
-    CONSTRAINT fk_remember_tokens_user_id
-        FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+CREATE TABLE `remember_token` (
+  `id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
+  `user_id` INT UNSIGNED NOT NULL,
+  `token` VARCHAR(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `expiry_date` DATETIME NOT NULL,
+  `created_at` TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP,
+  `remember_token_id` VARCHAR(10) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL,
+  PRIMARY KEY (`id`) USING BTREE,
+  UNIQUE INDEX `uq_token` (`token` ASC) USING BTREE,
+  UNIQUE INDEX `remember_token_id` (`remember_token_id` ASC) USING BTREE,
+  INDEX `user_id` (`user_id` ASC) USING BTREE,
+  INDEX `expiry_date` (`expiry_date` ASC) USING BTREE,
+  CONSTRAINT `remember_token_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE RESTRICT
+) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci ROW_FORMAT = DYNAMIC;
 
-    -- Index để cải thiện tốc độ query
-    INDEX idx_token_hash (token_hash),
-    INDEX idx_user_id (user_id),
-    INDEX idx_expires_at (expires_at),
-    INDEX idx_is_active (is_active)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+DROP TRIGGER IF EXISTS `before_insert_remember_token`;
 
-DELIMITER //
-DROP PROCEDURE IF EXISTS deactivate_expired_tokens //
-CREATE PROCEDURE deactivate_expired_tokens()
-BEGIN
-    UPDATE remember_tokens
-    SET is_active = 0, updated_at = NOW()
-    WHERE expires_at < NOW() AND is_active = 1;
-END //
+DELIMITER ;;
+
+CREATE TRIGGER `before_insert_remember_token` BEFORE INSERT ON `remember_token` FOR EACH ROW BEGIN
+    DECLARE next_id INT;
+
+    SELECT AUTO_INCREMENT
+    INTO next_id
+    FROM information_schema.TABLES
+    WHERE TABLE_NAME = 'remember_token'
+    AND TABLE_SCHEMA = DATABASE();
+
+    -- Pad to 5 digits: RT00001, RT00002, ..., RT99999 (supports up to 100k tokens)
+    SET NEW.remember_token_id = CONCAT('RT', LPAD(next_id, 5, '0'));
+END;;
+
 DELIMITER ;
-
-SET GLOBAL event_scheduler = ON;
-DROP EVENT IF EXISTS deactivate_tokens_event;
-CREATE EVENT deactivate_tokens_event
-ON SCHEDULE EVERY 1 day
-DO
-    CALL deactivate_expired_tokens();

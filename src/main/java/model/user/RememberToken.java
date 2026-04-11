@@ -14,27 +14,23 @@ public class RememberToken implements Serializable {
     private static final long serialVersionUID = 1L;
 
     private int id;
-    private int userId;
-    private String tokenHash;
-    private LocalDateTime expiresAt;
-    private LocalDateTime createdAt;
-    private LocalDateTime updatedAt;
-    private boolean isActive;
+    private int user_id;
+    private String token;
+    private LocalDateTime expiry_date;
+    private LocalDateTime created_at;
+    private String remember_token_id;
+    private boolean is_active;
+    private LocalDateTime invalidated_at;
 
-    // Constructors
     public RememberToken() {
     }
 
-    public RememberToken(int userId, String tokenHash, LocalDateTime expiresAt) {
-        this.userId = userId;
-        this.tokenHash = tokenHash;
-        this.expiresAt = expiresAt;
-        this.isActive = true;
-        this.createdAt = LocalDateTime.now();
-        this.updatedAt = LocalDateTime.now();
+    public RememberToken(int user_id, String token, LocalDateTime expiry_date) {
+        this.user_id = user_id;
+        this.token = token;
+        this.expiry_date = expiry_date;
     }
 
-    // Getters & Setters
     public int getId() {
         return id;
     }
@@ -43,76 +39,77 @@ public class RememberToken implements Serializable {
         this.id = id;
     }
 
-    public int getUserId() {
-        return userId;
+    public int getUser_id() {
+        return user_id;
     }
 
-    public void setUserId(int userId) {
-        this.userId = userId;
+    public void setUser_id(int user_id) {
+        this.user_id = user_id;
     }
 
-    public String getTokenHash() {
-        return tokenHash;
+    public String getToken() {
+        return token;
     }
 
-    public void setTokenHash(String tokenHash) {
-        this.tokenHash = tokenHash;
+    public void setToken(String token) {
+        this.token = token;
     }
 
-    public LocalDateTime getExpiresAt() {
-        return expiresAt;
+    public LocalDateTime getExpiry_date() {
+        return expiry_date;
     }
 
-    public void setExpiresAt(LocalDateTime expiresAt) {
-        this.expiresAt = expiresAt;
+    public void setExpiry_date(LocalDateTime expiry_date) {
+        this.expiry_date = expiry_date;
     }
 
     public LocalDateTime getCreatedAt() {
-        return createdAt;
+        return created_at;
     }
 
-    public void setCreatedAt(LocalDateTime createdAt) {
-        this.createdAt = createdAt;
+    public void setCreated_at(LocalDateTime created_at) {
+        this.created_at = created_at;
     }
 
-    public LocalDateTime getUpdatedAt() {
-        return updatedAt;
+    public String getRemember_token_id() {
+        return remember_token_id;
     }
 
-    public void setUpdatedAt(LocalDateTime updatedAt) {
-        this.updatedAt = updatedAt;
+    public void setRemember_token_id(String remember_token_id) {
+        this.remember_token_id = remember_token_id;
     }
 
-    public boolean isActive() {
-        return isActive;
-    }
-
-    public void setActive(boolean active) {
-        this.isActive = active;
-    }
-
-    /**
-     * Kiểm tra token có hết hạn không
-     */
-    public boolean isExpired() {
-        return LocalDateTime.now().isAfter(expiresAt);
-    }
-
-    /**
-     * Kiểm tra token có hợp lệ không (chưa hết hạn và đang active)
-     */
     public boolean isValid() {
-        return isActive && !isExpired();
+        return is_active && expiry_date != null && LocalDateTime.now().isBefore(expiry_date);
+    }
+
+    public boolean isIs_active() {
+        return is_active;
+    }
+
+    public void setIs_active(boolean is_active) {
+        this.is_active = is_active;
+    }
+
+    public LocalDateTime getInvalidated_at() {
+        return invalidated_at;
+    }
+
+    public void setInvalidated_at(LocalDateTime invalidated_at) {
+        this.invalidated_at = invalidated_at;
     }
 
     @Override
     public String toString() {
         return "RememberToken{" +
                 "id=" + id +
-                ", userId=" + userId +
-                ", tokenHash='" + tokenHash + '\'' +
-                ", expiresAt=" + expiresAt +
-                ", isActive=" + isActive +
+                ", user_id=" + user_id +
+                ", token='" + (token != null ? token.substring(0, Math.min(10, token.length())) + "..." : "null") + '\'' +
+                ", expiry_date=" + expiry_date +
+                ", created_at=" + created_at +
+                ", remember_token_id='" + remember_token_id + '\'' +
+                ", is_active=" + is_active +
+                ", invalidated_at=" + invalidated_at +
                 '}';
     }
 }
