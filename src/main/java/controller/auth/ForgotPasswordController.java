@@ -1,5 +1,7 @@
 package controller.auth;
 
+import java.io.IOException;
+
 import dao.user.UserDao;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
@@ -9,8 +11,6 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import services.auth.ForgotPasswordService;
 import services.common.EmailServices;
-
-import java.io.IOException;
 
 @WebServlet("/forgot-password")
 public class ForgotPasswordController extends HttpServlet {

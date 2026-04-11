@@ -25,6 +25,8 @@
               - favicon
             -->
           <link rel="icon" href="${pageContext.request.contextPath}/assets/favicon_io/favicon.ico" />
+        <!-- Google reCAPTCHA v2 -->
+        <script src="https://www.google.com/recaptcha/api.js" async defer></script>
         <link
           rel="stylesheet"
           href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css"
@@ -121,6 +123,14 @@
                                         required
                                 />
                             </fieldset>
+
+                            <%-- Chỉ hiển thị reCAPTCHA khi đã sai >= 3 lần --%>
+                            <% if (Boolean.TRUE.equals(request.getAttribute("showRecaptcha"))) { %>
+                            <fieldset class="form-auth" id="recaptcha-container">
+                                <div class="g-recaptcha" data-sitekey="<%= utils.RecaptchaVerifier.getSiteKey() %>"></div>
+                            </fieldset>
+                            <% } %>
+
                             <p id="login-error" class="auth-error-message"></p>
 
                             <fieldset class="form-auth remember-me-field">
@@ -168,6 +178,11 @@
           </section>
         </main>
         <jsp:include page="Footer.jsp" />
+        <%-- Truyền config reCAPTCHA cho JavaScript --%>
+        <script>
+            window.RECAPTCHA_SITE_KEY = "<%= utils.RecaptchaVerifier.getSiteKey() %>";
+            window.SHOW_RECAPTCHA = <%= Boolean.TRUE.equals(request.getAttribute("showRecaptcha")) %>;
+        </script>
         <script
           type="module"
           src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.esm.js"
