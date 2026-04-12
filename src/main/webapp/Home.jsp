@@ -302,8 +302,6 @@
         });
       </script>
 
-      <script src="${pageContext.request.contextPath}/assets/script/product-popup.js"></script>
-
     </body>
 
     </html>

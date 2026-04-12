@@ -1,0 +1,95 @@
+plugins {
+    id 'java'
+    id 'war'
+    id 'org.hidetake.ssh' version '2.11.2'
+}
+
+group = 'com.ra'
+version = '1.0-SNAPSHOT'
+
+repositories {
+    mavenCentral()
+}
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(21)
+    }
+}
+
+dependencies {
+    providedCompile 'jakarta.servlet:jakarta.servlet-api:6.1.0'
+
+    implementation 'com.cloudinary:cloudinary-http44:1.39.0'
+    implementation 'jakarta.servlet.jsp.jstl:jakarta.servlet.jsp.jstl-api:3.0.0'
+    implementation 'org.glassfish.web:jakarta.servlet.jsp.jstl:3.0.1'
+    implementation 'org.slf4j:slf4j-simple:2.0.7'
+    implementation 'org.mindrot:jbcrypt:0.4'
+    implementation 'com.google.firebase:firebase-admin:9.2.0'
+    implementation 'com.sun.mail:jakarta.mail:2.0.1'
+    implementation 'com.google.code.gson:gson:2.10.1'
+    implementation 'org.jdbi:jdbi3-core:3.49.5'
+    implementation 'com.mysql:mysql-connector-j:8.0.33'
+
+    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.13.2'
+    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.13.2'
+}
+
+test {
+    useJUnitPlatform()
+}
+
+war {
+    archiveFileName = 'ROOT.war'
+}
+
+def props = new Properties()
+file("local.properties").withInputStream { props.load(it) }
+
+remotes {
+    vps {
+        host = '149.28.148.238'
+        user = 'root'
+        password = props['vps.pass']
+    }
+}
+tasks.withType(JavaCompile).configureEach {
+    options.encoding = 'UTF-8'
+}
+ssh.settings {
+    knownHosts = allowAnyHosts
+}
+
+task dockerAppStart {
+    doLast {
+        println 'begin dockerAppStart'
+        ssh.run {
+            session(remotes.vps) {
+                execute 'mkdir -p /usr/deploy'
+                execute 'docker network create app-net', ignoreError: true
+                execute 'docker stop tomcat10', ignoreError: true
+                execute 'docker rm tomcat10', ignoreError: true
+                execute 'docker run -d --name tomcat10 --network app-net -v /usr/deploy:/usr/local/tomcat/webapps -p 80:8080 tomcat:10.1.49'
+            }
+        }
+    }
+}
+
+task dockerUploadFileToServer {
+    dependsOn war
+    doLast {
+        println 'begin dockerUploadFileToServer'
+        ssh.run {
+            session(remotes.vps) {
+                execute 'rm -f /usr/deploy/ROOT.war', ignoreError: true
+                put from: "${buildDir}/libs/ROOT.war", into: "/usr/deploy/ROOT.war"
+            }
+        }
+    }
+}
+
+task dockerDeploy {
+    dependsOn dockerAppStart
+    dependsOn dockerUploadFileToServer
+    tasks.dockerUploadFileToServer.mustRunAfter tasks.dockerAppStart
+}

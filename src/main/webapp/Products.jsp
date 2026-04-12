@@ -224,8 +224,6 @@
                 <script src="${pageContext.request.contextPath}/assets/script/ajax.js"></script>
                 <script src="https://unpkg.com/swiper@8/swiper-bundle.min.js"></script>
                 <script src="${pageContext.request.contextPath}/assets/script/reponsive.js"></script>
-
-                <script src="${pageContext.request.contextPath}/assets/script/product-popup.js"></script>
                 <script src="${pageContext.request.contextPath}/assets/script/SliderBanner.js"></script>
                 <script src="${pageContext.request.contextPath}/assets/script/filter.js"></script>
 
