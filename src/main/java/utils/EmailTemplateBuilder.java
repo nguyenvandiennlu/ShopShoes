@@ -10,7 +10,7 @@ public class EmailTemplateBuilder {
                 + "background:#f4f4f4;padding:12px 18px;display:inline-block;border-radius:8px;'>"
                 + otp
                 + "</div>"
-                + "<p style='margin-top:16px;'>Mã có hiệu lực trong <b>2 phút</b>.</p>"
+                + "<p style='margin-top:16px;'>Mã có hiệu lực trong <b>15 phút</b>.</p>"
                 + "<p>Nếu bạn không thực hiện yêu cầu này, hãy bỏ qua email.</p>"
                 + "</div>";
     }
