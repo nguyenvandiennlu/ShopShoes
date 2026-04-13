@@ -39,13 +39,10 @@ public class UserServices {
     }
 
     public boolean register(String fullName, String phone, String email, String password, String address) {
-
-        // check trùng email / phone
         if (userDao.findByEmail(email) != null ||
                 userDao.findByPhone(phone) != null) {
             return false;
         }
-
         User user = new User();
         user.setFullName(fullName);
         user.setPhoneNumber(phone);

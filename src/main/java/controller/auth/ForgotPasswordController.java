@@ -76,53 +76,56 @@ public class ForgotPasswordController extends HttpServlet {
 
     private void handleSendOtp(HttpServletRequest req, HttpServletResponse resp, HttpSession session) throws IOException {
         String recaptchaResponse = req.getParameter("g-recaptcha-response");
-
         if (!RecaptchaVerifier.verify(recaptchaResponse)) {
             sendJson(resp, false, "Vui lòng xác nhận bạn không phải robot", null);
             return;
         }
-
         String email = req.getParameter("email");
         if (email != null) {
             email = email.trim();
         }
-
-        String result = forgotPasswordService.sendOtp(email, session);
-
-        if (result == null) {
-            sendJson(resp, false, "Không thể tạo OTP", null);
+        String otp = forgotPasswordService.sendOtp(email, session);
+        if (otp != null && otp.contains("Vui lòng chờ")) {
+            sendJson(resp, false, otp, null);
+            return;
+        }
+        if (otp != null && otp.contains("đã yêu cầu OTP quá nhiều")) {
+            sendJson(resp, false, otp, null);
+            return;
+        }
+        if (otp == null || otp.isBlank() || !otp.matches("\\d{6}")) {
+            String errorMsg = otp != null ? otp : "Không thể tạo OTP";
+            sendJson(resp, false, errorMsg, null);
             return;
         }
 
-        if (!result.matches("\\d{6}")) {
-            sendJson(resp, false, result, null);
-            return;
+        try {
+            String html = EmailTemplateBuilder.buildForgotPasswordOtpEmail(otp);
+            boolean sent = javaMail.send(email, "Mã OTP đặt lại mật khẩu", html);
+
+            if (!sent) {
+                System.err.println("[ForgotPasswordController] Email send returned false for: " + email);
+                sendJson(resp, false, "Không thể gửi email OTP. Vui lòng thử lại", null);
+                return;
+            }
+            sendJson(resp, true, "OTP đã được gửi tới email của bạn. Vui lòng kiểm tra hộp thư (xem trong thư rác nếu không thấy)", null);
+        } catch (Exception e) {
+            System.err.println("[ForgotPasswordController] Email send exception: " + e.getMessage());
+            e.printStackTrace();
+            sendJson(resp, false, "Gửi email thất bại. Vui lòng thử lại sau", null);
         }
-
-        String html = EmailTemplateBuilder.buildForgotPasswordOtpEmail(result);
-
-        boolean sent = javaMail.send(email, "Mã OTP đặt lại mật khẩu", html);
-        if (!sent) {
-            sendJson(resp, false, "Không thể gửi email OTP", null);
-            return;
-        }
-
-        sendJson(resp, true, "OTP đã được gửi tới email của bạn", null);
     }
-
     private void handleVerifyOtp(HttpServletRequest req, HttpServletResponse resp, HttpSession session) throws IOException {
         String otp = req.getParameter("otp");
         if (otp != null) {
             otp = otp.trim();
         }
-
         String error = forgotPasswordService.verifyOtp(otp, session);
 
         if (error != null) {
             sendJson(resp, false, error, null);
             return;
         }
-
         sendJson(resp, true, "Xác thực OTP thành công", null);
     }
 

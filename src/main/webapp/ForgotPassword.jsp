@@ -232,7 +232,11 @@
             .then(d => {
                 showMessage(d.message, d.success);
                 if (d.success && d.redirect) {
-                    setTimeout(() => location.href = d.redirect, 1000);
+                    showMessage("Đổi mật khẩu thành công. Đang chuyển về trang đăng nhập...", true);
+
+                    setTimeout(() => {
+                        location.href = d.redirect;
+                    }, 3000);
                 }
             })
             .catch(() => {
