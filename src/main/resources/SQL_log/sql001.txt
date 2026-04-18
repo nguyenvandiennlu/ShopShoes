@@ -1,0 +1,35 @@
+DROP TABLE IF EXISTS `remember_token`;
+
+CREATE TABLE `remember_token` (
+  `id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
+  `user_id` INT UNSIGNED NOT NULL,
+  `token` VARCHAR(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `expiry_date` DATETIME NOT NULL,
+  `created_at` TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP,
+  `remember_token_id` VARCHAR(10) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL,
+  PRIMARY KEY (`id`) USING BTREE,
+  UNIQUE INDEX `uq_token` (`token` ASC) USING BTREE,
+  UNIQUE INDEX `remember_token_id` (`remember_token_id` ASC) USING BTREE,
+  INDEX `user_id` (`user_id` ASC) USING BTREE,
+  INDEX `expiry_date` (`expiry_date` ASC) USING BTREE,
+  CONSTRAINT `remember_token_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE RESTRICT
+) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci ROW_FORMAT = DYNAMIC;
+
+DROP TRIGGER IF EXISTS `before_insert_remember_token`;
+
+DELIMITER ;;
+
+CREATE TRIGGER `before_insert_remember_token` BEFORE INSERT ON `remember_token` FOR EACH ROW BEGIN
+    DECLARE next_id INT;
+
+    SELECT AUTO_INCREMENT
+    INTO next_id
+    FROM information_schema.TABLES
+    WHERE TABLE_NAME = 'remember_token'
+    AND TABLE_SCHEMA = DATABASE();
+
+    -- Pad to 5 digits: RT00001, RT00002, ..., RT99999 (supports up to 100k tokens)
+    SET NEW.remember_token_id = CONCAT('RT', LPAD(next_id, 5, '0'));
+END;;
+
+DELIMITER ;
