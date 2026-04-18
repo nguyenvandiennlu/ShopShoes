@@ -1,37 +1,38 @@
 package services.auth;
 
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.time.LocalDateTime;
-
 import org.mindrot.jbcrypt.BCrypt;
-
 import dao.auth.TokenTypeDao;
 import dao.user.UserDao;
 import enums.TokenType;
 import jakarta.servlet.http.HttpSession;
 import model.user.User;
-
 public class ForgotPasswordService {
     private final UserDao userDao;
     private final TokenTypeDao tokenDao;
     private static final SecureRandom RANDOM = new SecureRandom();
-
+    private static final int SO_LAN_SAI_TOI_DA = 5;
+    private static final long THOI_GIAN_KHOA_MS = 60 * 60 * 1000;
     public ForgotPasswordService() {
         this.userDao = new UserDao();
         this.tokenDao = new TokenTypeDao();
     }
-
     public String sendOtp(String email, HttpSession session) {
         if (email == null || email.isBlank()) {
             return "Vui lòng nhập email";
         }
+        String thongBaoKhoa = kiemTraKhoa(session);
+        if (thongBaoKhoa != null) return thongBaoKhoa;
         email = email.trim();
         if (!email.matches("^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$")) {
             return "Email không hợp lệ. Ví dụ: example@gmail.com";
         }
         LocalDateTime oneMinuteAgo = LocalDateTime.now().minusSeconds(60);
         boolean recentlyRequested = tokenDao.existsRecentToken(email, TokenType.FORGOT_PASSWORD, oneMinuteAgo);
-
         if (recentlyRequested) {
             return "Vui lòng chờ 60 giây trước khi yêu cầu OTP mới";
         }
@@ -41,40 +42,56 @@ public class ForgotPasswordService {
             return "Bạn đã yêu cầu OTP quá nhiều lần. Vui lòng thử lại sau 1 giờ";
         }
         User user = userDao.findByEmail(email);
-        if (user == null) {
-            return "Email không tồn tại";
+        if (user != null) {
+            String otp = generateOtp();
+            String hashOTP = hashSHA256(email + ":" + otp);
+            LocalDateTime expiryTime = LocalDateTime.now().plusMinutes(15);
+            tokenDao.invalidateAllTokensByEmail(email, TokenType.FORGOT_PASSWORD);
+            tokenDao.saveToken(email, hashOTP, TokenType.FORGOT_PASSWORD, expiryTime);
+            session.setAttribute("resetEmail", email);
+            session.removeAttribute("otpVerified");
+            session.removeAttribute("verifiedOtp");
+            session.removeAttribute("soLanNhapSai");
         }
-        String otp = generateOtp();
-        LocalDateTime expiryTime = LocalDateTime.now().plusMinutes(15);
-        tokenDao.invalidateAllTokensByEmail(email, TokenType.FORGOT_PASSWORD);
-        tokenDao.saveToken(email, otp, TokenType.FORGOT_PASSWORD, expiryTime);
-        session.setAttribute("resetEmail", email);
-        session.removeAttribute("otpVerified");
-        session.removeAttribute("verifiedOtp");
-        return otp;
-    }
 
+        return "Nếu email tồn tại, mã OTP đã được gửi";
+    }
     public String verifyOtp(String inputOtp, HttpSession session) {
         String email = (String) session.getAttribute("resetEmail");
-
         if (email == null || email.isBlank()) {
             return "Phiên làm việc đã hết hạn";
         }
+
+        String thongBaoKhoa = kiemTraKhoa(session);
+        if (thongBaoKhoa != null) return thongBaoKhoa;
+
         if (inputOtp == null || inputOtp.isBlank()) {
             return "Vui lòng nhập mã OTP";
         }
         inputOtp = inputOtp.trim();
-        boolean valid = tokenDao.isValidToken(email, inputOtp, TokenType.FORGOT_PASSWORD);
+        String hashInput = hashSHA256(email + ":" + inputOtp);
+        boolean valid = tokenDao.isValidToken(email, hashInput, TokenType.FORGOT_PASSWORD);
         if (!valid) {
-            return "Mã OTP không đúng hoặc đã hết hạn";
+            Integer soLanSai = (Integer) session.getAttribute("soLanNhapSai");
+            soLanSai = (soLanSai == null) ? 1 : soLanSai + 1;
+
+            if (soLanSai >= SO_LAN_SAI_TOI_DA) {
+                session.setAttribute("thoiDiemKhoa", System.currentTimeMillis());
+                tokenDao.invalidateAllTokensByEmail(email, TokenType.FORGOT_PASSWORD);
+                clearResetSession(session);
+                return "Nhập sai quá " + SO_LAN_SAI_TOI_DA + " lần. Vui lòng thử lại sau 1 giờ";
+            }
+            session.setAttribute("soLanNhapSai", soLanSai);
+            int conLai = SO_LAN_SAI_TOI_DA - soLanSai;
+            return "Mã OTP không đúng. Còn " + conLai + " lần thử";
         }
+        session.removeAttribute("soLanNhapSai");
         session.setAttribute("otpVerified", true);
-        session.setAttribute("verifiedOtp", inputOtp);
+        session.setAttribute("verifiedOtp", hashInput);
         return null;
     }
 
     public String resetPassword(String password, String confirmPassword, HttpSession session) {
-        // ===== VALIDATE SESSION & OTP VERIFICATION =====
         String email = (String) session.getAttribute("resetEmail");
         Boolean verified = (Boolean) session.getAttribute("otpVerified");
         String verifiedOtp = (String) session.getAttribute("verifiedOtp");
@@ -110,14 +127,38 @@ public class ForgotPasswordService {
         clearResetSession(session);
         return null;
     }
-
     private String generateOtp() {
         return String.format("%06d", RANDOM.nextInt(1000000));
     }
-
     private void clearResetSession(HttpSession session) {
         session.removeAttribute("resetEmail");
         session.removeAttribute("otpVerified");
         session.removeAttribute("verifiedOtp");
+        session.removeAttribute("soLanNhapSai");
+    }
+    private String kiemTraKhoa(HttpSession session) {
+        Long thoiDiemKhoa = (Long) session.getAttribute("thoiDiemKhoa");
+        if (thoiDiemKhoa == null) return null;
+        long daQuaMs = System.currentTimeMillis() - thoiDiemKhoa;
+        if (daQuaMs >= THOI_GIAN_KHOA_MS) {
+            session.removeAttribute("thoiDiemKhoa");
+            session.removeAttribute("soLanNhapSai");
+            return null;
+        }
+        long phutConLai = (long) Math.ceil((THOI_GIAN_KHOA_MS - daQuaMs) / 60000.0);
+        return "Bạn đã nhập sai quá nhiều lần. Thử lại sau " + phutConLai + " phút";
+    }
+    private String hashSHA256(String input) {
+        try {
+            MessageDigest digest = MessageDigest.getInstance("SHA-256");
+            byte[] hashBytes = digest.digest(input.getBytes(StandardCharsets.UTF_8));
+            StringBuilder hex = new StringBuilder();
+            for (byte b : hashBytes) {
+                hex.append(String.format("%02x", b));
+            }
+            return hex.toString();
+        } catch (NoSuchAlgorithmException e) {
+            throw new RuntimeException("SHA-256 khong kha dung", e);
+        }
     }
 }
