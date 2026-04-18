@@ -132,6 +132,19 @@
                             <% } %>
 
                             <p id="login-error" class="auth-error-message"></p>
+
+                            <fieldset class="form-auth remember-me-field">
+                                <div class="remember-me-wrapper">
+                                    <label for="rememberMe" class="label-remember">Ghi nhớ tài khoản</label>
+                                    <input
+                                            type="checkbox"
+                                            id="rememberMe"
+                                            name="rememberMe"
+                                            class="checkbox-remember"
+                                    />
+                                </div>
+                            </fieldset>
+
                             <input type="hidden" name="redirect" value="${param.redirect}" />
                             <div id="login-submit">
                                 <button type="submit" id="btn-primary" class="btn-primary">

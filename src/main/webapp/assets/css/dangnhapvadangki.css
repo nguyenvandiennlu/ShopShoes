@@ -354,3 +354,75 @@ small {
   font-family: "Roboto", sans-serif;
   color: #d32f2f;
 }
+
+/* Remember Me Checkbox Styles */
+.remember-me-field {
+  margin-bottom: 25px !important;
+  margin-top: 5px;
+}
+
+.remember-me-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: right;
+  gap: 10px;
+  cursor: pointer;
+}
+
+.checkbox-remember {
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  width: 18px;
+  height: 18px;
+  border: 2px solid #bfbfbf;
+  border-radius: 4px;
+  cursor: pointer;
+  background-color: #ffffff;
+  transition: all 0.3s ease;
+  position: relative;
+  flex-shrink: 0;
+}
+
+.checkbox-remember:hover {
+  border-color: #fa8072;
+  box-shadow: 0 0 0 2px rgba(250, 128, 114, 0.1);
+}
+
+.checkbox-remember:focus-visible {
+  outline: 2px solid #fa8072;
+  outline-offset: 2px;
+  box-shadow: 0 0 0 2px rgba(250, 128, 114, 0.2);
+}
+
+.checkbox-remember:checked {
+  background-color: #fa8072;
+  border-color: #fa8072;
+  box-shadow: none;
+}
+
+.checkbox-remember:checked::after {
+  content: '✓';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  color: #ffffff;
+  font-size: 12px;
+  font-weight: bold;
+}
+
+.label-remember {
+  font-family: "Roboto", sans-serif;
+  font-size: 14px;
+  font-weight: 400;
+  color: #757575;
+  margin-bottom: 0;
+  cursor: pointer;
+  user-select: none;
+  transition: color 0.3s ease;
+}
+
+.checkbox-remember:hover {
+  color: #fa8072;
+}
