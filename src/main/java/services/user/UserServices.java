@@ -1,8 +1,8 @@
 package services.user;
 
 import dao.user.UserDao;
-import model.user.User;
 import enums.Role;
+import model.user.User;
 import org.mindrot.jbcrypt.BCrypt;
 
 import java.time.LocalDateTime;
@@ -57,38 +57,35 @@ public class UserServices {
         return userDao.insertUser(user) > 0;
     }
 
-    public User processSocialLogin(String email, String name, String firebase_uid, String provider) {
-
-        // TÌM USER TRONG DB THEO EMAIL
-        User user = userDao.findByEmail(email);
-        // ↑
-        // Query: SELECT * FROM users WHERE email = 'nguyenvana@gmail.com'
-
+    public User processGoogleLoginVerified(String email, String name, String firebaseUid, String picture) {
+        User user = userDao.findByFirebaseUID(firebaseUid);
         if (user != null) {
-            // USER ĐÃ TỒN TẠI → Trả về luôn
-            System.out.println("User đã tồn tại: " + user.getId());
+            System.out.println("User đã tồn tại theo firebase_uid: " + user.getId());
             return user;
-        } else {
-            // USER CHƯA TỒN TẠI → Tạo mới
-            System.out.println("Tạo user mới...");
-
-            // TẠO OBJECT USER MỚI
-            User newUser = new User();
-            newUser.setEmail(email); // "nguyenvana@gmail.com"
-            newUser.setFullName(name); // "Nguyễn Văn A"
-            newUser.setFirebaseUID(firebase_uid); // "AbC123XyZ"
-            newUser.setRole(Role.USER); // Role mặc định
-            newUser.setIsActive(true); // Kích hoạt ngay
-            newUser.setPasswordHash("");
-            newUser.setAddress("");
-            // Google login không cần password
-            newUser.setCreatedAt(LocalDateTime.now()); // Thời gian hiện tại
-
-            // LƯU VÀO DATABASE
-            userDao.insertUser(newUser);
-
-            // LẤY LẠI USER VỪA TẠO (để có ID)
-            return userDao.findByEmail(email);
         }
+        user = userDao.findByEmail(email);
+        if (user != null) {
+            System.out.println("User đã tồn tại theo email, cập nhật firebase_uid: " + user.getId());
+            user.setFirebaseUID(firebaseUid);
+            if (user.getFullName() == null || user.getFullName().isBlank()) {
+                user.setFullName(name);
+            }
+            userDao.update(user);
+            return userDao.findById(user.getId());
+        }
+        System.out.println("Tạo user Google mới...");
+
+        User newUser = new User();
+        newUser.setEmail(email);
+        newUser.setFullName(name != null ? name : "");
+        newUser.setFirebaseUID(firebaseUid);
+        newUser.setRole(Role.USER);
+        newUser.setIsActive(true);
+        newUser.setPasswordHash("");
+        newUser.setAddress("");
+        newUser.setCreatedAt(LocalDateTime.now());
+
+        userDao.insertUser(newUser);
+        return userDao.findByEmail(email);
     }
 }

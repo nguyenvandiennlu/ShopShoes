@@ -37,3 +37,4 @@ build/
 
 ### Mac OS ###
 .DS_Store
+webapp/WEB-INF/firebase-service-account.json

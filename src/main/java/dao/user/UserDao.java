@@ -5,6 +5,7 @@ import model.user.User;
 import org.jdbi.v3.core.Jdbi;
 
 import java.util.List;
+import java.util.Objects;
 
 public class UserDao {
 
@@ -195,5 +196,19 @@ public class UserDao {
                 .bind("password", newPasswordHash)
                 .execute()) > 0;
     }
-
+    public User findByFirebaseUID(String firebaseUID) {
+        String sql = "SELECT * FROM users WHERE firebase_uid = :firebaseUID";
+        return jdbi.withHandle(handle -> handle.createQuery(sql)
+                .bind("firebaseUID", firebaseUID)
+                .mapToBean(User.class)
+                .findOne()
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy user")));
+    }
+    public boolean updateFirebaseUID(int userId, String firebaseUID) {
+        String sql = "UPDATE users SET firebase_uid = :firebaseUID WHERE id = :id";
+        return jdbi.withHandle(handle -> handle.createUpdate(sql)
+                .bind("firebaseUID", firebaseUID)
+                .bind("id", userId)
+                .execute()) > 0;
+    }
 }
