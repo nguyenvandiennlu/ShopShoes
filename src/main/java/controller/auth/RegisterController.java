@@ -18,6 +18,7 @@ import java.nio.charset.StandardCharsets;
 public class RegisterController extends HttpServlet {
     private UserServices userService;
     private RegisterService registerService;
+
     @Override
     public void init() {
         userService = new UserServices();
@@ -52,8 +53,7 @@ public class RegisterController extends HttpServlet {
         String baseUrl = req.getScheme() + "://" + req.getServerName() + ":" + req.getServerPort()
                 + req.getContextPath();
         RegisterService.RegisterResult result = registerService.register(
-                fullName, email, phone, password, confirmPassword, address, baseUrl
-        );
+                fullName, email, phone, password, confirmPassword, address, baseUrl);
 
         // 1. Validate dữ liệu
         if (fullName == null || email == null || phone == null ||
@@ -104,7 +104,7 @@ public class RegisterController extends HttpServlet {
             return;
         }
         EmailServices emailService = new EmailServices();
-        String emailContent = EmailTemplateBuilder.buildActivationEmail(fullName, result.activationLink);
+        String emailContent = EmailTemplateBuilder.buildEmailVerificationOtpEmail(fullName, result.activationLink);
         try {
             emailService.send(email, "Kích hoạt tài khoản ShopShoes", emailContent);
             req.setAttribute("success", result.message);
@@ -141,7 +141,8 @@ public class RegisterController extends HttpServlet {
         boolean passwordValid = passwordRules.allValid;
         boolean confirmPasswordValid = !confirmPassword.isBlank() && confirmPassword.equals(password);
 
-        boolean formValid = fullNameValid && addressValid && emailValid && phoneValid && passwordValid && confirmPasswordValid;
+        boolean formValid = fullNameValid && addressValid && emailValid && phoneValid && passwordValid
+                && confirmPasswordValid;
 
         String emailMessage = !emailFormatValid
                 ? "Email phải có dạng tenban@domain.com"
@@ -164,9 +165,11 @@ public class RegisterController extends HttpServlet {
                 .append("\"valid\":").append(formValid).append(",")
                 .append("\"fields\":{")
                 .append("\"fullName\":{\"valid\":").append(fullNameValid)
-                .append(",\"message\":\"").append(escapeJson(fullNameValid ? "Họ và tên hợp lệ" : "Vui lòng nhập họ và tên")).append("\"},")
+                .append(",\"message\":\"")
+                .append(escapeJson(fullNameValid ? "Họ và tên hợp lệ" : "Vui lòng nhập họ và tên")).append("\"},")
                 .append("\"address\":{\"valid\":").append(addressValid)
-                .append(",\"message\":\"").append(escapeJson(addressValid ? "Địa chỉ hợp lệ" : "Vui lòng nhập địa chỉ")).append("\"},")
+                .append(",\"message\":\"").append(escapeJson(addressValid ? "Địa chỉ hợp lệ" : "Vui lòng nhập địa chỉ"))
+                .append("\"},")
                 .append("\"email\":{\"valid\":").append(emailValid)
                 .append(",\"message\":\"").append(escapeJson(emailMessage)).append("\"},")
                 .append("\"phone\":{\"valid\":").append(phoneValid)
