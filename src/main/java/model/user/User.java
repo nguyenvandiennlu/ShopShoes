@@ -33,6 +33,9 @@ public class User implements Serializable {
     @ColumnName("firebase_uid")
     private String firebaseUID;
 
+    @ColumnName("email_verified")
+    private boolean emailVerified;
+
     public User() {
 
     }
@@ -77,6 +80,10 @@ public class User implements Serializable {
         return firebaseUID;
     }
 
+    public boolean isEmailVerified() {
+        return emailVerified;
+    }
+
     public void setId(int id) {
         this.id = id;
     }
@@ -115,5 +122,9 @@ public class User implements Serializable {
 
     public void setFirebaseUID(String firebaseUID) {
         this.firebaseUID = firebaseUID;
+    }
+
+    public void setEmailVerified(boolean emailVerified) {
+        this.emailVerified = emailVerified;
     }
 }
