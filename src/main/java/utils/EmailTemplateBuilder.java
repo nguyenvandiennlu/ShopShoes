@@ -15,7 +15,7 @@ public class EmailTemplateBuilder {
                 + "</div>";
     }
 
-    public static String buildActivationEmail(String fullName, String activationLink) {
+    public static String buildEmailVerificationOtpEmail(String fullName, String activationLink) {
         return "<div style='font-family:Arial,sans-serif;font-size:15px;color:#333;'>"
                 + "<h2 style='color:#28a745;'>Kích hoạt tài khoản</h2>"
                 + "<p>Xin chào <b>" + fullName + "</b>,</p>"
