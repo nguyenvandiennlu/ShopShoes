@@ -6,7 +6,7 @@ import services.user.UserServices;
 public class RegisterService {
 
     private final UserServices userServices = new UserServices();
-    private final ActivationService activationService = new ActivationService();
+    private final TokenTypeService tokenTypeService = new TokenTypeService();
 
 
     public static class RegisterResult {
@@ -84,7 +84,7 @@ public class RegisterService {
             return new RegisterResult(false, "Email hoặc số điện thoại đã được sử dụng", null);
         }
 
-        String token = activationService.createActivationToken(email);
+        String token = tokenTypeService.createActivationToken(email);
 
         String activationLink = baseUrl + "/activate?token=" + token;
 

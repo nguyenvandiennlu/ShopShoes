@@ -1,20 +1,22 @@
 package services.auth;
-import dao.auth.ActivationTokenDao;
+
+import dao.auth.TokenTypeDao;
 import dao.user.UserDao;
 import java.time.LocalDateTime;
 import java.util.UUID;
-public class ActivationService {
-    private final ActivationTokenDao tokenDao = new ActivationTokenDao();
-    private final UserDao userDao = new UserDao();
+import enums.TokenType;
 
+public class TokenTypeService {
+    private final TokenTypeDao tokenDao = new TokenTypeDao();
+    private final UserDao userDao = new UserDao();
     public String createActivationToken(String email) {
         String token = UUID.randomUUID().toString();
         LocalDateTime expiresAt = LocalDateTime.now().plusMinutes(2);
-        tokenDao.saveToken(email, token, expiresAt);
+        tokenDao.saveToken(email, token, TokenType.ACCOUNT_ACTIVATION, expiresAt);
         return token;
     }
     public boolean activateUserByToken(String token) {
-        String email = tokenDao.getEmailByToken(token);
+        String email = tokenDao.getEmailByToken(token, TokenType.ACCOUNT_ACTIVATION);
         if (email == null) {
             return false;
         }
@@ -22,8 +24,4 @@ public class ActivationService {
         tokenDao.markTokenAsUsed(token);
         return true;
     }
-    public boolean isTokenValid(String token) {
-        String email = tokenDao.getEmailByToken(token);
-        return email != null;
     }
-}

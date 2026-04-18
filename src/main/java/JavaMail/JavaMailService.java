@@ -1,23 +1,30 @@
-package services.common;
-import JavaMail.IJavaMail;
+package JavaMail;
+
+import jakarta.mail.Authenticator;
 import jakarta.mail.Message;
-import jakarta.mail.MessagingException;
 import jakarta.mail.PasswordAuthentication;
 import jakarta.mail.Session;
 import jakarta.mail.Transport;
 import jakarta.mail.internet.InternetAddress;
 import jakarta.mail.internet.MimeMessage;
 import utils.EmailConfigLoader;
+
 import java.util.Properties;
-public class EmailServices implements IJavaMail {
+
+public class JavaMailService implements IJavaMail {
+
     @Override
     public boolean send(String to, String subject, String messageContent) {
         Properties props = new Properties();
+
         props.put("mail.smtp.host", EmailConfigLoader.get("mail.host"));
         props.put("mail.smtp.port", EmailConfigLoader.get("mail.port"));
         props.put("mail.smtp.auth", EmailConfigLoader.get("mail.auth"));
-        props.put("mail.smtp.starttls.enable", EmailConfigLoader.get("mail.starttls"));
-        Session session = Session.getInstance(props, new jakarta.mail.Authenticator() {
+        props.put("mail.smtp.starttls.enable", EmailConfigLoader.get("mail.starttls.enable"));
+        props.put("mail.smtp.ssl.trust", EmailConfigLoader.get("mail.smtp.ssl.trust"));
+        props.put("mail.smtp.starttls.required", "true");
+
+        Session session = Session.getInstance(props, new Authenticator() {
             @Override
             protected PasswordAuthentication getPasswordAuthentication() {
                 return new PasswordAuthentication(
@@ -36,7 +43,7 @@ public class EmailServices implements IJavaMail {
 
             Transport.send(message);
             return true;
-        } catch (MessagingException e) {
+        } catch (Exception e) {
             e.printStackTrace();
             return false;
         }

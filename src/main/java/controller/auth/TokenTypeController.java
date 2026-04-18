@@ -5,16 +5,16 @@ import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import services.auth.ActivationService;
+import services.auth.TokenTypeService;
 import java.io.IOException;
 
 @WebServlet("/activate")
-public class ActivateController extends HttpServlet {
+public class TokenTypeController extends HttpServlet {
 
-   private ActivationService activationService;
+   private TokenTypeService tokenTypeService;
     @Override
     public void init() {
-        activationService = new ActivationService();  // Tạo instance service
+        tokenTypeService = new TokenTypeService();  // Tạo instance service
     }
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp)
@@ -24,7 +24,7 @@ public class ActivateController extends HttpServlet {
             resp.getWriter().println("Link kích hoạt không hợp lệ.");
             return;
         }
-        boolean success = activationService.activateUserByToken(token);
+        boolean success = tokenTypeService.activateUserByToken(token);
 
         if (success) {
             resp.sendRedirect(req.getContextPath() + "/login?activated=1");

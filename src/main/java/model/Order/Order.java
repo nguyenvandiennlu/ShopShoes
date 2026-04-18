@@ -3,6 +3,10 @@ package model.Order;
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import enums.OrderStatus;
+import enums.PaymentMethod;
+import enums.PaymentStatus;
+import enums.ShippingStatus;
 
 public class Order implements Serializable {
 
@@ -17,9 +21,12 @@ public class Order implements Serializable {
     private String shipping_address;
     private String phone_number;
 
-    private String order_status;
-    private String payment_method;
-    private String payment_status;
+    private OrderStatus order_status;
+    private PaymentMethod payment_method;
+    private PaymentStatus payment_status;
+    private ShippingStatus shipping_status;
+
+    private String orders_id;
 
     private String order_note;
 
@@ -92,28 +99,44 @@ public class Order implements Serializable {
         this.phone_number = phone_number;
     }
 
-    public String getOrderStatus() {
+    public OrderStatus getOrderStatus() {
         return order_status;
     }
 
-    public void setOrderStatus(String order_status) {
+    public void setOrderStatus(OrderStatus order_status) {
         this.order_status = order_status;
     }
 
-    public String getPaymentMethod() {
+    public PaymentMethod getPaymentMethod() {
         return payment_method;
     }
 
-    public void setPaymentMethod(String payment_method) {
+    public void setPaymentMethod(PaymentMethod payment_method) {
         this.payment_method = payment_method;
     }
 
-    public String getPaymentStatus() {
+    public PaymentStatus getPaymentStatus() {
         return payment_status;
     }
 
-    public void setPaymentStatus(String payment_status) {
+    public void setPaymentStatus(PaymentStatus payment_status) {
         this.payment_status = payment_status;
+    }
+
+    public ShippingStatus getShippingStatus() {
+        return shipping_status;
+    }
+
+    public void setShippingStatus(ShippingStatus shipping_status) {
+        this.shipping_status = shipping_status;
+    }
+
+    public String getOrdersId() {
+        return orders_id;
+    }
+
+    public void setOrdersId(String orders_id) {
+        this.orders_id = orders_id;
     }
 
     public String getOrderNote() {
