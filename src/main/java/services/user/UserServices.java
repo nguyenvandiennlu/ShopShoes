@@ -60,11 +60,17 @@ public class UserServices {
     public User processGoogleLoginVerified(String email, String name, String firebaseUid, String picture) {
         User user = userDao.findByFirebaseUID(firebaseUid);
         if (user != null) {
+            if (!user.isActive()) {
+                throw new IllegalStateException("Tài khoản đã bị khóa");
+            }
             System.out.println("User đã tồn tại theo firebase_uid: " + user.getId());
             return user;
         }
         user = userDao.findByEmail(email);
         if (user != null) {
+            if (!user.isActive()) {
+                throw new IllegalStateException("Tài khoản đã bị khóa");
+            }
             System.out.println("User đã tồn tại theo email, cập nhật firebase_uid: " + user.getId());
             user.setFirebaseUID(firebaseUid);
             if (user.getFullName() == null || user.getFullName().isBlank()) {
