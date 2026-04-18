@@ -1,50 +1,40 @@
 package model.user;
 
+import org.jdbi.v3.core.mapper.reflect.ColumnName;
+
 import java.io.Serial;
 import java.io.Serializable;
 import java.time.LocalDateTime;
 
-/**
- * Model đại diện cho token nhớ tài khoản
- * Lưu trữ thông tin xác thực người dùng dài hạn
- */
 public class RememberToken implements Serializable {
 
     @Serial
     private static final long serialVersionUID = 1L;
 
     private int id;
-    private int user_id;
+    private int userId;
     private String token;
-    private LocalDateTime expiry_date;
-    private LocalDateTime created_at;
-    private String remember_token_id;
-    private boolean is_active;
-    private LocalDateTime invalidated_at;
+    private LocalDateTime expiryDate;
+    private LocalDateTime createdAt;
+    private String rememberTokenId;
+    private boolean active;
+    private LocalDateTime invalidatedAt;
 
-    public RememberToken() {
-    }
-
-    public RememberToken(int user_id, String token, LocalDateTime expiry_date) {
-        this.user_id = user_id;
-        this.token = token;
-        this.expiry_date = expiry_date;
-    }
+    public RememberToken() {}
 
     public int getId() {
         return id;
     }
-
     public void setId(int id) {
         this.id = id;
     }
 
-    public int getUser_id() {
-        return user_id;
+    public int getUserId() {
+        return userId;
     }
-
-    public void setUser_id(int user_id) {
-        this.user_id = user_id;
+    @ColumnName("user_id")
+    public void setUserId(int userId) {
+        this.userId = userId;
     }
 
     public String getToken() {
@@ -55,61 +45,51 @@ public class RememberToken implements Serializable {
         this.token = token;
     }
 
-    public LocalDateTime getExpiry_date() {
-        return expiry_date;
+    public LocalDateTime getExpiryDate() {
+        return expiryDate;
     }
 
-    public void setExpiry_date(LocalDateTime expiry_date) {
-        this.expiry_date = expiry_date;
+    @ColumnName("expiry_date")
+    public void setExpiryDate(LocalDateTime expiryDate) {
+        this.expiryDate = expiryDate;
     }
 
     public LocalDateTime getCreatedAt() {
-        return created_at;
+        return createdAt;
     }
 
-    public void setCreated_at(LocalDateTime created_at) {
-        this.created_at = created_at;
+    @ColumnName("created_at")
+    public void setCreatedAt(LocalDateTime createdAt) {
+        this.createdAt = createdAt;
     }
 
-    public String getRemember_token_id() {
-        return remember_token_id;
+    public String getRememberTokenId() {
+        return rememberTokenId;
+    }
+    @ColumnName("remember_token_id")
+    public void setRememberTokenId(String rememberTokenId) {
+        this.rememberTokenId = rememberTokenId;
     }
 
-    public void setRemember_token_id(String remember_token_id) {
-        this.remember_token_id = remember_token_id;
+    public boolean isActive() {
+        return active;
+    }
+
+    @ColumnName("is_active")
+    public void setActive(boolean active) {
+        this.active = active;
+    }
+
+    public LocalDateTime getInvalidatedAt() {
+        return invalidatedAt;
+    }
+
+    @ColumnName("invalidated_at")
+    public void setInvalidatedAt(LocalDateTime invalidatedAt) {
+        this.invalidatedAt = invalidatedAt;
     }
 
     public boolean isValid() {
-        return is_active && expiry_date != null && LocalDateTime.now().isBefore(expiry_date);
-    }
-
-    public boolean isIs_active() {
-        return is_active;
-    }
-
-    public void setIs_active(boolean is_active) {
-        this.is_active = is_active;
-    }
-
-    public LocalDateTime getInvalidated_at() {
-        return invalidated_at;
-    }
-
-    public void setInvalidated_at(LocalDateTime invalidated_at) {
-        this.invalidated_at = invalidated_at;
-    }
-
-    @Override
-    public String toString() {
-        return "RememberToken{" +
-                "id=" + id +
-                ", user_id=" + user_id +
-                ", token='" + (token != null ? token.substring(0, Math.min(10, token.length())) + "..." : "null") + '\'' +
-                ", expiry_date=" + expiry_date +
-                ", created_at=" + created_at +
-                ", remember_token_id='" + remember_token_id + '\'' +
-                ", is_active=" + is_active +
-                ", invalidated_at=" + invalidated_at +
-                '}';
+        return active && expiryDate != null && LocalDateTime.now().isBefore(expiryDate);
     }
 }

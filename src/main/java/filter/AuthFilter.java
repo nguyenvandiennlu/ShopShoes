@@ -8,6 +8,8 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import model.user.User;
 import services.auth.AuthService;
+import utils.CookieUtil;
+import utils.TokenGenerator;
 import utils.URLPath;
 
 import java.io.IOException;
@@ -31,42 +33,38 @@ public class AuthFilter implements Filter {
         HttpServletRequest httpRequest = (HttpServletRequest) request;
         HttpServletResponse httpResponse = (HttpServletResponse) response;
 
-        String requestPath = httpRequest.getRequestURI();
+        String requestPath = httpRequest.getServletPath();
+
         if (URLPath.isStaticResource(requestPath)) {
+            chain.doFilter(request, response);
             return;
         }
+
         try {
-            System.out.println("→ [AuthFilter] Processing request: " + httpRequest.getRequestURI());
+            HttpSession session = httpRequest.getSession(false);
+            User currentUser = (session != null) ? (User) session.getAttribute(SESSION_USER) : null;
 
-            String rememberToken = getCookieValue(httpRequest, REMEMBER_TOKEN_COOKIE);
+            if (currentUser == null) {
+                String rememberToken = CookieUtil.getCookieValue(httpRequest, REMEMBER_TOKEN_COOKIE);
 
-            if (rememberToken != null && !rememberToken.isEmpty()) {
-                System.out.println("→ [AuthFilter] Found REMEMBER_TOKEN cookie");
+                if (rememberToken != null && !rememberToken.isEmpty()) {
 
-                if (authService.validateToken(rememberToken)) {
-                    System.out.println("✓ [AuthFilter] Token is valid");
+                    if (TokenGenerator.isValidTokenFormat(rememberToken)) {
+                        User autoLoginUser = authService.getUserFromToken(rememberToken);
 
-                    User user = authService.getUserFromToken(rememberToken);
-
-                    if (user != null) {
-                        System.out.println("✓ [AuthFilter] User retrieved: " + user.getEmail());
-
-                        HttpSession session = httpRequest.getSession(true);
-                        session.setAttribute(SESSION_USER, user);
-
-                        System.out.println("✓ [AuthFilter] Session created/restored for user: " + user.getEmail());
+                        if (autoLoginUser != null) {
+                            session = httpRequest.getSession(true);
+                            session.setAttribute(SESSION_USER, autoLoginUser);
+                            System.out.println("✓ [AuthFilter] Auto-login success for: " + autoLoginUser.getEmail());
+                        } else {
+                            System.out.println("→ [AuthFilter] Token expired or invalid in DB. Removing cookie.");
+                            CookieUtil.removeCookie(httpResponse, REMEMBER_TOKEN_COOKIE);
+                        }
                     } else {
-                        System.err.println("✗ [AuthFilter] Could not get user from token");
-                        removeCookie(httpResponse, REMEMBER_TOKEN_COOKIE);
+                        System.out.println("→ [AuthFilter] Invalid token format. Removing cookie.");
+                        CookieUtil.removeCookie(httpResponse, REMEMBER_TOKEN_COOKIE);
                     }
-                } else {
-                    System.err.println("✗ [AuthFilter] Token is invalid or expired");
-
-                    removeCookie(httpResponse, REMEMBER_TOKEN_COOKIE);
-                    System.out.println("→ [AuthFilter] Cookie removed");
                 }
-            } else {
-                System.out.println("→ [AuthFilter] No REMEMBER_TOKEN cookie found");
             }
 
         } catch (Exception e) {
@@ -74,28 +72,6 @@ public class AuthFilter implements Filter {
             e.printStackTrace();
         }
 
-        System.out.println("→ [AuthFilter] Passing request to next filter/servlet");
         chain.doFilter(httpRequest, httpResponse);
-    }
-
-    private String getCookieValue(HttpServletRequest request, String cookieName) {
-        Cookie[] cookies = request.getCookies();
-
-        if (cookies != null) {
-            for (Cookie cookie : cookies) {
-                if (cookieName.equals(cookie.getName())) {
-                    return cookie.getValue();
-                }
-            }
-        }
-
-        return null;
-    }
-
-    private void removeCookie(HttpServletResponse response, String cookieName) {
-        Cookie cookie = new Cookie(cookieName, "");
-        cookie.setMaxAge(0);
-        cookie.setPath("/");
-        response.addCookie(cookie);
     }
 }

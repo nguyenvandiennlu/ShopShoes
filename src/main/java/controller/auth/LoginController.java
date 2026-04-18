@@ -95,6 +95,23 @@ public class LoginController extends HttpServlet {
             session.setAttribute("currentUser", user);
             session.setMaxInactiveInterval(30 * 60);
 
+            String rememberMe = req.getParameter("rememberMe");
+
+            if ("on".equals(rememberMe)) {
+                services.auth.AuthService authService = new services.auth.AuthService();
+                String rawToken = authService.generateAndSaveToken(user.getId());
+
+                if (rawToken != null) {
+                    jakarta.servlet.http.Cookie rememberCookie = new jakarta.servlet.http.Cookie("REMEMBER_TOKEN", rawToken);
+                    rememberCookie.setMaxAge(30 * 24 * 60 * 60);
+                    rememberCookie.setPath("/");
+                    rememberCookie.setHttpOnly(true);
+
+                    resp.addCookie(rememberCookie);
+                    System.out.println("✓ [LoginController] Remember Me cookie issued for user: " + user.getEmail());
+                }
+            }
+
             Role role = user.getRole();
             String redirectUrl;
 

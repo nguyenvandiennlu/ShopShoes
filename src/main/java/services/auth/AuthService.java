@@ -5,10 +5,12 @@ import dao.user.UserDao;
 import model.user.RememberToken;
 import model.user.User;
 import utils.TokenGenerator;
-import jakarta.servlet.http.Cookie;
-import jakarta.servlet.http.HttpServletResponse;
 
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
 import java.time.LocalDateTime;
+import java.util.Base64;
+
 public class AuthService {
     private final RememberTokenDao rememberTokenDao;
     private final UserDao userDao;
@@ -22,103 +24,81 @@ public class AuthService {
         this.userDao = new UserDao();
     }
 
+    private String hashToken(String rawToken) {
+        try {
+            MessageDigest digest = MessageDigest.getInstance("SHA-256");
+            byte[] hash = digest.digest(rawToken.getBytes(StandardCharsets.UTF_8));
+            return Base64.getUrlEncoder().withoutPadding().encodeToString(hash);
+        } catch (Exception e) {
+            throw new RuntimeException("Lỗi mã hóa token", e);
+        }
+    }
+
     public String generateAndSaveToken(int userId) {
-        System.out.println("→ [AuthService] Generating token for user_id: " + userId);
+        System.out.println("→ [AuthService] Generating secure token for user_id: " + userId);
 
         try {
-            String tokenString = TokenGenerator.generateToken();
+            String rawToken = TokenGenerator.generateToken();
+
+            String hashedToken = hashToken(rawToken);
 
             RememberToken token = new RememberToken();
-            token.setUser_id(userId);
-            token.setToken(tokenString);
-            token.setExpiry_date(LocalDateTime.now().plusDays(TOKEN_EXPIRY_DAYS));
+            token.setUserId(userId);
+            token.setToken(hashedToken);
+            token.setExpiryDate(LocalDateTime.now().plusDays(TOKEN_EXPIRY_DAYS));
+            token.setActive(true);
 
             int rows = rememberTokenDao.insert(token);
 
             if (rows > 0) {
-                System.out.println("✓ [AuthService] Token saved successfully (is_active=true by default)");
-                return tokenString;
-            } else {
-                System.err.println("✗ [AuthService] Failed to save token");
-                return null;
+                return rawToken;
             }
         } catch (Exception e) {
-            System.err.println("✗ [AuthService] Error generating token: " + e.getMessage());
+            System.err.println("✗ [AuthService] Error saving token: " + e.getMessage());
             e.printStackTrace();
-            return null;
         }
+        return null;
     }
 
-    public boolean validateToken(String tokenString) {
-        System.out.println("→ [AuthService] Validating token...");
-
+    public User getUserFromToken(String rawTokenString) {
         try {
-            if (!TokenGenerator.isValidTokenFormat(tokenString)) {
-                System.err.println("✗ [AuthService] Invalid token format");
-                return false;
-            }
-
-            boolean isValid = rememberTokenDao.isTokenValid(tokenString);
-
-            if (isValid) {
-                System.out.println("✓ [AuthService] Token is valid (active + not expired)");
-            } else {
-                System.err.println("✗ [AuthService] Token invalid (not found, invalidated, or expired)");
-            }
-
-            return isValid;
-        } catch (Exception e) {
-            System.err.println("✗ [AuthService] Error validating token: " + e.getMessage());
-            e.printStackTrace();
-            return false;
-        }
-    }
-
-    public User getUserFromToken(String tokenString) {
-        System.out.println("→ [AuthService] Getting user from token...");
-
-        try {
-            RememberToken tokenObj = rememberTokenDao.findByToken(tokenString);
+            String hashedToken = hashToken(rawTokenString);
+            RememberToken tokenObj = rememberTokenDao.findByToken(hashedToken);
 
             if (tokenObj == null) {
-                System.err.println("✗ [AuthService] Token not found or invalid");
                 return null;
             }
 
-            int userId = tokenObj.getUser_id();
-            User user = userDao.findById(userId);
+            if (!tokenObj.isValid()) {
+                return null;
+            }
 
-            if (user != null) {
-                System.out.println("✓ [AuthService] User retrieved from token: " + user.getEmail());
-                return user;
+            User user = userDao.findById(tokenObj.getUserId());
+            if (user == null) {
+                System.out.println("→ [Debug] Lỗi 3: Token hợp lệ nhưng không tìm ra User có ID = " + tokenObj.getUserId());
             } else {
-                System.err.println("✗ [AuthService] User not found for token");
-                return null;
+                System.out.println("→ [Debug] Lấy User THÀNH CÔNG: " + user.getEmail());
             }
+
+            return user;
         } catch (Exception e) {
-            System.err.println("✗ [AuthService] Error getting user from token: " + e.getMessage());
             e.printStackTrace();
             return null;
         }
     }
 
-    public boolean logoutFromDevice(int tokenId) {
-        System.out.println("→ [AuthService] Logging out from device (tokenId: " + tokenId + ")");
-
+    public void logoutFromDevice(String rawTokenString) {
         try {
-            int rows = rememberTokenDao.markTokenAsInvalid(tokenId);
+            String hashedToken = hashToken(rawTokenString);
+            RememberToken tokenObj = rememberTokenDao.findByToken(hashedToken);
 
-            if (rows > 0) {
-                System.out.println("✓ [AuthService] Device logged out");
-                return true;
-            } else {
-                System.err.println("✗ [AuthService] Token not found or already invalid");
-                return false;
+            if (tokenObj != null) {
+                rememberTokenDao.markTokenAsInvalid(tokenObj.getId());
+                System.out.println("✓ [AuthService] Token invalidated successfully.");
             }
         } catch (Exception e) {
-            System.err.println("✗ [AuthService] Error logging out from device: " + e.getMessage());
+            System.err.println("✗ [AuthService] Error invalidating token: " + e.getMessage());
             e.printStackTrace();
-            return false;
         }
     }
 

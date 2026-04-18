@@ -6,22 +6,6 @@ import org.jdbi.v3.core.Jdbi;
 
 import java.util.List;
 
-/**
- * Data Access Object for Remember Token
- * Handles all CRUD operations for remember_token table
- * Used for persistent login (Remember Me feature)
- *
- * ===== 9 CORE METHODS =====
- * 1. insert() - Tạo token mới
- * 2. findByToken() - Tìm token để validate
- * 3. findByUserId() - Lấy tất cả tokens của user
- * 4. findValidByUserId() - Lấy tokens chưa hết hạn
- * 5. deleteById() - Xóa 1 token
- * 6. deleteByUserId() - Logout từ tất cả devices
- * 7. deleteExpiredTokens() - Cleanup tokens hết hạn
- * 8. countValidTokensByUserId() - Đếm devices còn login
- * 9. isTokenValid() - Check token hữu dụng?
- */
 public class RememberTokenDao {
 
     private final Jdbi jdbi;
@@ -46,14 +30,14 @@ public class RememberTokenDao {
                     // Bước 2: Tạo update statement
                     handle.createUpdate(sql)
                             // Bước 3: Bind parameters
-                            .bind("user_id", token.getUser_id())
+                            .bind("user_id", token.getUserId())
                             .bind("token", token.getToken())
-                            .bind("expiry_date", token.getExpiry_date())
+                            .bind("expiry_date", token.getExpiryDate())
                             // Bước 4: Execute
                             .execute()
             );
 
-            System.out.println("✓ [RememberTokenDao] Token inserted for user_id: " + token.getUser_id());
+            System.out.println("✓ [RememberTokenDao] Token inserted for user_id: " + token.getUserId());
             return rows;
         } catch (Exception e) {
             System.err.println("✗ [RememberTokenDao] Error inserting token: " + e.getMessage());
@@ -81,7 +65,7 @@ public class RememberTokenDao {
             );
 
             if (token != null) {
-                System.out.println("✓ [RememberTokenDao] Token found for user_id: " + token.getUser_id());
+                System.out.println("✓ [RememberTokenDao] Token found for user_id: " + token.getUserId());
             } else {
                 System.out.println("✗ [RememberTokenDao] Token not found or expired");
             }
