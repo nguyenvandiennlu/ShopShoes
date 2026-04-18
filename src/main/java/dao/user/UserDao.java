@@ -15,17 +15,19 @@ public class UserDao {
         this.jdbi = JDBIConnector.getJdbi();
     }
 
-    // ===== FIND BY EMAIL =====
     public User findByEmail(String email) {
-        String sql = "SELECT * FROM users WHERE email = :email";
+        if (email == null || email.isEmpty()) {
+            return null;
+        }
+
+        String sql = "SELECT * FROM users WHERE LOWER(email) = LOWER(:email)";
         return jdbi.withHandle(handle -> handle.createQuery(sql)
-                .bind("email", email)
+                .bind("email", email.trim())
                 .mapToBean(User.class)
                 .findOne()
                 .orElse(null));
     }
 
-    // ===== FIND BY PHONE =====
     public User findByPhone(String phone) {
         String sql = "SELECT * FROM users WHERE phone_number = :phone";
         return jdbi.withHandle(handle -> handle.createQuery(sql)
@@ -35,7 +37,6 @@ public class UserDao {
                 .orElse(null));
     }
 
-    // ===== FIND BY ID =====
     public User findById(Integer id) {
         String sql = "SELECT * FROM users WHERE id = :id";
         return jdbi.withHandle(handle -> handle.createQuery(sql)
@@ -52,14 +53,13 @@ public class UserDao {
                 .list());
     }
 
-    // ===== INSERT USER =====
     public int insertUser(User user) {
         String sql = """
                     INSERT INTO users (
-                        email, password_hash, phone_number, address, full_name, role, is_active, created_at, firebase_uid
+                        email, password_hash, phone_number, address, full_name, role, is_active, created_at, firebase_uid, email_verified
                     )
                     VALUES (
-                        :email, :passwordHash, :phoneNumber, :address, :fullName, :role, :isActive, :createdAt, :firebaseUID
+                        :email, :passwordHash, :phoneNumber, :address, :fullName, :role, :isActive, :createdAt, :firebaseUID, :emailVerified
                     )
                 """;
 
@@ -74,18 +74,19 @@ public class UserDao {
                     .bind("isActive", user.isActive())
                     .bind("createdAt", user.getCreatedAt())
                     .bind("firebaseUID", user.getFirebaseUID())
+                    .bind("emailVerified", user.isEmailVerified())
                     .execute());
 
             System.out.println("insertUser rows = " + rows);
             return rows;
         } catch (Exception e) {
-            System.out.println("insertUser FAILED!");
+            System.err.println("[ERROR] insertUser FAILED: " + e.getMessage());
+            System.err.println("[ERROR] Full trace:");
             e.printStackTrace();
             return 0;
         }
     }
 
-    // ===== UPDATE PASSWORD (cho quên mật khẩu) =====
     public boolean updatePassword(String email, String newPasswordHash) {
         String sql = "UPDATE users SET password_hash = :password WHERE email = :email";
 
@@ -97,6 +98,13 @@ public class UserDao {
 
     public boolean activateByEmail(String email) {
         String sql = "UPDATE users SET is_active = 1 WHERE email = :email";
+        return jdbi.withHandle(handle -> handle.createUpdate(sql)
+                .bind("email", email)
+                .execute()) > 0;
+    }
+
+    public boolean verifyEmailByEmail(String email) {
+        String sql = "UPDATE users SET email_verified = 1 WHERE email = :email";
         return jdbi.withHandle(handle -> handle.createUpdate(sql)
                 .bind("email", email)
                 .execute()) > 0;
@@ -115,7 +123,8 @@ public class UserDao {
                               full_name = :fullName,
                               role = :role,
                               is_active = :isActive,
-                              firebase_uid = :firebaseUID
+                              firebase_uid = :firebaseUID,
+                              email_verified = :emailVerified
                           WHERE id = :id
                         """
                 : """
@@ -126,9 +135,10 @@ public class UserDao {
                               full_name = :fullName,
                               role = :role,
                               is_active = :isActive,
-                              firebase_uid = :firebaseUID
+                              firebase_uid = :firebaseUID,
+                              email_verified = :emailVerified
                           WHERE id = :id
-                        """;
+                        """; 
 
         return jdbi.withHandle(h -> {
             var q = h.createUpdate(sql)
@@ -139,7 +149,8 @@ public class UserDao {
                     .bind("fullName", user.getFullName())
                     .bind("role", user.getRole() != null ? user.getRole().name() : null)
                     .bind("isActive", user.isActive())
-                    .bind("firebaseUID", user.getFirebaseUID());
+                    .bind("firebaseUID", user.getFirebaseUID())
+                    .bind("emailVerified", user.isEmailVerified());
 
             if (hasPassword) {
                 q.bind("passwordHash", user.getPasswordHash());

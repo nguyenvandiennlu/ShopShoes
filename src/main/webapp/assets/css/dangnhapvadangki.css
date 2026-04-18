@@ -364,7 +364,7 @@ small {
 .remember-me-wrapper {
   display: flex;
   align-items: center;
-  justify-content: right;
+  justify-content: right !important;
   gap: 10px;
   cursor: pointer;
 }
