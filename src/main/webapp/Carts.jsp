@@ -130,7 +130,9 @@
                   </form>
                 </div>
                 <form action="${pageContext.request.contextPath}/cart/remove"
-                      method="post">
+                      method="post"
+                      class="delete-item-form"
+                      data-product-name="${item.name}">
                   <input type="hidden" name="key"
                          value="${item.productId}-${item.colorId}-${item.sizeId}" />
                   <button class="action-btn delete-btn">Xoá</button>
@@ -162,21 +164,41 @@
       </div>
     </main>
 
-    <!--
-- #FOOTER
--->
+    <!--- #FOOTER-->
     <jsp:include page="Footer.jsp"/>
-    <!-
-- ionicon link
--->
-    <script
-      type="module"
-      src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.esm.js"
-    ></script>
-    <script
-      nomodule
-      src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.js"
-    ></script>
+    <!-- ionicon link -->
+    <script type="module" src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.esm.js"></script>
+    <script nomodule src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.js"></script>
     <script src="${pageContext.request.contextPath}/assets/script/reponsive.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <script>
+      document.addEventListener('DOMContentLoaded', function() {
+        const deleteForms = document.querySelectorAll('.delete-item-form');
+
+        deleteForms.forEach(function(form) {
+          form.addEventListener('submit', function(event) {
+            event.preventDefault();
+
+            const productName = this.getAttribute('data-product-name');
+
+            Swal.fire({
+              title: 'Xác nhận xóa?',
+              html: 'Bạn có chắc chắn muốn xóa <b>' + productName + '</b> khỏi giỏ hàng?',
+              icon: 'warning',
+              showCancelButton: true,
+              confirmButtonColor: '#d33',
+              cancelButtonColor: '#3085d6',
+              confirmButtonText: 'Có, xóa ngay!',
+              cancelButtonText: 'Hủy bỏ'
+            }).then((result) => {
+              if (result.isConfirmed) {
+                this.submit();
+              }
+            });
+          });
+        });
+      });
+    </script>
   </body>
 </html>
