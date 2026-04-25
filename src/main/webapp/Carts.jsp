@@ -17,7 +17,7 @@
     -  css link
   -->
     <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/style.css" />
-
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/cart.css" />
     <!--
     - google font link
   -->
@@ -62,105 +62,73 @@
           <c:if test="${empty cartItems}">
             <p style="text-align:center">Giỏ hàng của bạn đang trống</p>
           </c:if>
+
+          <c:if test="${not empty cartItems}">
+            <div class="cart-header-row">
+              <div class="col-title">Sản phẩm</div>
+              <div class="col-title">Đơn giá</div>
+              <div class="col-title" style="text-align: center;">Số lượng</div>
+              <div class="col-title" style="text-align: right; margin-right: 20px">Thao tác</div>
+            </div>
+          </c:if>
+
           <c:forEach var="item" items="${cartItems}">
-            <div class="product-item">
+            <div class="product-item grid-layout">
 
               <div class="product-details">
-                <img
-                        src="${item.image}"
-                        alt="${item.name}"
-                        class="product-image"
-                />
+                <img src="${item.image}" alt="${item.name}" class="product-image"/>
                 <div class="product-info">
                   <h2 class="product-name">
-                    <a href="${pageContext.request.contextPath}/product?id=${item.productId}"
-                       class="product-link">
+                    <a href="${pageContext.request.contextPath}/product?id=${item.productId}" class="product-link">
                         ${item.name}
                     </a>
                   </h2>
                   <div class="product-attributes-line-2">
                     <p class="product-size">Size: ${item.sizeName}</p>
-
                     <div class="product-color">
                       <span class="color-name">${item.colorName}</span>
                     </div>
                   </div>
-                  <div class="product-price-line-3c">
-                    <div class="discounted-price-group">
-            <span class="discounted-price">
-                ${item.finalPrice}
-            </span>
-                      <c:if test="${not empty item.discountValue}">
-              <span class="original-price">
-                  ${item.originalPrice}
-              </span>
-                      </c:if>
-                    </div>
-                    <c:if test="${not empty item.discountValue}">
-                      <p class="discount-value">
-                        Giảm: ${item.discountValue}
-                      </p>
-                    </c:if>
-                  </div>
                 </div>
               </div>
-              <div class="product-actions">
+
+              <div class="product-price-col">
+                <span class="discounted-price">${item.finalPrice}</span>
+                <c:if test="${not empty item.discountValue}">
+                  <span class="original-price">${item.originalPrice}</span>
+                  <p class="discount-value">Giảm: ${item.discountValue}</p>
+                </c:if>
+              </div>
+
+              <div class="quantity-col">
                 <div class="quantity-control">
-                  <form action="${pageContext.request.contextPath}/cart/update"
-                        method="post">
-
-                    <input type="hidden" name="key"
-                           value="${item.productId}-${item.colorId}-${item.sizeId}" />
-
-                    <button type="submit"
-                            name="action"
-                            value="minus"
-                            class="quantity-btn minus-btn">-</button>
-
-                    <input type="number"
-                           value="${item.quantity}"
-                           min="1"
-                           readonly
-                           class="quantity-input" />
-
-                    <button type="submit"
-                            name="action"
-                            value="plus"
-                            class="quantity-btn plus-btn">+</button>
+                  <form action="${pageContext.request.contextPath}/cart/update" method="post" style="display:flex;">
+                    <input type="hidden" name="key" value="${item.productId}-${item.colorId}-${item.sizeId}" />
+                    <button type="submit" name="action" value="minus" class="quantity-btn minus-btn">-</button>
+                    <input type="number" value="${item.quantity}" min="1" readonly class="quantity-input" />
+                    <button type="submit" name="action" value="plus" class="quantity-btn plus-btn">+</button>
                   </form>
                 </div>
-                <form action="${pageContext.request.contextPath}/cart/remove"
-                      method="post"
-                      class="delete-item-form"
-                      data-product-name="${item.name}">
-                  <input type="hidden" name="key"
-                         value="${item.productId}-${item.colorId}-${item.sizeId}" />
-                  <button class="action-btn delete-btn">Xoá</button>
+              </div>
+
+              <div class="product-actions-col">
+                <form action="${pageContext.request.contextPath}/cart/remove" method="post" class="delete-item-form" data-product-name="${item.name}">
+                  <input type="hidden" name="key" value="${item.productId}-${item.colorId}-${item.sizeId}" />
+                  <button type="submit" class="action-btn delete-btn">Xoá</button>
                 </form>
-                <form action="${pageContext.request.contextPath}/buy-now"
-                      method="post">
+
+                <form action="${pageContext.request.contextPath}/buy-now" method="post">
                   <input type="hidden" name="productId" value="${item.productId}" />
                   <input type="hidden" name="colorId" value="${item.colorId}" />
                   <input type="hidden" name="sizeId" value="${item.sizeId}" />
                   <input type="hidden" name="quantity" value="${item.quantity}" />
-                  <button class="action-btn buy-now-btn">Mua ngay</button>
+                  <button type="submit" class="action-btn buy-now-btn">Mua ngay</button>
                 </form>
-
               </div>
+
             </div>
             <hr class="separator" />
           </c:forEach>
-          <div class="cart-summary-section">
-          <div class="total-line">
-            <span class="total-label">Tổng cộng:</span>
-            <span class="total-price">${cartTotal}</span>
-          </div>
-            <form action="${pageContext.request.contextPath}/buy-all"
-                  method="get">
-              <button class="checkout-btn">Tiến Hành Đặt hàng</button>
-            </form>
-          </div>
-      </div>
       </div>
     </main>
 
