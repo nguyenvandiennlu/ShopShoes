@@ -1,7 +1,5 @@
 package controller.auth;
 
-import java.io.IOException;
-
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
@@ -9,19 +7,17 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import services.auth.RegisterService;
 import services.common.EmailServices;
-import services.user.UserServices;
 import utils.EmailTemplateBuilder;
 
+import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 
 @WebServlet("/register")
 public class RegisterController extends HttpServlet {
-    private UserServices userService;
     private RegisterService registerService;
 
     @Override
     public void init() {
-        userService = new UserServices();
         registerService = new RegisterService();
     }
 
@@ -41,7 +37,7 @@ public class RegisterController extends HttpServlet {
             return;
         }
 
-        req.setCharacterEncoding("UTF-8");
+        req.setCharacterEncoding(StandardCharsets.UTF_8.name());
         resp.setContentType("text/html;charset=UTF-8");
 
         String fullName = req.getParameter("fullName");
@@ -50,67 +46,43 @@ public class RegisterController extends HttpServlet {
         String password = req.getParameter("password");
         String confirmPassword = req.getParameter("confirmPassword");
         String address = req.getParameter("address");
+
         String baseUrl = req.getScheme() + "://" + req.getServerName() + ":" + req.getServerPort()
                 + req.getContextPath();
+
         RegisterService.RegisterResult result = registerService.register(
-                fullName, email, phone, password, confirmPassword, address, baseUrl);
-
-        // 1. Validate dữ liệu
-        if (fullName == null || email == null || phone == null ||
-                password == null || confirmPassword == null ||
-                fullName.isBlank() || email.isBlank() || phone.isBlank() || address.isBlank() ||
-                password.isBlank() || confirmPassword.isBlank()) {
-
-            req.setAttribute("error", "Vui lòng điền đầy đủ thông tin");
-            req.getRequestDispatcher("/Register.jsp").forward(req, resp);
-            return;
-        }
-
-        // 2. Kiểm tra mật khẩu khớp
-        if (!password.equals(confirmPassword)) {
-            req.setAttribute("error", "Mật khẩu xác nhận không khớp");
-            req.getRequestDispatcher("/Register.jsp").forward(req, resp);
-            return;
-        }
-
-        // 3. Kiểm tra độ dài mật khẩu
-        password = password.trim();
-        confirmPassword = confirmPassword.trim();
-
-        if (!isPasswordValid(password)) {
-            req.setAttribute("error",
-                    "Mật khẩu >= 8 ký tự, có chữ hoa, chữ thường, số và ký tự đặc biệt (không chứa khoảng trắng).");
-            req.getRequestDispatcher("/Register.jsp").forward(req, resp);
-            return;
-        }
-
-        // 4. Validate email format (phải có domain đầy đủ như @gmail.com)
-        if (!isEmailValid(email)) {
-            req.setAttribute("error", "Email không hợp lệ. Ví dụ đúng: tenban@domain.com");
-            req.getRequestDispatcher("/Register.jsp").forward(req, resp);
-            return;
-        }
-
-        // 5. Validate phone format (10-12 số, bắt đầu bằng 0)
-        if (!isPhoneValid(phone)) {
-            req.setAttribute("error", "Số điện thoại phải đủ 10-12 số và bắt đầu từ số 0");
-            req.getRequestDispatcher("/Register.jsp").forward(req, resp);
-            return;
-        }
+                fullName, email, phone, password, confirmPassword, address, baseUrl
+        );
 
         if (!result.success) {
             req.setAttribute("error", result.message);
             req.getRequestDispatcher("/Register.jsp").forward(req, resp);
             return;
         }
+
         EmailServices emailService = new EmailServices();
-        String emailContent = EmailTemplateBuilder.buildEmailVerificationOtpEmail(fullName, result.activationLink);
+        
+        String otp = extractOtpFromToken(result.token);
+        String emailContent = EmailTemplateBuilder.buildRegistrationOtpEmail(fullName, otp);
         try {
-            emailService.send(email, "Kích hoạt tài khoản ShopShoes", emailContent);
-            req.setAttribute("success", result.message);
-            req.getRequestDispatcher("/Login").forward(req, resp);
+            boolean emailSent = emailService.send(email, "Kích hoạt tài khoản ShopShoes - Mã OTP", emailContent);
+            if (emailSent) {
+
+                req.setAttribute("email", result.email);
+                req.setAttribute("token", result.token);
+                req.setAttribute("otp", otp);
+                req.setAttribute("success", "Đăng ký thành công! Chúng tôi đã gửi mã OTP vào email của bạn. Vui lòng nhập mã OTP để kích hoạt tài khoản.");
+                req.getRequestDispatcher("/OtpVerification.jsp").forward(req, resp);
+            } else {
+                System.err.println("[ERROR] Email send failed (returned false)");
+                req.setAttribute("error", "Đăng ký thành công nhưng gửi email kích hoạt thất bại. Vui lòng thử lại sau.");
+                req.getRequestDispatcher("/Register.jsp").forward(req, resp);
+            }
         } catch (Exception e) {
-            req.setAttribute("error", "Đăng ký thành công nhưng gửi email kích hoạt thất bại.");
+            System.err.println("[ERROR] Exception when sending email: " + e.getMessage());
+            System.err.println("[ERROR] Full trace:");
+            e.printStackTrace();
+            req.setAttribute("error", "Đăng ký thành công nhưng gửi email kích hoạt thất bại: " + e.getMessage());
             req.getRequestDispatcher("/Register.jsp").forward(req, resp);
         }
     }
@@ -119,131 +91,34 @@ public class RegisterController extends HttpServlet {
         req.setCharacterEncoding(StandardCharsets.UTF_8.name());
         resp.setContentType("application/json;charset=UTF-8");
 
-        String fullName = trimOrEmpty(req.getParameter("fullName"));
-        String email = trimOrEmpty(req.getParameter("email"));
-        String phone = trimOrEmpty(req.getParameter("phone"));
+        String fullName = req.getParameter("fullName");
+        String email = req.getParameter("email");
+        String phone = req.getParameter("phone");
         String password = req.getParameter("password") == null ? "" : req.getParameter("password");
         String confirmPassword = req.getParameter("confirmPassword") == null ? "" : req.getParameter("confirmPassword");
-        String address = trimOrEmpty(req.getParameter("address"));
+        String address = req.getParameter("address");
 
-        boolean fullNameValid = !fullName.isBlank();
-        boolean addressValid = !address.isBlank();
+        String json = registerService.buildAjaxValidationJson(
+                fullName, email, phone, password, confirmPassword, address
+        );
 
-        boolean emailFormatValid = isEmailValid(email);
-        boolean emailUnique = emailFormatValid && userService.getUserDao().findByEmail(email) == null;
-        boolean emailValid = emailFormatValid && emailUnique;
-
-        boolean phoneFormatValid = isPhoneValid(phone);
-        boolean phoneUnique = phoneFormatValid && userService.getUserDao().findByPhone(phone) == null;
-        boolean phoneValid = phoneFormatValid && phoneUnique;
-
-        PasswordRules passwordRules = evaluatePassword(password);
-        boolean passwordValid = passwordRules.allValid;
-        boolean confirmPasswordValid = !confirmPassword.isBlank() && confirmPassword.equals(password);
-
-        boolean formValid = fullNameValid && addressValid && emailValid && phoneValid && passwordValid
-                && confirmPasswordValid;
-
-        String emailMessage = !emailFormatValid
-                ? "Email phải có dạng tenban@domain.com"
-                : (emailUnique ? "Email hợp lệ" : "Email này đã được sử dụng");
-
-        String phoneMessage = !phoneFormatValid
-                ? "Số điện thoại phải đủ 10-12 số và bắt đầu từ số 0"
-                : (phoneUnique ? "Số điện thoại hợp lệ" : "Số điện thoại này đã được sử dụng");
-
-        String passwordMessage = passwordValid
-                ? "Mật khẩu hợp lệ"
-                : "Mật khẩu chưa đạt đủ các quy tắc";
-
-        String confirmPasswordMessage = confirmPasswordValid
-                ? "Mật khẩu xác nhận khớp"
-                : "Mật khẩu xác nhận chưa khớp";
-
-        StringBuilder json = new StringBuilder();
-        json.append("{")
-                .append("\"valid\":").append(formValid).append(",")
-                .append("\"fields\":{")
-                .append("\"fullName\":{\"valid\":").append(fullNameValid)
-                .append(",\"message\":\"")
-                .append(escapeJson(fullNameValid ? "Họ và tên hợp lệ" : "Vui lòng nhập họ và tên")).append("\"},")
-                .append("\"address\":{\"valid\":").append(addressValid)
-                .append(",\"message\":\"").append(escapeJson(addressValid ? "Địa chỉ hợp lệ" : "Vui lòng nhập địa chỉ"))
-                .append("\"},")
-                .append("\"email\":{\"valid\":").append(emailValid)
-                .append(",\"message\":\"").append(escapeJson(emailMessage)).append("\"},")
-                .append("\"phone\":{\"valid\":").append(phoneValid)
-                .append(",\"message\":\"").append(escapeJson(phoneMessage)).append("\"},")
-                .append("\"password\":{\"valid\":").append(passwordValid)
-                .append(",\"message\":\"").append(escapeJson(passwordMessage)).append("\",")
-                .append("\"rules\":{")
-                .append("\"minLength\":").append(passwordRules.minLength).append(",")
-                .append("\"hasUpper\":").append(passwordRules.hasUpper).append(",")
-                .append("\"hasLower\":").append(passwordRules.hasLower).append(",")
-                .append("\"hasDigit\":").append(passwordRules.hasDigit).append(",")
-                .append("\"hasSpecial\":").append(passwordRules.hasSpecial).append(",")
-                .append("\"noSpace\":").append(passwordRules.noSpace)
-                .append("}},")
-                .append("\"confirmPassword\":{\"valid\":").append(confirmPasswordValid)
-                .append(",\"message\":\"").append(escapeJson(confirmPasswordMessage)).append("\"}")
-                .append("}")
-                .append("}");
-
-        resp.getWriter().write(json.toString());
+        resp.getWriter().write(json);
     }
 
-    private static boolean isEmailValid(String email) {
-        if (email == null || email.isBlank()) {
-            return false;
+    /**
+     * Generate 6-digit numeric OTP from token
+     * Example: "6ef5f7a5-4aea-4f42-b94c-1574f3278c46" -> "123456"
+     */
+    private String extractOtpFromToken(String token) {
+        if (token == null || token.isEmpty()) {
+            return "000000";
         }
-        return email.toLowerCase().matches("^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\\.com$");
-    }
-
-    private static boolean isPhoneValid(String phone) {
-        if (phone == null || phone.isBlank()) {
-            return false;
-        }
-        return phone.matches("^0\\d{9,11}$");
-    }
-
-    private static boolean isPasswordValid(String password) {
-        return evaluatePassword(password).allValid;
-    }
-
-    private static PasswordRules evaluatePassword(String password) {
-        String value = password == null ? "" : password;
-
-        PasswordRules rules = new PasswordRules();
-        rules.minLength = value.length() >= 8;
-        rules.hasUpper = value.matches(".*[A-Z].*");
-        rules.hasLower = value.matches(".*[a-z].*");
-        rules.hasDigit = value.matches(".*\\d.*");
-        rules.hasSpecial = value.matches(".*[^A-Za-z0-9].*");
-        rules.noSpace = !value.matches(".*\\s+.*");
-        rules.allValid = rules.minLength && rules.hasUpper && rules.hasLower
-                && rules.hasDigit && rules.hasSpecial && rules.noSpace;
-        return rules;
-    }
-
-    private static String trimOrEmpty(String value) {
-        return value == null ? "" : value.trim();
-    }
-
-    private static String escapeJson(String value) {
-        return value
-                .replace("\\", "\\\\")
-                .replace("\"", "\\\"")
-                .replace("\n", "\\n")
-                .replace("\r", "\\r");
-    }
-
-    private static class PasswordRules {
-        boolean minLength;
-        boolean hasUpper;
-        boolean hasLower;
-        boolean hasDigit;
-        boolean hasSpecial;
-        boolean noSpace;
-        boolean allValid;
+        
+        // Use token's hash code to generate deterministic 6-digit OTP
+        int hashCode = Math.abs(token.hashCode());
+        int otp = hashCode % 1000000; // Get last 6 digits (0-999999)
+        
+        // Format as 6-digit string with leading zeros if needed
+        return String.format("%06d", otp);
     }
 }

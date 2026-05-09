@@ -24,4 +24,19 @@ public class TokenTypeService {
         tokenDao.markTokenAsUsed(token);
         return true;
     }
+
+    public boolean verifyEmailByToken(String token) {
+        String email = tokenDao.getEmailByToken(token, TokenType.ACCOUNT_ACTIVATION);
+        if (email == null) {
+            return false;
+        }
+        userDao.verifyEmailByEmail(email);
+        tokenDao.markTokenAsUsed(token);
+        return true;
+    }
+
+    public String getEmailByToken(String token) {
+        return tokenDao.getEmailByToken(token, TokenType.ACCOUNT_ACTIVATION);
+    }
+    
     }
