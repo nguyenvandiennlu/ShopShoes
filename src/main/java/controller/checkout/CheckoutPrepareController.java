@@ -50,28 +50,21 @@ public class CheckoutPrepareController extends HttpServlet {
             return;
         }
 
-        BigDecimal subTotalR =
-                cartService.calculateTotal(checkoutCart);
+        BigDecimal subTotalR = cartService.calculateTotal(checkoutCart);
 
-        BigDecimal shippingFeeR =
-                BigDecimal.valueOf(50000);
+        BigDecimal shippingFeeR = BigDecimal.ZERO;
         session.setAttribute("shippingFeeRaw", shippingFeeR);
 
+        BigDecimal grandTotalR = subTotalR.add(shippingFeeR);
 
-        BigDecimal grandTotalR =
-                subTotalR.add(shippingFeeR);
-
-        String subTotal =
-                promotionService.formatVND(subTotalR);
-        String shippingFee =
-                promotionService.formatVND(shippingFeeR);
-        String grandTotal =
-                promotionService.formatVND(grandTotalR);
-
+        String subTotal = promotionService.formatVND(subTotalR);
+        String shippingFee = promotionService.formatVND(shippingFeeR);
+        String grandTotal = promotionService.formatVND(grandTotalR);
 
         req.setAttribute("cart", checkoutCart);
         req.setAttribute("subTotal", subTotal);
-        req.setAttribute("shippingFee", shippingFee);
+        req.setAttribute("subTotalRaw", subTotalR);
+        req.setAttribute("shippingFee", "Chưa xác định");
         req.setAttribute("grandTotal", grandTotal);
 
         req.getRequestDispatcher("/Checkout.jsp").forward(req, resp);

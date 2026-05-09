@@ -125,11 +125,12 @@
                   <button type="submit" class="action-btn buy-now-btn">Mua ngay</button>
                 </form>
               </div>
-
             </div>
+        </div>
             <hr class="separator" />
           </c:forEach>
       </div>
+
     </main>
 
     <!--- #FOOTER-->
