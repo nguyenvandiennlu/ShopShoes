@@ -3841,3 +3841,9 @@ a.footer-link:is(:hover, :focus) {
 .quantity-btn:hover {
   filter: brightness(0.95);
 }
+
+/* --- Tùy chỉnh SweetAlert2 --- */
+div.swal2-popup {
+  font-family: 'Josefin Sans', 'Roboto', sans-serif !important;
+  font-size: 20px !important;
+}

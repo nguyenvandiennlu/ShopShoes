@@ -44,8 +44,33 @@
           <input type="text" name="phone" value="${currentUser.phoneNumber}"/>
         </div>
         <div class="form-group">
-          <label>Địa chỉ giao hàng</label>
-          <input type="text" name="address" value="${currentUser.address}"/>
+          <div class="form-group">
+            <label>Tỉnh/Thành phố <span style="color:red">*</span></label>
+            <select id="province" required>
+              <option value="">Chọn Tỉnh/Thành phố</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label>Quận/Huyện <span style="color:red">*</span></label>
+            <select id="district" disabled required>
+              <option value="">Chọn Quận/Huyện</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label>Phường/Xã <span style="color:red">*</span></label>
+            <select id="ward" disabled required>
+              <option value="">Chọn Phường/Xã</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label>Địa chỉ cụ thể (Số nhà, Tên đường) <span style="color:red">*</span></label>
+            <input type="text" id="street" placeholder="VD: 123 Đường Kha Vạn Cân" required/>
+          </div>
+
+          <input type="hidden" name="address" id="fullAddress" value=""/>
         </div>
         <div class="form-group">
           <label>Ghi chú</label>
@@ -87,11 +112,11 @@
             </div>
             <div class="summary-row">
               <span>Phí vận chuyển</span>
-              <span>${shippingFee}</span>
+              <span id="shippingFeeDisplay">${shippingFee}</span>
             </div>
             <div class="summary-row total">
               <strong>Tổng cộng</strong>
-              <strong>${grandTotal}</strong>
+              <strong id="grandTotalDisplay">${grandTotal}</strong>
             </div>
           </div>
           <button type="submit" class="btn-submit">ĐẶT HÀNG</button>
@@ -103,5 +128,12 @@
 </div>
 
 <jsp:include page="Footer.jsp"/>
+
+<script>
+  const contextPath = '${pageContext.request.contextPath}';
+  const subTotalRaw = ${subTotalRaw != null ? subTotalRaw : 0};
+</script>
+
+<script src="${pageContext.request.contextPath}/assets/script/checkout.js"></script>
 </body>
 </html>

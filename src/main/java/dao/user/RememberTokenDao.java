@@ -59,9 +59,9 @@ public class RememberTokenDao {
             RememberToken token = jdbi.withHandle(handle ->
                     handle.createQuery(sql)
                             .bind("token", tokenString)
-                            .mapToBean(RememberToken.class)  // Map result to object
-                            .findOne()  // Get first result (should be only 1)
-                            .orElse(null)  // Return null if not found
+                            .mapToBean(RememberToken.class)
+                            .findOne()
+                            .orElse(null)
             );
 
             if (token != null) {
