@@ -12,6 +12,7 @@ import model.user.User;
 import services.checkout.CheckoutService;
 import services.checkout.MomoSandboxService;
 import services.product.PromotionService;
+import services.user.AccountServices;
 
 import java.io.IOException;
 import java.math.BigDecimal;
@@ -23,6 +24,7 @@ public class CheckoutController extends HttpServlet {
     private final CheckoutService checkoutService = new CheckoutService();
     private final MomoSandboxService momoSandboxService = new MomoSandboxService();
     private final PromotionService promotionService = new PromotionService();
+    private final AccountServices accountServices = new AccountServices();
 
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp)
@@ -58,6 +60,16 @@ public class CheckoutController extends HttpServlet {
         }
 
         String rawPaymentMethod = req.getParameter("paymentMethod");
+        String phone = safe(req.getParameter("phone"));
+        String address = safe(req.getParameter("address"));
+        String note = safe(req.getParameter("note"));
+
+        if (phone.isBlank() || address.isBlank()) {
+            req.setAttribute("errorMessage", "Vui long nhap day du so dien thoai va dia chi giao hang.");
+            req.getRequestDispatcher("/Checkout.jsp").forward(req, resp);
+            return;
+        }
+
         PaymentMethod paymentMethod;
         try {
             paymentMethod = PaymentMethod.valueOf(
@@ -74,8 +86,18 @@ public class CheckoutController extends HttpServlet {
                     user.getId(),
                     cart,
                     shippingFee,
-                    paymentMethod
+                    paymentMethod,
+                    address,
+                    phone,
+                    note
             );
+
+            if (!address.equals(user.getAddress()) || !phone.equals(user.getPhoneNumber())) {
+                accountServices.updateUserProfile(user.getId(), user.getFullName(), phone, address);
+                user.setAddress(address);
+                user.setPhoneNumber(phone);
+                session.setAttribute("currentUser", user);
+            }
 
             if (paymentMethod == PaymentMethod.MOMO) {
                 session.setAttribute("pendingOrderId", orderId);
@@ -130,5 +152,9 @@ public class CheckoutController extends HttpServlet {
             subTotal = subTotal.add(unitPrice.multiply(BigDecimal.valueOf(item.getQuantity())));
         }
         return subTotal.add(shippingFee).longValue();
+    }
+
+    private String safe(String input) {
+        return input == null ? "" : input.trim();
     }
 }

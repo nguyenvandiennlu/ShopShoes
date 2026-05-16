@@ -22,14 +22,15 @@ public class OrderDao {
     }
 
     public int insertOrder(Handle handle, int userId, BigDecimal subTotal, BigDecimal shippingFee,
-            BigDecimal grandTotal, PaymentMethod paymentMethod) {
+            BigDecimal grandTotal, PaymentMethod paymentMethod, String shippingAddress,
+            String phoneNumber, String orderNote) {
         return handle.createUpdate("""
                     INSERT INTO orders
                     (user_id, sub_total, shipping_fee, grand_total,
-                     order_status, payment_method, payment_status)
+                     order_status, payment_method, payment_status, shipping_address, phone_number, order_note)
                     VALUES
                     (:user_id, :sub_total, :shipping_fee, :grand_total,
-                     :order_status, :payment_method, :payment_status)
+                     :order_status, :payment_method, :payment_status, :shipping_address, :phone_number, :order_note)
                 """)
                 .bind("user_id", userId)
                 .bind("sub_total", subTotal)
@@ -38,6 +39,9 @@ public class OrderDao {
                 .bind("order_status", OrderStatus.NEW.name())
                 .bind("payment_method", paymentMethod.name())
                 .bind("payment_status", PaymentStatus.UNPAID.name())
+                .bind("shipping_address", shippingAddress)
+                .bind("phone_number", phoneNumber)
+                .bind("order_note", orderNote)
                 .executeAndReturnGeneratedKeys("id")
                 .mapTo(Integer.class)
                 .one();
