@@ -64,6 +64,9 @@
           </c:if>
 
           <c:if test="${not empty cartItems}">
+            <div style="display:flex;justify-content:flex-end;margin:10px 0 16px;">
+              <a href="${pageContext.request.contextPath}/buy-all" class="action-btn buy-now-btn">Mua tất cả trong giỏ</a>
+            </div>
             <div class="cart-header-row">
               <div class="col-title">Sản phẩm</div>
               <div class="col-title">Đơn giá</div>

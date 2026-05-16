@@ -18,6 +18,7 @@ public class BuyAllController extends HttpServlet {
         HttpSession session = req.getSession();
         session.removeAttribute("checkoutMode");
         session.removeAttribute("checkoutCart");
+        session.removeAttribute("shippingFeeRaw");
         resp.sendRedirect(req.getContextPath() + "/pr-checkout");
     }
 }
