@@ -13,18 +13,25 @@ public class FirebaseInitializer implements ServletContextListener {
     public void contextInitialized(ServletContextEvent sce) {
         try {
             if (FirebaseApp.getApps().isEmpty()) {
-                InputStream serviceAccount =
-                        sce.getServletContext()
-                                .getResourceAsStream("/WEB-INF/firebase-service-account.json");
-                FirebaseOptions options = FirebaseOptions.builder()
-                        .setCredentials(GoogleCredentials.fromStream(serviceAccount))
-                        .build();
+                InputStream serviceAccount = sce.getServletContext()
+                        .getResourceAsStream("/WEB-INF/firebase-service-account.json");
 
-                FirebaseApp.initializeApp(options);
-                System.out.println("Firebase initialized!");
+                if (serviceAccount == null) {
+                    System.out.println("Firebase skipped: missing /WEB-INF/firebase-service-account.json");
+                    return;
+                }
+
+                try (serviceAccount) {
+                    FirebaseOptions options = FirebaseOptions.builder()
+                            .setCredentials(GoogleCredentials.fromStream(serviceAccount))
+                            .build();
+
+                    FirebaseApp.initializeApp(options);
+                    System.out.println("Firebase initialized!");
+                }
             }
         } catch (Exception e) {
-            throw new RuntimeException("Firebase init failed", e);
+            System.out.println("Firebase skipped due to init error: " + e.getMessage());
         }
     }
     @Override

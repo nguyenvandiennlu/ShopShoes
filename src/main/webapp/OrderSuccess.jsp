@@ -36,7 +36,7 @@
 <jsp:include page="Header.jsp"/>
 
 <div class="message-box success">
-    <h2>${successMessage}</h2>
+    <h2>${empty successMessage ? 'Đặt hàng thành công!' : successMessage}</h2>
     <p>Cảm ơn bạn đã mua hàng ❤️</p>
 
     <a href="${pageContext.request.contextPath}/menu" class="btn-primary">

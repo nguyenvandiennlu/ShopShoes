@@ -21,8 +21,7 @@ public class CheckoutPrepareController extends HttpServlet {
 
     private final ProductVariantDao variantDao = new ProductVariantDao();
     private final CartService cartService = new CartService();
-    private final PromotionService promotionService =new PromotionService();
-
+    private final PromotionService promotionService = new PromotionService();
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp)
@@ -32,13 +31,11 @@ public class CheckoutPrepareController extends HttpServlet {
         String mode = (String) session.getAttribute("checkoutMode");
 
         User user = (User) session.getAttribute("currentUser");
-
         if (user != null) {
             req.setAttribute("currentUser", user);
         }
 
         Map<String, CartItem> checkoutCart;
-
         if ("BUY_NOW".equals(mode)) {
             checkoutCart = (Map<String, CartItem>) session.getAttribute("checkoutCart");
         } else {
@@ -50,24 +47,22 @@ public class CheckoutPrepareController extends HttpServlet {
             return;
         }
 
-        BigDecimal subTotalR = cartService.calculateTotal(checkoutCart);
-
-        BigDecimal shippingFeeR = BigDecimal.ZERO;
-        session.setAttribute("shippingFeeRaw", shippingFeeR);
-
-        BigDecimal grandTotalR = subTotalR.add(shippingFeeR);
-
-        String subTotal = promotionService.formatVND(subTotalR);
-        String shippingFee = promotionService.formatVND(shippingFeeR);
-        String grandTotal = promotionService.formatVND(grandTotalR);
+        BigDecimal subTotalRaw = cartService.calculateTotal(checkoutCart);
+        BigDecimal shippingFeeRaw = (BigDecimal) session.getAttribute("shippingFeeRaw");
+        BigDecimal grandTotalRaw = shippingFeeRaw == null ? subTotalRaw : subTotalRaw.add(shippingFeeRaw);
 
         req.setAttribute("cart", checkoutCart);
-        req.setAttribute("subTotal", subTotal);
-        req.setAttribute("subTotalRaw", subTotalR);
-        req.setAttribute("shippingFee", "Chưa xác định");
-        req.setAttribute("grandTotal", grandTotal);
+        req.setAttribute("subTotal", promotionService.formatVND(subTotalRaw));
+        req.setAttribute("subTotalRaw", subTotalRaw);
+        req.setAttribute("shippingFee", shippingFeeRaw == null ? "Chua xac dinh" : promotionService.formatVND(shippingFeeRaw));
+        req.setAttribute("grandTotal", shippingFeeRaw == null ? "Chua xac dinh" : promotionService.formatVND(grandTotalRaw));
+
+        Object checkoutErrorMsg = session.getAttribute("checkoutErrorMsg");
+        if (checkoutErrorMsg != null) {
+            req.setAttribute("errorMessage", checkoutErrorMsg.toString());
+            session.removeAttribute("checkoutErrorMsg");
+        }
 
         req.getRequestDispatcher("/Checkout.jsp").forward(req, resp);
     }
 }
-
