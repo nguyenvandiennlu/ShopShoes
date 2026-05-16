@@ -21,6 +21,7 @@
     -  css link
   -->
       <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/style.css" />
+      <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/search-autocomplete.css" />
       <link rel="stylesheet" href="https://unpkg.com/swiper@8/swiper-bundle.min.css" />
       <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/hero-slider.css" />
       <!--
@@ -303,6 +304,10 @@
       </script>
 
       <script src="${pageContext.request.contextPath}/assets/script/product-popup.js"></script>
+      <script>
+        const CONTEXT_PATH = "${pageContext.request.contextPath}";
+      </script>
+      <script src="${pageContext.request.contextPath}/assets/script/search-autocomplete.js"></script>
 
     </body>
 

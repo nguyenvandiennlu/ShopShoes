@@ -12,6 +12,7 @@
             <link rel="icon" href="${pageContext.request.contextPath}/assets/favicon_io/favicon.ico" />
 
             <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/style.css" />
+            <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/search-autocomplete.css" />
             <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/products.css" />
 
             <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css"
@@ -155,6 +156,10 @@
             <script type="module" src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.esm.js"></script>
             <script nomodule src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.js"></script>
             <script src="${pageContext.request.contextPath}/assets/script/reponsive.js"></script>
+            <script>
+                const CONTEXT_PATH = "${pageContext.request.contextPath}";
+            </script>
+            <script src="${pageContext.request.contextPath}/assets/script/search-autocomplete.js"></script>
         </body>
 
         </html>

@@ -25,15 +25,27 @@ document.addEventListener("DOMContentLoaded", function () {
        2. XỬ LÝ TOGGLE SEARCH FORM
     ================================================== */
     const searchToggleBtn = document.getElementById("searchToggleBtn");
+    const searchToggleBtnMobile = document.getElementById("searchToggleBtnMobile");
     const searchCloseBtn = document.getElementById("searchCloseBtn");
     const searchForm = document.getElementById("search-form");
 
+    // Desktop search button
     if (searchToggleBtn && searchForm) {
         searchToggleBtn.addEventListener("click", function () {
             searchForm.classList.toggle("active");
             searchForm.querySelector("input").focus();
         });
     }
+
+    // Mobile search button
+    if (searchToggleBtnMobile && searchForm) {
+        searchToggleBtnMobile.addEventListener("click", function () {
+            searchForm.classList.toggle("active");
+            searchForm.querySelector("input").focus();
+        });
+    }
+
+    // Close button
     if (searchCloseBtn && searchForm) {
         searchCloseBtn.addEventListener("click", function () {
             searchForm.classList.remove("active");

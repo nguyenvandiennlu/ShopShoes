@@ -13,6 +13,7 @@
       <link rel="icon" href="${pageContext.request.contextPath}/assets/favicon_io/favicon.ico" />
 
       <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/style.css" />
+      <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/search-autocomplete.css" />
       <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/chitietsanpham.css" />
       <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/products.css" />
 
@@ -244,6 +245,10 @@
 
       <script src="${pageContext.request.contextPath}/assets/script/reponsive.js"></script>
       <script src="${pageContext.request.contextPath}/assets/script/chitietsanpham.js"></script>
+      <script>
+        const CONTEXT_PATH = "${pageContext.request.contextPath}";
+      </script>
+      <script src="${pageContext.request.contextPath}/assets/script/search-autocomplete.js"></script>
       <script>
         // Hàm hiển thị toast
         function showToast(message) {
