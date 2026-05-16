@@ -39,7 +39,7 @@ public class OtpVerificationController extends HttpServlet {
 
         // Nếu người dùng bỏ qua xác nhận OTP
         if ("skip".equalsIgnoreCase(action)) {
-            req.getRequestDispatcher("/Login").forward(req, resp);
+            resp.sendRedirect(req.getContextPath() + "/menufilter?brandId=all");
             return;
         }
 
@@ -52,7 +52,7 @@ public class OtpVerificationController extends HttpServlet {
             // Kiểm tra và xác nhận token
             if (tokenTypeService.verifyEmailByToken(token)) {
                 req.setAttribute("success", "Email đã được xác thực thành công!");
-                req.getRequestDispatcher("/Login").forward(req, resp);
+                resp.sendRedirect(req.getContextPath() + "/menufilter?brandId=all");
             } else {
                 req.setAttribute("error", "OTP không hợp lệ hoặc đã hết hạn. Vui lòng thử lại.");
                 req.setAttribute("email", email);
