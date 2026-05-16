@@ -64,10 +64,10 @@
           </c:if>
 
           <c:if test="${not empty cartItems}">
-            <div style="display:flex;justify-content:flex-end;margin:10px 0 16px;">
-              <a href="${pageContext.request.contextPath}/buy-all" class="action-btn buy-now-btn">Mua tất cả trong giỏ</a>
-            </div>
             <div class="cart-header-row">
+              <div class="col-title select-header-col">
+                <input type="checkbox" id="select-all-cart" />
+              </div>
               <div class="col-title">Sản phẩm</div>
               <div class="col-title">Đơn giá</div>
               <div class="col-title" style="text-align: center;">Số lượng</div>
@@ -77,6 +77,14 @@
 
           <c:forEach var="item" items="${cartItems}">
             <div class="product-item grid-layout">
+
+              <div class="select-col" style="display:flex; align-items:center; justify-content:center;">
+                <input type="checkbox"
+                       class="cart-item-checkbox"
+                       name="selectedKeys"
+                       value="${item.key}"
+                       form="checkoutSelectedForm" />
+              </div>
 
               <div class="product-details">
                 <img src="${item.image}" alt="${item.name}" class="product-image"/>
@@ -129,11 +137,23 @@
                 </form>
               </div>
             </div>
-        </div>
             <hr class="separator" />
           </c:forEach>
-      </div>
 
+          <c:if test="${not empty cartItems}">
+            <div class="checkout-cart-wrapper">
+              <button type="submit" form="checkoutSelectedForm" class="checkout-cart-btn">
+                Mua sản phẩm
+              </button>
+            </div>
+          </c:if>
+
+          <form id="checkoutSelectedForm"
+                action="${pageContext.request.contextPath}/cart/checkout-selected"
+                method="post">
+          </form>
+      </div>
+      </div>
     </main>
 
     <!--- #FOOTER-->
@@ -146,6 +166,35 @@
 
     <script>
       document.addEventListener('DOMContentLoaded', function() {
+        const selectAll = document.getElementById('select-all-cart');
+        const itemCheckboxes = document.querySelectorAll('.cart-item-checkbox');
+
+        if (selectAll) {
+
+          selectAll.addEventListener('change', function () {
+
+            itemCheckboxes.forEach(cb => {
+              cb.checked = this.checked;
+            });
+
+          });
+
+        }
+
+        itemCheckboxes.forEach(cb => {
+
+          cb.addEventListener('change', function () {
+
+            const allChecked =
+                    [...itemCheckboxes].length > 0 &&
+                    [...itemCheckboxes].every(x => x.checked);
+
+            selectAll.checked = allChecked;
+
+          });
+
+        });
+
         const deleteForms = document.querySelectorAll('.delete-item-form');
 
         deleteForms.forEach(function(form) {

@@ -31,7 +31,7 @@ public class BuyNowController extends HttpServlet {
         checkoutCart.put(item.getKey(), item);
 
         req.getSession().setAttribute("checkoutCart", checkoutCart);
-        req.getSession().setAttribute("checkoutMode", "BUY_NOW");
+//        req.getSession().setAttribute("checkoutMode", "BUY_NOW");
 
         resp.sendRedirect(req.getContextPath() + "/pr-checkout");
     }
