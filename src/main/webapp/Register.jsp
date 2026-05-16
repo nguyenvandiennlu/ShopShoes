@@ -10,6 +10,8 @@
     <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/style.css" />
 
     <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/dangnhapvadangki.css" />
+    
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/otp-verification.css" />
     <!--
           - favicon
         -->
@@ -232,8 +234,26 @@
       src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.js"
     ></script>
 
+  <!-- Loading Overlay -->
+  <div id="registerLoadingOverlay" class="register-loading-overlay">
+    <div class="register-loading-container">
+      <div class="register-spinner"></div>
+      <div class="register-loading-text">Đang tải...</div>
+    </div>
+  </div>
+
   <script src="${pageContext.request.contextPath}/assets/script/reponsive.js"></script>
   <script src="${pageContext.request.contextPath}/assets/script/register.js?v=20260406-4"></script>
+
+  <script>
+    // Show loading popup when register form is submitted
+    const registerForm = document.getElementById('register');
+    if (registerForm) {
+      registerForm.addEventListener('submit', function(e) {
+        document.getElementById('registerLoadingOverlay').classList.add('active');
+      });
+    }
+  </script>
 
   </body>
 </html>
