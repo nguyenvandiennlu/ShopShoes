@@ -1,4 +1,5 @@
 document.addEventListener('DOMContentLoaded', function() {
+    const checkoutForm = document.querySelector('.checkout-form');
     const provinceSelect = document.getElementById('province');
     const districtSelect = document.getElementById('district');
     const wardSelect = document.getElementById('ward');
@@ -111,4 +112,22 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     streetInput.addEventListener('input', updateFullAddress);
+
+    if (checkoutForm) {
+        checkoutForm.addEventListener('submit', function (event) {
+            updateFullAddress();
+
+            const isAddressIncomplete =
+                !provinceSelect.value ||
+                !districtSelect.value ||
+                !wardSelect.value ||
+                !streetInput.value.trim() ||
+                !fullAddressInput.value.trim();
+
+            if (isAddressIncomplete) {
+                event.preventDefault();
+                alert('Vui lòng chọn đầy đủ tỉnh/thành phố, quận/huyện, phường/xã và nhập số nhà, tên đường.');
+            }
+        });
+    }
 });

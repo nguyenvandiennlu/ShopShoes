@@ -32,7 +32,10 @@ public class CheckoutService {
             int userId,
             Map<String, CartItem> cart,
             BigDecimal shippingFee,
-            PaymentMethod paymentMethod
+            PaymentMethod paymentMethod,
+            String shippingAddress,
+            String phoneNumber,
+            String orderNote
     ) {
 
         return jdbi.inTransaction(handle -> {
@@ -62,7 +65,10 @@ public class CheckoutService {
                     subTotal,
                     shippingFee,
                     grandTotal,
-                    paymentMethod
+                    paymentMethod,
+                    shippingAddress,
+                    phoneNumber,
+                    orderNote
             );
 
             if (paymentMethod == PaymentMethod.COD) {
