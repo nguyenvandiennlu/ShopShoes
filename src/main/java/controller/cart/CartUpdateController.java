@@ -1,12 +1,13 @@
 package controller.cart;
 
-
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
-import model.user.CartItem;
+import model.user.User;
+import model.cart.CartItem; // nếu project bạn đang dùng model.user.CartItem thì đổi lại
+import services.cart.CartService;
 
 import java.io.IOException;
 import java.util.Map;
@@ -14,13 +15,14 @@ import java.util.Map;
 @WebServlet("/cart/update")
 public class CartUpdateController extends HttpServlet {
 
+    private final CartService cartService = new CartService();
+
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp)
             throws IOException {
 
         HttpSession session = req.getSession();
-        Map<String, CartItem> cart =
-                (Map<String, CartItem>) session.getAttribute("cart");
+        Map<String, CartItem> cart = (Map<String, CartItem>) session.getAttribute("cart");
 
         if (cart == null) {
             resp.sendRedirect(req.getContextPath() + "/cart");
@@ -36,18 +38,20 @@ public class CartUpdateController extends HttpServlet {
             return;
         }
 
-        if ("plus".equals(action)) {
-            item.setQuantity(item.getQuantity() + 1);
-        }
+        User currentUser = (User) session.getAttribute("currentUser");
 
-        if ("minus".equals(action)) {
-            if (item.getQuantity() > 1) {
+        if (currentUser == null) {
+            if ("plus".equals(action)) {
+                item.setQuantity(item.getQuantity() + 1);
+            }
+            if ("minus".equals(action) && item.getQuantity() > 1) {
                 item.setQuantity(item.getQuantity() - 1);
             }
+            session.setAttribute("cart", cart);
+        } else {
+            cartService.syncUpdate(session, currentUser.getId(), key, action);
         }
 
-        session.setAttribute("cart", cart);
         resp.sendRedirect(req.getContextPath() + "/cart");
     }
 }
-

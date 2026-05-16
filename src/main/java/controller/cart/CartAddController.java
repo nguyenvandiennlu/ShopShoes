@@ -6,11 +6,12 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import services.cart.CartService;
+import model.user.User;
 
 import java.io.IOException;
 
 @WebServlet("/cart/add")
-public class CartController extends HttpServlet {
+public class CartAddController extends HttpServlet {
 
     private final CartService cartService = new CartService();
 
@@ -32,15 +33,14 @@ public class CartController extends HttpServlet {
         }
 
         int sizeId = Integer.parseInt(sizeRaw);
+        User currentUser = (User) session.getAttribute("currentUser") ;
+        if(currentUser == null){
+            cartService.addToCart(session, productId, colorId, sizeId, qty);
 
-        cartService.addToCart(
-                session,
-                productId,
-                colorId,
-                sizeId,
-                qty);
-
-        // Redirect về trang sản phẩm với thông báo thành công
+        }
+        else{
+            cartService.syncAdd(session,currentUser.getId(), productId, colorId, sizeId, qty);
+        }
         resp.sendRedirect(req.getContextPath() + "/product?id=" + productId + "&colorId=" + colorId + "&sizeId="
                 + sizeId + "&msg=cart_added");
     }
