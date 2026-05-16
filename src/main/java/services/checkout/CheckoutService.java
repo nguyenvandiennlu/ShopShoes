@@ -6,7 +6,7 @@ import dao.order.OrderDetailDao;
 import dao.product.ProductVariantDao;
 import enums.PaymentMethod;
 import enums.PaymentStatus;
-import model.user.CartItem;
+import model.cart.CartItem;
 import org.jdbi.v3.core.Jdbi;
 import services.product.PromotionService;
 

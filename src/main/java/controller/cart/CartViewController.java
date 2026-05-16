@@ -6,7 +6,8 @@ import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
-import model.user.CartItem;
+import model.cart.CartItem;
+import model.user.User;
 import services.cart.CartService;
 import services.product.PromotionService;
 
@@ -26,10 +27,15 @@ public class CartViewController extends HttpServlet {
             throws ServletException, IOException {
 
         HttpSession session = request.getSession();
+        User currentUser = (User) session.getAttribute("currentUser");
+
         Map<String, CartItem> cart =
                 (Map<String, CartItem>) session.getAttribute("cart");
-
-        if (cart == null) {
+        if(currentUser != null && ( cart == null || cart.isEmpty()) ){
+        cartService.loadDbCartToSession(session, currentUser.getId());
+        cart =(Map<String, CartItem>) session.getAttribute("cart");
+        }
+        if(cart==null){
             cart = new LinkedHashMap<>();
         }
 

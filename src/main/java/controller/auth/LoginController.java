@@ -7,6 +7,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import model.user.User;
+import services.cart.CartService;
 import services.user.UserServices;
 import utils.LoginAttemptTracker;
 import utils.RecaptchaVerifier;
@@ -15,9 +16,11 @@ import java.io.IOException;
 @WebServlet("/login")
 public class LoginController extends HttpServlet {
     private UserServices userService;
+    private CartService cartService = new CartService();
     @Override
     public void init() {
         userService = new UserServices();
+        cartService = new CartService();
     }
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp)
@@ -94,6 +97,7 @@ public class LoginController extends HttpServlet {
             }
             LoginAttemptTracker.resetAttempts(session);
             session.setAttribute("currentUser", user);
+            cartService.mergeSessionIntoDbThenReload(session, user.getId());
             session.setMaxInactiveInterval(30 * 60);
 
             String rememberMe = req.getParameter("rememberMe");

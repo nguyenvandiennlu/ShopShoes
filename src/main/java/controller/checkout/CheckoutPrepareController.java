@@ -7,7 +7,7 @@ import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
-import model.user.CartItem;
+import model.cart.CartItem;
 import model.user.User;
 import services.cart.CartService;
 import services.product.PromotionService;

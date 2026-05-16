@@ -6,7 +6,7 @@ import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
-import model.user.CartItem;
+import model.cart.CartItem;
 import services.checkout.CheckoutService;
 
 import java.io.IOException;
