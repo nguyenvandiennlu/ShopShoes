@@ -57,6 +57,10 @@ public class AccountServices {
         }
 
         // Mã hóa mật khẩu mới
+        if (BCrypt.checkpw(newPassword, user.getPasswordHash())) {
+            return "Mật khẩu mới phải khác mật khẩu hiện tại!";
+        }
+
         String hashedNewPassword = BCrypt.hashpw(newPassword, BCrypt.gensalt(12));
 
         // Cập nhật vào DB

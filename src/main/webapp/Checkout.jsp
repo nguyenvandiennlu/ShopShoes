@@ -44,34 +44,32 @@
           <input type="text" name="phone" value="${currentUser.phoneNumber}"/>
         </div>
         <div class="form-group">
-          <div class="form-group">
-            <label>Tỉnh/Thành phố <span style="color:red">*</span></label>
-            <select id="province" required>
-              <option value="">Chọn Tỉnh/Thành phố</option>
-            </select>
-          </div>
-
-          <div class="form-group">
-            <label>Quận/Huyện <span style="color:red">*</span></label>
-            <select id="district" disabled required>
-              <option value="">Chọn Quận/Huyện</option>
-            </select>
-          </div>
-
-          <div class="form-group">
-            <label>Phường/Xã <span style="color:red">*</span></label>
-            <select id="ward" disabled required>
-              <option value="">Chọn Phường/Xã</option>
-            </select>
-          </div>
-
-          <div class="form-group">
-            <label>Địa chỉ cụ thể (Số nhà, Tên đường) <span style="color:red">*</span></label>
-            <input type="text" id="street" placeholder="VD: 123 Đường Kha Vạn Cân" required/>
-          </div>
-
-          <input type="hidden" name="address" id="fullAddress" value=""/>
+          <label>Tỉnh/Thành phố <span style="color:red">*</span></label>
+          <select id="province" required>
+            <option value="">Chọn Tỉnh/Thành phố</option>
+          </select>
         </div>
+
+        <div class="form-group">
+          <label>Quận/Huyện <span style="color:red">*</span></label>
+          <select id="district" disabled required>
+            <option value="">Chọn Quận/Huyện</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label>Phường/Xã <span style="color:red">*</span></label>
+          <select id="ward" disabled required>
+            <option value="">Chọn Phường/Xã</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label>Địa chỉ cụ thể (Số nhà, Tên đường) <span style="color:red">*</span></label>
+          <input type="text" id="street" placeholder="VD: 123 Đường Kha Vạn Cân" required/>
+        </div>
+
+        <input type="hidden" name="address" id="fullAddress" value=""/>
         <div class="form-group">
           <label>Ghi chú</label>
           <input type="text" name="note"/>
@@ -102,6 +100,10 @@
             <label>
               <input type="radio" name="paymentMethod" value="COD" checked/>
               Thanh toán khi nhận hàng (COD)
+            </label>
+            <label>
+              <input type="radio" name="paymentMethod" value="MOMO"/>
+              Thanh toán MoMo
             </label>
           </div>
 

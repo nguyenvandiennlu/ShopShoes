@@ -10,6 +10,7 @@ import org.jdbi.v3.core.Jdbi;
 import dao.JDBIConnector;
 import model.Order.Order;
 import enums.OrderStatus;
+import enums.PaymentMethod;
 import enums.PaymentStatus;
 
 public class OrderDao {
@@ -21,24 +22,55 @@ public class OrderDao {
     }
 
     public int insertOrder(Handle handle, int userId, BigDecimal subTotal, BigDecimal shippingFee,
-            BigDecimal grandTotal) {
+            BigDecimal grandTotal, PaymentMethod paymentMethod) {
         return handle.createUpdate("""
                     INSERT INTO orders
                     (user_id, sub_total, shipping_fee, grand_total,
-                     order_status, payment_status)
+                     order_status, payment_method, payment_status)
                     VALUES
                     (:user_id, :sub_total, :shipping_fee, :grand_total,
-                     :order_status, :payment_status)
+                     :order_status, :payment_method, :payment_status)
                 """)
                 .bind("user_id", userId)
                 .bind("sub_total", subTotal)
                 .bind("shipping_fee", shippingFee)
                 .bind("grand_total", grandTotal)
                 .bind("order_status", OrderStatus.NEW.name())
+                .bind("payment_method", paymentMethod.name())
                 .bind("payment_status", PaymentStatus.UNPAID.name())
                 .executeAndReturnGeneratedKeys("id")
                 .mapTo(Integer.class)
                 .one();
+    }
+
+    public void updatePaymentStatus(Handle handle, int orderId, PaymentStatus paymentStatus) {
+        handle.createUpdate("""
+                    UPDATE orders
+                    SET payment_status = :payment_status
+                    WHERE id = :order_id
+                """)
+                .bind("payment_status", paymentStatus.name())
+                .bind("order_id", orderId)
+                .execute();
+    }
+
+    public PaymentStatus getPaymentStatusByOrderId(int orderId) {
+        String sql = """
+                SELECT payment_status
+                FROM orders
+                WHERE id = :order_id
+                """;
+
+        String status = jdbi.withHandle(handle -> handle.createQuery(sql)
+                .bind("order_id", orderId)
+                .mapTo(String.class)
+                .findOne()
+                .orElse(null));
+
+        if (status == null || status.isBlank()) {
+            return null;
+        }
+        return PaymentStatus.valueOf(status);
     }
 
     public List<Order> findWithFilter(Integer orderId, Integer userId, String status) {

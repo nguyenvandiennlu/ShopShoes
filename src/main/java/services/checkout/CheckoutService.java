@@ -4,6 +4,8 @@ import dao.JDBIConnector;
 import dao.order.OrderDao;
 import dao.order.OrderDetailDao;
 import dao.product.ProductVariantDao;
+import enums.PaymentMethod;
+import enums.PaymentStatus;
 import model.user.CartItem;
 import org.jdbi.v3.core.Jdbi;
 import services.product.PromotionService;
@@ -26,18 +28,22 @@ public class CheckoutService {
         this.jdbi = JDBIConnector.getJdbi();
     }
 
-    public void placeOrder(
+    public int placeOrder(
             int userId,
             Map<String, CartItem> cart,
-            BigDecimal shippingFee
+            BigDecimal shippingFee,
+            PaymentMethod paymentMethod
     ) {
 
-        jdbi.useTransaction(handle -> {
+        return jdbi.inTransaction(handle -> {
 
             BigDecimal subTotal = BigDecimal.ZERO;
             Map<String, BigDecimal> unitPrices = new HashMap<>();
 
             for (CartItem item : cart.values()) {
+                if (item.getQuantity() <= 0) {
+                    throw new RuntimeException("So luong san pham khong hop le");
+                }
 
                 BigDecimal unitPrice =
                         promotionService.parsePrice(item.getFinalPrice());
@@ -55,15 +61,45 @@ public class CheckoutService {
                     userId,
                     subTotal,
                     shippingFee,
-                    grandTotal
+                    grandTotal,
+                    paymentMethod
             );
 
-            orderDetailDao.insertOrderDetails(
-                    handle,
-                    orderId,
-                    cart,
-                    unitPrices
-            );
+            if (paymentMethod == PaymentMethod.COD) {
+                orderDetailDao.insertOrderDetails(
+                        handle,
+                        orderId,
+                        cart,
+                        unitPrices
+                );
+
+                for (CartItem item : cart.values()) {
+                    variantDao.updateStock(
+                            handle,
+                            item.getProductId(),
+                            item.getColorId(),
+                            item.getSizeId(),
+                            item.getQuantity()
+                    );
+                }
+            }
+
+            return orderId;
+        });
+    }
+
+    public void completeMomoPayment(int orderId, Map<String, CartItem> cart) {
+        jdbi.useTransaction(handle -> {
+            Map<String, BigDecimal> unitPrices = new HashMap<>();
+
+            for (CartItem item : cart.values()) {
+                if (item.getQuantity() <= 0) {
+                    throw new RuntimeException("So luong san pham khong hop le");
+                }
+                unitPrices.put(item.getKey(), promotionService.parsePrice(item.getFinalPrice()));
+            }
+
+            orderDetailDao.insertOrderDetails(handle, orderId, cart, unitPrices);
 
             for (CartItem item : cart.values()) {
                 variantDao.updateStock(
@@ -74,6 +110,12 @@ public class CheckoutService {
                         item.getQuantity()
                 );
             }
+
+            orderDao.updatePaymentStatus(handle, orderId, PaymentStatus.PAID);
         });
+    }
+
+    public void failMomoPayment(int orderId) {
+        jdbi.useTransaction(handle -> orderDao.updatePaymentStatus(handle, orderId, PaymentStatus.FAILED));
     }
 }

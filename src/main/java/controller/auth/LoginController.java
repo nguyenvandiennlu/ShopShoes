@@ -1,5 +1,4 @@
 package controller.auth;
-
 import enums.Role;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
@@ -11,7 +10,6 @@ import model.user.User;
 import services.user.UserServices;
 import utils.LoginAttemptTracker;
 import utils.RecaptchaVerifier;
-
 import java.io.IOException;
 
 @WebServlet("/login")
@@ -35,6 +33,9 @@ public class LoginController extends HttpServlet {
         HttpSession session = req.getSession();
         try {
             String email = req.getParameter("email");
+            if (email != null) {
+                email = email.trim().toLowerCase();
+            }
             String password = req.getParameter("password");
             if (LoginAttemptTracker.isRecaptchaRequired(session)) {
                 String recaptchaResponse = req.getParameter("g-recaptcha-response");

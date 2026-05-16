@@ -1,7 +1,11 @@
 package controller.auth;
 
+import DTO.GoogleLoginRequest;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseToken;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
+import enums.Role;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
@@ -10,9 +14,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import model.user.User;
 import services.user.UserServices;
-import enums.Role;
 
-import java.io.BufferedReader;
 import java.io.IOException;
 
 @WebServlet("/google-login")
@@ -30,53 +32,46 @@ public class GoogleLoginController extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp)
             throws ServletException, IOException {
-
         resp.setContentType("application/json");
         resp.setCharacterEncoding("UTF-8");
 
         try {
-
-            BufferedReader reader = req.getReader();
-            StringBuilder sb = new StringBuilder();
-            String line;
-            while ((line = reader.readLine()) != null) {
-                sb.append(line);
+            GoogleLoginRequest googleData = gson.fromJson(req.getReader(), GoogleLoginRequest.class);
+            if (googleData == null || googleData.getIdToken() == null || googleData.getIdToken().isBlank()) {
+                sendError(resp, "Thiếu idToken");
+                return;
             }
-            GoogleLoginRequest googleData = gson.fromJson(sb.toString(), GoogleLoginRequest.class);
-            User user = userService.processSocialLogin(
-                    googleData.email,
-                    googleData.name,
-                    googleData.uid,
-                    "google");
+            FirebaseToken decodedToken = FirebaseAuth.getInstance().verifyIdToken(googleData.getIdToken());
+            String firebaseUid = decodedToken.getUid();
+            String email = decodedToken.getEmail();
+            String name = (String) decodedToken.getName();
+            String picture = (String) decodedToken.getPicture();
 
-            if (user != null) {
-                // 4. Tạo Session
-                HttpSession session = req.getSession(true);
-                session.setAttribute("currentUser", user);
-                session.setMaxInactiveInterval(30 * 60);
-
-                // 5. Trả về JSON thành công
-                JsonObject jsonResponse = new JsonObject();
-                jsonResponse.addProperty("success", true);
-
-                // Điều hướng dựa trên role
-                if (Role.ADMIN.equals(user.getRole())) {
-                    resp.sendRedirect(req.getContextPath() + "/admin/dashboard");
-                } else {
-                    resp.sendRedirect(req.getContextPath() + "/Home.jsp");
-                }
-
-                resp.getWriter().write(gson.toJson(jsonResponse));
-            } else {
+            if (email == null || email.isBlank()) {
+                sendError(resp, "Token không chứa email hợp lệ");
+                return;
+            }
+            User user = userService.processGoogleLoginVerified(email, name, firebaseUid, picture);
+            if (user == null) {
                 sendError(resp, "Không thể xử lý đăng nhập.");
+                return;
             }
-
+            HttpSession session = req.getSession(true);
+            session.setAttribute("currentUser", user);
+            session.setMaxInactiveInterval(30 * 60);
+            JsonObject jsonResponse = new JsonObject();
+            jsonResponse.addProperty("success", true);
+            if (Role.ADMIN.equals(user.getRole())) {
+                jsonResponse.addProperty("redirect", req.getContextPath() + "/admin/dashboard");
+            } else {
+                jsonResponse.addProperty("redirect", req.getContextPath() + "/menu");
+            }
+            resp.getWriter().write(gson.toJson(jsonResponse));
         } catch (Exception e) {
             e.printStackTrace();
-            sendError(resp, "Lỗi Server: " + e.getMessage());
+            sendError(resp, "Token không hợp lệ hoặc lỗi server: " + e.getMessage());
         }
     }
-
     private void sendError(HttpServletResponse resp, String message) throws IOException {
         JsonObject jsonResponse = new JsonObject();
         jsonResponse.addProperty("success", false);
@@ -84,10 +79,6 @@ public class GoogleLoginController extends HttpServlet {
         resp.getWriter().write(gson.toJson(jsonResponse));
     }
 
-    private static class GoogleLoginRequest {
-        String email;
-        String name;
-        String uid;
-        String photoURL;
-    }
+
+
 }
