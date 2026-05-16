@@ -268,6 +268,28 @@
     min-width: 100px;
 }
 
+.account-nav-list li a {
+    display: flex;
+    align-items: center;
+    column-gap: 5px;
+    row-gap: 10px;
+    padding: 10px 15px;
+    margin-top: 10px;
+    color: var(--onyx);
+    font-size: var(--fs-5);
+    font-weight: var(--fw-500);
+    text-decoration: none;
+    border-radius: 4px;
+    transition: var(--transition-1);
+}
+
+.account-nav-list li a:hover,
+.account-nav-list li.active a {
+    background: var(--bittersweet);
+    color: var(--white);
+    font-weight: var(--fw-600);
+}
+
 /* Responsive */
 @media (max-width: 576px) {
     .order-header {
@@ -295,3 +317,4 @@
         margin-top: 4px;
     }
 }
+
