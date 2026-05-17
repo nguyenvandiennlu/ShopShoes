@@ -8,7 +8,7 @@ import org.jdbi.v3.core.Handle;
 
 import dao.JDBIConnector;
 import model.Order.OrderDetailDTO;
-import model.user.CartItem;
+import model.cart.CartItem;
 
 public class OrderDetailDao {
 

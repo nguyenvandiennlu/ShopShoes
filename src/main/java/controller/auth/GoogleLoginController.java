@@ -13,6 +13,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import model.user.User;
+import services.cart.CartService;
 import services.user.UserServices;
 
 import java.io.IOException;
@@ -21,11 +22,13 @@ import java.io.IOException;
 public class GoogleLoginController extends HttpServlet {
 
     private UserServices userService;
+    private CartService cartService;
     private Gson gson;
 
     @Override
     public void init() {
         userService = new UserServices();
+        cartService = new CartService();
         gson = new Gson();
     }
 
@@ -58,6 +61,7 @@ public class GoogleLoginController extends HttpServlet {
             }
             HttpSession session = req.getSession(true);
             session.setAttribute("currentUser", user);
+            cartService.mergeSessionIntoDbThenReload(session, user.getId());
             session.setMaxInactiveInterval(30 * 60);
             JsonObject jsonResponse = new JsonObject();
             jsonResponse.addProperty("success", true);

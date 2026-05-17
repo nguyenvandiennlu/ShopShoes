@@ -1,9 +1,6 @@
-/* --- CẬP NHẬT LẠI LAYOUT GIỎ HÀNG (DÙNG CSS GRID) --- */
-
-/* Hàng tiêu đề giỏ hàng */
 .cart-header-row {
     display: grid;
-    grid-template-columns: 4fr 2fr 1.5fr 2fr;
+    grid-template-columns: 50px 4fr 2fr 1.5fr 2fr;
     padding-bottom: 15px;
     border-bottom: 2px solid var(--gainsboro, #e0e0e0);
     margin-bottom: 15px;
@@ -18,33 +15,37 @@
     text-transform: uppercase;
 }
 
-/* Biến sản phẩm thành dạng lưới thay vì flexbox */
-.product-item.grid-layout {
-    display: grid;
-    grid-template-columns: 4fr 2fr 1.5fr 2fr;
+.select-header-col,
+.select-col {
+    display: flex;
     align-items: center;
-    padding: 15px 0; /* Thu hẹp khoảng cách trên dưới */
-    min-height: auto;
-    gap: 15px; /* Thu hẹp khoảng cách giữa các cột */
+    justify-content: center;
 }
 
-/* Cột 1: Chi tiết */
+.product-item.grid-layout {
+    display: grid;
+    grid-template-columns: 50px 4fr 2fr 1.5fr 2fr;
+    align-items: center;
+    padding: 15px 0;
+    min-height: auto;
+    gap: 15px;
+}
+
 .product-item.grid-layout .product-details {
-    flex-basis: auto; /* Xóa thuộc tính flex cũ */
+    flex-basis: auto;
     gap: 15px;
 }
 .product-image {
-    width: 80px; /* Thu nhỏ ảnh một chút cho gọn */
+    width: 80px;
     height: 80px;
 }
 .product-name {
-    font-size: 1.4rem; /* Cân chỉnh lại font chữ */
+    font-size: 1.4rem;
 }
 .product-attributes-line-2 {
     font-size: 1.2rem;
 }
 
-/* Cột 2: Cột Đơn giá */
 .product-price-col {
     display: flex;
     flex-direction: column;
@@ -62,27 +63,73 @@
     margin-top: 5px;
 }
 
-/* Cột 3: Cột Số lượng */
 .quantity-col {
     display: flex;
     justify-content: center;
 }
 
-/* Cột 4: Cột Thao tác */
 .product-actions-col {
     display: flex;
-    flex-direction: column; /* Các nút xếp chồng lên nhau cho tiết kiệm không gian */
+    flex-direction: column;
     gap: 8px;
     align-items: flex-end;
 }
 .product-actions-col .action-btn {
-    width: 100px; /* Đặt width cố định để 2 nút bằng nhau */
+    width: 100px;
     text-align: center;
     padding: 10px 0;
     font-size: 1.2rem;
 }
 
-/* Mobile Responsive: Tắt tiêu đề và cuộn dọc trên điện thoại */
+.checkout-cart-wrapper {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 24px;
+}
+
+.checkout-cart-btn {
+
+    min-width: 220px;
+    height: 52px;
+
+    padding: 0 28px;
+
+    border: none;
+    border-radius: 12px;
+
+    background: var(--bittersweet);
+
+    color: white;
+
+    font-size: 1.5rem;
+    font-weight: 700;
+
+    cursor: pointer;
+
+    transition:
+            transform 0.2s ease,
+            opacity 0.2s ease,
+            box-shadow 0.2s ease;
+
+    box-shadow:
+            0 6px 18px rgba(0,0,0,0.12);
+}
+
+.checkout-cart-btn:hover {
+
+    opacity: 0.95;
+
+    transform: translateY(-2px);
+
+    box-shadow:
+            0 10px 24px rgba(0,0,0,0.16);
+}
+
+.checkout-cart-btn:active {
+
+    transform: scale(0.98);
+}
+
 @media (max-width: 768px) {
     .cart-header-row {
         display: none;

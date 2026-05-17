@@ -5,7 +5,7 @@ import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import model.user.CartItem;
+import model.cart.CartItem;
 import services.cart.CartService;
 
 import java.io.IOException;
@@ -31,7 +31,7 @@ public class BuyNowController extends HttpServlet {
         checkoutCart.put(item.getKey(), item);
 
         req.getSession().setAttribute("checkoutCart", checkoutCart);
-        req.getSession().setAttribute("checkoutMode", "BUY_NOW");
+//        req.getSession().setAttribute("checkoutMode", "BUY_NOW");
 
         resp.sendRedirect(req.getContextPath() + "/pr-checkout");
     }
