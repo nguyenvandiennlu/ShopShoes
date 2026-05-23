@@ -5,7 +5,8 @@ document.addEventListener("click", function (e) {
     // Kiểm tra tính hợp lệ
     if (btn && !btn.classList.contains("disabled") && !btn.classList.contains("active")) {
 
-        const page = btn.dataset.page;
+        const page = parseInt(btn.dataset.page, 10);
+        if (!Number.isFinite(page) || page < 1) return;
         const filterForm = document.getElementById("filter-form");
         const sortSelect = document.getElementById("sort-select");
 
@@ -32,6 +33,9 @@ document.addEventListener("click", function (e) {
         fetch(`${CONTEXT_PATH}/products${queryString}`)
             .then(res => res.text())
             .then(html => {
+                if (window.updatePriceBoundsFromHtml) {
+                    window.updatePriceBoundsFromHtml(html, true);
+                }
                 if (productsContainer) {
                     productsContainer.innerHTML = html;
                     productsContainer.style.opacity = "1";
