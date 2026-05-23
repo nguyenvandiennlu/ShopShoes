@@ -54,6 +54,9 @@
     </c:forEach>
 </ul>
 
+<input type="hidden" id="priceMinBoundMeta" value="${priceMinBound}" />
+<input type="hidden" id="priceMaxBoundMeta" value="${priceMaxBound}" />
+
 <c:set var="currentPage" value="${empty page ? 1 : page}" />
 <div class="pagination">
     <button type="button" class="page-btn prev-btn ${currentPage == 1 ? 'disabled' : ''}"

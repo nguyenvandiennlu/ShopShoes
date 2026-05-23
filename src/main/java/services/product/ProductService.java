@@ -5,6 +5,7 @@ import dao.product.ProductDao;
 import model.Promotion.PromotionResult;
 import model.product.Product;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -208,6 +209,11 @@ public class ProductService {
                                      int pageSize) {
         int total = productDao.countFilteredProducts(keyword, brandIds, sizeIds, colorIds, minPrice, maxPrice);
         return (int) Math.ceil(total * 1.0 / pageSize);
+    }
+
+    public BigDecimal[] getEffectivePriceBounds(String keyword, List<Integer> brandIds,
+                                                List<Integer> sizeIds, List<Integer> colorIds) {
+        return productDao.getEffectivePriceBounds(keyword, brandIds, sizeIds, colorIds);
     }
 
 

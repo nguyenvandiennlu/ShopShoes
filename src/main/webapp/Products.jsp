@@ -133,27 +133,29 @@
                                     <div class="price-filter">
                                         <div class="slider-container">
                                             <div class="slider-track"></div>
-                                            <input type="range" min="0" max="10000000"
-                                                value="${minPrice != null ? minPrice : 0}" id="slider-1"
+                                            <input type="range" min="${priceMinBound}" max="${priceMaxBound}"
+                                                value="${minPrice != null ? minPrice : priceMinBound}" id="slider-1"
                                                 oninput="slideOne()" />
-                                            <input type="range" min="0" max="10000000"
-                                                value="${maxPrice != null ? maxPrice : 10000000}" id="slider-2"
+                                            <input type="range" min="${priceMinBound}" max="${priceMaxBound}"
+                                                value="${maxPrice != null ? maxPrice : priceMaxBound}" id="slider-2"
                                                 oninput="slideTwo()" />
                                         </div>
                                         <div class="price-input">
                                             <div class="field">
                                                 <span>Từ</span>
-                                                <input type="text" id="range1" value="0đ" readonly />
+                                                <input type="text" id="range1" value="${minPrice != null ? minPrice : priceMinBound}đ" readonly />
                                             </div>
                                             <div class="separator">-</div>
                                             <div class="field">
                                                 <span>Đến</span>
-                                                <input type="text" id="range2" value="10.000.000đ" readonly />
+                                                <input type="text" id="range2" value="${maxPrice != null ? maxPrice : priceMaxBound}đ" readonly />
                                             </div>
                                         </div>
                                         <!-- Hidden inputs để submit giá -->
                                         <input type="hidden" name="minPrice" id="minPriceInput" value="${minPrice}" />
                                         <input type="hidden" name="maxPrice" id="maxPriceInput" value="${maxPrice}" />
+                                        <input type="hidden" id="priceMinBoundInput" value="${priceMinBound}" />
+                                        <input type="hidden" id="priceMaxBoundInput" value="${priceMaxBound}" />
                                     </div>
                                 </div>
                             </div>

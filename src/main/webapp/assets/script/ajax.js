@@ -33,6 +33,9 @@ document.addEventListener("click", function (e) {
         fetch(`${CONTEXT_PATH}/products${queryString}`)
             .then(res => res.text())
             .then(html => {
+                if (window.updatePriceBoundsFromHtml) {
+                    window.updatePriceBoundsFromHtml(html, true);
+                }
                 if (productsContainer) {
                     productsContainer.innerHTML = html;
                     productsContainer.style.opacity = "1";
