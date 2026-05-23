@@ -8,14 +8,7 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Wishlist - BHD SPORT SHOES</title>
-
-    <link rel="icon" href="${pageContext.request.contextPath}/assets/favicon_io/favicon.ico" />
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/style.css" />
-
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Josefin+Sans:wght@300;400;500;600;700&family=Roboto:wght@400;500;700&display=swap" rel="stylesheet"/>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css"/>
+    <jsp:include page="head-resources.jsp" />
 </head>
 
 <body id="top">
@@ -97,11 +90,7 @@
     </div>
 </main>
 <jsp:include page="Footer.jsp" />
-<script type="module" src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.esm.js"></script>
-<script nomodule src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.js"></script>
-
-<script src="${pageContext.request.contextPath}/assets/script/reponsive.js"></script>
-
+<jsp:include page="body-scripts.jsp" />
 <script src="${pageContext.request.contextPath}/assets/script/product-popup.js"></script>
 </body>
 </html>

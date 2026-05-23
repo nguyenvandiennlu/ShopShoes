@@ -28,27 +28,34 @@ document.addEventListener("DOMContentLoaded", function () {
     const searchToggleBtnMobile = document.getElementById("searchToggleBtnMobile");
     const searchCloseBtn = document.getElementById("searchCloseBtn");
     const searchForm = document.getElementById("search-form");
+    const searchWrapper = document.querySelector(".search-wrapper");
 
     // Desktop search button
-    if (searchToggleBtn && searchForm) {
+    if (searchToggleBtn && searchWrapper) {
         searchToggleBtn.addEventListener("click", function () {
-            searchForm.classList.toggle("active");
-            searchForm.querySelector("input").focus();
+            searchWrapper.classList.toggle("active");
+            const searchInput = searchWrapper.querySelector("input");
+            if (searchInput && searchWrapper.classList.contains("active")) {
+                searchInput.focus();
+            }
         });
     }
 
     // Mobile search button
-    if (searchToggleBtnMobile && searchForm) {
+    if (searchToggleBtnMobile && searchWrapper) {
         searchToggleBtnMobile.addEventListener("click", function () {
-            searchForm.classList.toggle("active");
-            searchForm.querySelector("input").focus();
+            searchWrapper.classList.toggle("active");
+            const searchInput = searchWrapper.querySelector("input");
+            if (searchInput && searchWrapper.classList.contains("active")) {
+                searchInput.focus();
+            }
         });
     }
 
     // Close button
-    if (searchCloseBtn && searchForm) {
+    if (searchCloseBtn && searchWrapper) {
         searchCloseBtn.addEventListener("click", function () {
-            searchForm.classList.remove("active");
+            searchWrapper.classList.remove("active");
         });
     }
 
