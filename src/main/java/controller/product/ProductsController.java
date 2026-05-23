@@ -136,6 +136,8 @@ public class ProductsController extends HttpServlet {
         req.setAttribute("colors", colors);
 
         req.setAttribute("productList", productList);
+        req.setAttribute("page", page);
+        req.setAttribute("currentPage", page);
         req.setAttribute("totalPages", totalPages);
 
         boolean isAjax = "1".equals(req.getParameter("ajax"));

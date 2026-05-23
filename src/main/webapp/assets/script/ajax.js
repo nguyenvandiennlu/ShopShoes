@@ -5,7 +5,8 @@ document.addEventListener("click", function (e) {
     // Kiểm tra tính hợp lệ
     if (btn && !btn.classList.contains("disabled") && !btn.classList.contains("active")) {
 
-        const page = btn.dataset.page;
+        const page = parseInt(btn.dataset.page, 10);
+        if (!Number.isFinite(page) || page < 1) return;
         const filterForm = document.getElementById("filter-form");
         const sortSelect = document.getElementById("sort-select");
 
