@@ -69,30 +69,63 @@ public class ProductsController extends HttpServlet {
     protected void doGet(HttpServletRequest req, HttpServletResponse resp)
             throws ServletException, IOException {
 
-        // Lấy các tham số filter
         String searchQuery = req.getParameter("q");
         int page = parseInt(req.getParameter("page"), 1);
-        String sortBy = req.getParameter("sort"); // Thêm sort
+        String sortBy = req.getParameter("sort");
 
         List<Integer> brandIds = parseIntArray(req.getParameterValues("brand"));
         List<Integer> sizeIds = parseIntArray(req.getParameterValues("size"));
         List<Integer> colorIds = parseIntArray(req.getParameterValues("color"));
+        String minPriceParam = req.getParameter("minPrice");
+        String maxPriceParam = req.getParameter("maxPrice");
         BigDecimal minPrice = parseBigDecimal(req.getParameter("minPrice"));
         BigDecimal maxPrice = parseBigDecimal(req.getParameter("maxPrice"));
 
-        // Kiểm tra có filter nào không
-        boolean hasFilter = (searchQuery != null && !searchQuery.trim().isEmpty())
+        if (searchQuery != null) {
+            searchQuery = searchQuery.trim();
+        }
+
+        // Dynamic bounds: based on non-price filters only
+        BigDecimal[] bounds = productService.getEffectivePriceBounds(searchQuery, brandIds, sizeIds, colorIds);
+        BigDecimal priceMinBound = bounds[0];
+        BigDecimal priceMaxBound = bounds[1];
+
+        if (priceMinBound.compareTo(priceMaxBound) > 0) {
+            priceMinBound = BigDecimal.ZERO;
+            priceMaxBound = BigDecimal.ZERO;
+        }
+
+        // If client does not send min/max, default to full dynamic bounds
+        if (minPrice == null) {
+            minPrice = priceMinBound;
+        }
+        if (maxPrice == null) {
+            maxPrice = priceMaxBound;
+        }
+
+        // Clamp values into bounds
+        if (minPrice.compareTo(priceMinBound) < 0) {
+            minPrice = priceMinBound;
+        }
+        if (maxPrice.compareTo(priceMaxBound) > 0) {
+            maxPrice = priceMaxBound;
+        }
+        if (minPrice.compareTo(maxPrice) > 0) {
+            minPrice = priceMinBound;
+            maxPrice = priceMaxBound;
+        }
+
+        boolean hasPriceFilter = (minPriceParam != null && !minPriceParam.isBlank())
+                || (maxPriceParam != null && !maxPriceParam.isBlank());
+
+        boolean hasFilter = (searchQuery != null && !searchQuery.isEmpty())
                 || brandIds != null || sizeIds != null || colorIds != null
-                || minPrice != null || maxPrice != null || (sortBy != null && !sortBy.equals("default"));
+                || hasPriceFilter || (sortBy != null && !sortBy.equals("default"));
 
         List<ProductDTO> productList;
         int totalPages;
 
         if (hasFilter) {
-            // Có filter -> sử dụng filterProducts
-            if (searchQuery != null)
-                searchQuery = searchQuery.trim();
-
             totalPages = Math.max(1, productService.getFilteredTotalPages(
                     searchQuery, brandIds, sizeIds, colorIds, minPrice, maxPrice, PAGE_SIZE));
 
@@ -104,7 +137,6 @@ public class ProductsController extends HttpServlet {
             productList = productService.filterProducts(
                     searchQuery, brandIds, sizeIds, colorIds, minPrice, maxPrice, sortBy, page, PAGE_SIZE);
 
-            // Truyền các filter ra JSP để giữ trạng thái
             if (searchQuery != null && !searchQuery.isEmpty()) {
                 req.setAttribute("searchQuery", searchQuery);
             }
@@ -115,7 +147,6 @@ public class ProductsController extends HttpServlet {
             req.setAttribute("maxPrice", maxPrice);
             req.setAttribute("sortBy", sortBy);
         } else {
-            // Không có filter -> hiển thị tất cả
             totalPages = Math.max(1, productService.getTotalPages(PAGE_SIZE));
 
             if (page < 1)
@@ -126,7 +157,6 @@ public class ProductsController extends HttpServlet {
             productList = productService.getProductsPage(page, PAGE_SIZE);
         }
 
-        // Lấy danh sách brands, sizes, colors cho filter sidebar
         List<Brand> brands = brandDao.findAllActive();
         List<Size> sizes = sizeDao.findAllActive();
         List<Color> colors = colorDao.findAllActive();
@@ -136,6 +166,12 @@ public class ProductsController extends HttpServlet {
         req.setAttribute("colors", colors);
 
         req.setAttribute("productList", productList);
+        req.setAttribute("minPrice", minPrice);
+        req.setAttribute("maxPrice", maxPrice);
+        req.setAttribute("priceMinBound", priceMinBound);
+        req.setAttribute("priceMaxBound", priceMaxBound);
+        req.setAttribute("page", page);
+        req.setAttribute("currentPage", page);
         req.setAttribute("totalPages", totalPages);
 
         boolean isAjax = "1".equals(req.getParameter("ajax"));
