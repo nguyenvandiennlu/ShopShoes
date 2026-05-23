@@ -273,8 +273,28 @@ public class ProductDao {
             BigDecimal minPrice, BigDecimal maxPrice,
             String sortBy, int limit, int offset) {
         StringBuilder sql = new StringBuilder("""
-                    SELECT DISTINCT p.* FROM product p
+                    SELECT DISTINCT p.*, COALESCE(ep.effective_price, p.price) AS effective_price
+                    FROM product p
                     LEFT JOIN product_variant pv ON p.id = pv.product_id
+                    LEFT JOIN (
+                        SELECT pp.product_id,
+                               MIN(
+                                   CASE
+                                       WHEN pr.discount_type = 'PERCENT'
+                                           THEN GREATEST(0, p2.price - (p2.price * pr.discount_value / 100))
+                                       WHEN pr.discount_type = 'FIXED'
+                                           THEN GREATEST(0, p2.price - pr.discount_value)
+                                       ELSE p2.price
+                                   END
+                               ) AS effective_price
+                        FROM promotion_product pp
+                        JOIN promotion pr ON pr.id = pp.promotion_id
+                        JOIN product p2 ON p2.id = pp.product_id
+                        WHERE pr.is_active = 1
+                          AND (pr.start_date IS NULL OR pr.start_date <= NOW())
+                          AND (pr.end_date IS NULL OR pr.end_date >= NOW())
+                        GROUP BY pp.product_id
+                    ) ep ON ep.product_id = p.id
                     WHERE p.is_available = 1 AND p.is_discontinue = 0
                 """);
 
@@ -300,17 +320,17 @@ public class ProductDao {
 
         // Price filter
         if (minPrice != null) {
-            sql.append(" AND p.price >= :minPrice ");
+            sql.append(" AND COALESCE(ep.effective_price, p.price) >= :minPrice ");
         }
         if (maxPrice != null) {
-            sql.append(" AND p.price <= :maxPrice ");
+            sql.append(" AND COALESCE(ep.effective_price, p.price) <= :maxPrice ");
         }
 
         // Sort
         String orderBy = switch (sortBy != null ? sortBy : "default") {
             case "newest" -> " ORDER BY p.added_at DESC ";
-            case "price-asc" -> " ORDER BY p.price ASC ";
-            case "price-desc" -> " ORDER BY p.price DESC ";
+            case "price-asc" -> " ORDER BY COALESCE(ep.effective_price, p.price) ASC, p.id DESC ";
+            case "price-desc" -> " ORDER BY COALESCE(ep.effective_price, p.price) DESC, p.id DESC ";
             default -> " ORDER BY p.added_at DESC ";
         };
         sql.append(orderBy);
@@ -353,6 +373,25 @@ public class ProductDao {
         StringBuilder sql = new StringBuilder("""
                     SELECT COUNT(DISTINCT p.id) FROM product p
                     LEFT JOIN product_variant pv ON p.id = pv.product_id
+                    LEFT JOIN (
+                        SELECT pp.product_id,
+                               MIN(
+                                   CASE
+                                       WHEN pr.discount_type = 'PERCENT'
+                                           THEN GREATEST(0, p2.price - (p2.price * pr.discount_value / 100))
+                                       WHEN pr.discount_type = 'FIXED'
+                                           THEN GREATEST(0, p2.price - pr.discount_value)
+                                       ELSE p2.price
+                                   END
+                               ) AS effective_price
+                        FROM promotion_product pp
+                        JOIN promotion pr ON pr.id = pp.promotion_id
+                        JOIN product p2 ON p2.id = pp.product_id
+                        WHERE pr.is_active = 1
+                          AND (pr.start_date IS NULL OR pr.start_date <= NOW())
+                          AND (pr.end_date IS NULL OR pr.end_date >= NOW())
+                        GROUP BY pp.product_id
+                    ) ep ON ep.product_id = p.id
                     WHERE p.is_available = 1 AND p.is_discontinue = 0
                 """);
 
@@ -369,10 +408,10 @@ public class ProductDao {
             sql.append(" AND pv.color_id IN (<colorIds>) ");
         }
         if (minPrice != null) {
-            sql.append(" AND p.price >= :minPrice ");
+            sql.append(" AND COALESCE(ep.effective_price, p.price) >= :minPrice ");
         }
         if (maxPrice != null) {
-            sql.append(" AND p.price <= :maxPrice ");
+            sql.append(" AND COALESCE(ep.effective_price, p.price) <= :maxPrice ");
         }
 
         String finalSql = sql.toString();
