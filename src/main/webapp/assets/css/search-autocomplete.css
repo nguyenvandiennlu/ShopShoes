@@ -1,0 +1,434 @@
+/**
+ * Search Autocomplete Styling
+ * CSS cho dropdown suggestions khi tìm kiếm
+ */
+
+/* Wrapper container cho search */
+.search-wrapper {
+    position: relative;
+    width: 100%;
+}
+
+/* Search form styling - Mobile only */
+@media (max-width: 991px) {
+  .search-form {
+    position: fixed;
+    top: 80px;
+    left: 0;
+    right: 0;
+    width: 100%;
+    height: 80px;
+    background: var(--white);
+    border-top: 1px solid var(--gainsboro);
+    border-bottom: 1px solid var(--gainsboro);
+    padding: 15px 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-20px);
+    transition: var(--transition-1);
+    z-index: 50;
+    margin: 0;
+    flex-direction: row;
+    box-sizing: border-box;
+  }
+
+  .search-form.active {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+  }
+}
+
+/* Desktop - don't override style.css rules */
+@media (min-width: 992px) {
+  .search-form {
+    position: relative !important;
+    top: auto !important;
+    left: auto !important;
+    right: auto !important;
+    width: auto !important;
+    height: auto !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+    transform: none !important;
+  }
+}
+
+/* Search input wrapper */
+.search-input-wrapper {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: auto;
+    flex: 1;
+    height: 50px;
+    background-color: #f5f5f5;
+    border: 1px solid var(--gainsboro);
+    border-radius: 4px;
+    padding: 0 15px;
+    gap: 10px;
+}
+
+#search-input {
+    flex-grow: 1;
+    height: 100%;
+    padding: 0;
+    border: none;
+    font-size: 16px;
+    color: var(--rich-black-fogra-29);
+    outline: none;
+    background-color: transparent;
+}
+
+#search-input::placeholder {
+    color: var(--gray-x-11-gray);
+    font-size: 16px;
+}
+
+#search-input:focus {
+    background-color: transparent;
+}
+
+.search-close-btn {
+    background: none;
+    border: none;
+    color: var(--onyx);
+    font-size: 2.2rem;
+    cursor: pointer;
+    padding: 0;
+    margin: 0;
+    transition: var(--transition-1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.search-close-btn:hover {
+    color: var(--bittersweet);
+}
+
+/* Search suggestions container - Mobile only */
+@media (max-width: 991px) {
+  .search-suggestions {
+    position: fixed;
+    top: 160px;
+    left: 0;
+    right: 0;
+    background: var(--white);
+    border: 1px solid var(--gainsboro);
+    max-height: 500px;
+    overflow-y: auto;
+    z-index: 100;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transition: opacity 0.2s ease, visibility 0.2s ease;
+  }
+
+  .search-suggestions.active {
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+  }
+}
+
+/* Desktop - use style.css rules */
+@media (min-width: 992px) {
+  .search-suggestions {
+    position: absolute !important;
+    top: 100% !important;
+    left: 0 !important;
+    right: 0 !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+    pointer-events: auto !important;
+  }
+}
+
+/* Suggestions list */
+.suggestions-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    max-height: 400px;
+    overflow-y: auto;
+}
+
+.suggestions-list::-webkit-scrollbar {
+    width: 6px;
+}
+
+.suggestions-list::-webkit-scrollbar-track {
+    background: #f5f5f5;
+}
+
+.suggestions-list::-webkit-scrollbar-thumb {
+    background: #ccc;
+    border-radius: 3px;
+}
+
+.suggestions-list::-webkit-scrollbar-thumb:hover {
+    background: #999;
+}
+
+/* Individual suggestion item */
+.suggestion-item {
+    margin: 0;
+    padding: 0;
+    border-bottom: 1px solid var(--gainsboro);
+    transition: background-color 0.2s ease;
+}
+
+.suggestion-item:last-child {
+    border-bottom: none;
+}
+
+.suggestion-item.hover,
+.suggestion-item:hover {
+    background-color: var(--cultured);
+}
+
+/* No results state */
+.suggestion-item.no-results {
+    padding: 20px 15px;
+    text-align: center;
+    background-color: #fafafa;
+    border: none;
+}
+
+.no-results-message {
+    color: var(--onyx);
+    font-size: var(--fs-6);
+    line-height: 1.5;
+}
+
+.no-results-message strong {
+    color: var(--rich-black-fogra-29);
+    font-weight: 600;
+}
+
+/* Error state */
+.suggestion-item.error {
+    padding: 20px 15px;
+    text-align: center;
+    background-color: #fff5f5;
+    border: none;
+}
+
+.error-message {
+    color: var(--bittersweet);
+    font-size: var(--fs-6);
+}
+
+/* Suggestion link */
+.suggestion-link {
+    display: flex;
+    gap: 12px;
+    padding: 12px 15px;
+    color: inherit;
+    text-decoration: none;
+    transition: background-color 0.2s ease;
+}
+
+.suggestion-link:hover {
+    background-color: var(--maximum-blue-green_10);
+}
+
+/* Suggestion image */
+.suggestion-image {
+    flex-shrink: 0;
+    width: 60px;
+    height: 60px;
+    border-radius: 4px;
+    overflow: hidden;
+    background-color: var(--gainsboro);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.suggestion-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+/* Suggestion info */
+.suggestion-info {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 4px;
+    min-width: 0; /* For text truncation */
+}
+
+/* Product name */
+.suggestion-name {
+    font-size: var(--fs-6);
+    color: var(--rich-black-fogra-29);
+    font-weight: 500;
+    line-height: 1.4;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+}
+
+/* Price section */
+.suggestion-price {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    font-size: var(--fs-7);
+}
+
+.final-price {
+    color: var(--bittersweet);
+    font-weight: 600;
+}
+
+.original-price {
+    color: var(--onyx);
+    text-decoration: line-through;
+    font-size: var(--fs-8);
+}
+
+/* Suggestions footer */
+.suggestions-footer {
+    padding: 12px 15px;
+    border-top: 1px solid var(--gainsboro);
+    background-color: var(--cultured);
+    text-align: center;
+    display: none;
+}
+
+.suggestions-footer.show {
+    display: block;
+}
+
+.view-all-link {
+    display: inline-block;
+    color: var(--bittersweet);
+    font-size: var(--fs-6);
+    font-weight: 600;
+    text-decoration: none;
+    padding: 5px 10px;
+    border-radius: 3px;
+    transition: all 0.2s ease;
+}
+
+.view-all-link:hover {
+    color: var(--white);
+    background-color: var(--bittersweet);
+    text-decoration: none;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .search-form {
+        top: 90px;
+        padding: 12px 15px;
+        height: 70px;
+    }
+
+    .search-input-wrapper {
+        height: 45px;
+    }
+
+    #search-input {
+        font-size: 14px;
+    }
+
+    #search-input::placeholder {
+        font-size: 14px;
+    }
+
+    .suggestion-image {
+        width: 50px;
+        height: 50px;
+    }
+
+    .suggestion-link {
+        gap: 10px;
+        padding: 10px 12px;
+    }
+
+    .suggestion-name {
+        font-size: var(--fs-7);
+    }
+
+    .suggestion-price {
+        font-size: var(--fs-8);
+    }
+
+    .search-suggestions {
+        max-height: 400px;
+        top: calc(90px + 70px);
+    }
+
+    .suggestions-list {
+        max-height: 320px;
+    }
+}
+
+@media (max-width: 480px) {
+    .search-form {
+        top: 70px;
+        padding: 10px 12px;
+        height: 60px;
+    }
+
+    .search-input-wrapper {
+        height: 40px;
+        padding: 0 10px;
+    }
+
+    #search-input {
+        font-size: 13px;
+    }
+
+    .search-close-btn {
+        font-size: 1.8rem;
+    }
+
+    .suggestion-image {
+        width: 45px;
+        height: 45px;
+    }
+
+    .suggestion-link {
+        gap: 8px;
+        padding: 8px 10px;
+    }
+
+    .search-suggestions {
+        border-left: 1px solid var(--gainsboro);
+        border-right: 1px solid var(--gainsboro);
+        top: calc(70px + 60px);
+    }
+}
+
+/* Animation for suggestions appearing */
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.search-suggestions.active .suggestion-item {
+    animation: slideDown 0.2s ease;
+}

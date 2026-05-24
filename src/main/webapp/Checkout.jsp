@@ -5,10 +5,9 @@
 <head>
   <meta charset="UTF-8"/>
   <title>Thanh toán</title>
+  <jsp:include page="head-resources.jsp"/>
   <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/checkout.css"/>
-  <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/style.css"/>
   <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/order-success.css"/>
-  <link rel="icon" href="${pageContext.request.contextPath}/assets/favicon_io/favicon.ico"/>
 </head>
 
 <body>
@@ -131,9 +130,11 @@
 
 <jsp:include page="Footer.jsp"/>
 
+<jsp:include page="body-scripts.jsp"/>
+
 <script>
   const contextPath = '${pageContext.request.contextPath}';
-  const subTotalRaw = ${subTotalRaw != null ? subTotalRaw : 0};
+  const subTotalRaw = parseFloat('${subTotalRaw != null ? subTotalRaw : 0}') || 0;
 </script>
 
 <script src="${pageContext.request.contextPath}/assets/script/checkout.js"></script>

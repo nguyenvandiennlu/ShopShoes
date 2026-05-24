@@ -25,18 +25,37 @@ document.addEventListener("DOMContentLoaded", function () {
        2. XỬ LÝ TOGGLE SEARCH FORM
     ================================================== */
     const searchToggleBtn = document.getElementById("searchToggleBtn");
+    const searchToggleBtnMobile = document.getElementById("searchToggleBtnMobile");
     const searchCloseBtn = document.getElementById("searchCloseBtn");
     const searchForm = document.getElementById("search-form");
+    const searchWrapper = document.querySelector(".search-wrapper");
 
-    if (searchToggleBtn && searchForm) {
+    // Desktop search button
+    if (searchToggleBtn && searchWrapper) {
         searchToggleBtn.addEventListener("click", function () {
-            searchForm.classList.toggle("active");
-            searchForm.querySelector("input").focus();
+            searchWrapper.classList.toggle("active");
+            const searchInput = searchWrapper.querySelector("input");
+            if (searchInput && searchWrapper.classList.contains("active")) {
+                searchInput.focus();
+            }
         });
     }
-    if (searchCloseBtn && searchForm) {
+
+    // Mobile search button
+    if (searchToggleBtnMobile && searchWrapper) {
+        searchToggleBtnMobile.addEventListener("click", function () {
+            searchWrapper.classList.toggle("active");
+            const searchInput = searchWrapper.querySelector("input");
+            if (searchInput && searchWrapper.classList.contains("active")) {
+                searchInput.focus();
+            }
+        });
+    }
+
+    // Close button
+    if (searchCloseBtn && searchWrapper) {
         searchCloseBtn.addEventListener("click", function () {
-            searchForm.classList.remove("active");
+            searchWrapper.classList.remove("active");
         });
     }
 
