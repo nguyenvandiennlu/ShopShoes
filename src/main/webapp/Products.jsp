@@ -14,6 +14,7 @@
                 <link rel="icon" href="${pageContext.request.contextPath}/assets/favicon_io/favicon.ico" />
 
                 <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/style.css" />
+                <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/search-autocomplete.css" />
                 <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/dangnhapvadangki.css" />
                 <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/products.css" />
 
@@ -230,6 +231,7 @@
                 <script src="${pageContext.request.contextPath}/assets/script/product-popup.js"></script>
                 <script src="${pageContext.request.contextPath}/assets/script/SliderBanner.js"></script>
                 <script src="${pageContext.request.contextPath}/assets/script/filter.js"></script>
+                <script src="${pageContext.request.contextPath}/assets/script/search-autocomplete.js"></script>
 
             </body>
 

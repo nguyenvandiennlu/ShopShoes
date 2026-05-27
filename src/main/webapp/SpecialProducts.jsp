@@ -7,7 +7,7 @@
             <meta charset="UTF-8" />
             <meta http-equiv="X-UA-Compatible" content="IE=edge" />
             <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-            <title>${collection.name} - BHD SPORT SHOES</title>
+            <title>Ưu đãi đặc biệt - BHD SPORT SHOES</title>
 
             <link rel="icon" href="${pageContext.request.contextPath}/assets/favicon_io/favicon.ico" />
 
@@ -31,38 +31,19 @@
         <body>
             <jsp:include page="Header.jsp" />
 
-            <!-- Collection Banner với hình ảnh động -->
-            <c:choose>
-                <c:when test="${not empty banner}">
-                    <!-- Banner có hình ảnh từ database -->
-                    <div class="collection-banner" style="background-image: url('${banner.imgUrl}');">
-                        <div class="banner-overlay">
-                            <div class="banner-content">
-                                <h1 class="banner-title animate-fade-up">${collection.name}</h1>
-                                <c:if test="${not empty banner.slogan}">
-                                    <p class="banner-slogan animate-fade-up delay-1">${banner.slogan}</p>
-                                </c:if>
-                                <p class="banner-count animate-fade-up delay-2">${totalProducts} sản phẩm</p>
-                            </div>
-                        </div>
-                    </div>
-                </c:when>
-                <c:otherwise>
-                    <!-- Banner mặc định (gradient) -->
-                    <div class="collection-header">
-                        <h1>${collection.name}</h1>
-                        <p class="product-count">${totalProducts} sản phẩm</p>
-                    </div>
-                </c:otherwise>
-            </c:choose>
+            <!-- Special Products Banner -->
+            <div class="collection-header">
+                <h1>Ưu đãi đặc biệt</h1>
+                <p class="product-count">${totalProducts} sản phẩm</p>
+            </div>
 
             <div class="collection-content">
                 <c:choose>
                     <c:when test="${empty productList}">
                         <div class="empty-collection">
                             <i class="fas fa-box-open"></i>
-                            <h2>Chưa có sản phẩm</h2>
-                            <p>Bộ sưu tập này hiện chưa có sản phẩm nào.</p>
+                            <h2>Chưa có sản phẩm ưu đãi</h2>
+                            <p>Hiện tại chưa có sản phẩm nào đang có ưu đãi đặc biệt.</p>
                             <a href="${pageContext.request.contextPath}/menu" class="back-link">Quay lại trang chủ</a>
                         </div>
                     </c:when>
@@ -122,7 +103,7 @@
                             <div class="collection-pagination">
                                 <c:if test="${currentPage > 1}">
                                     <a
-                                        href="${pageContext.request.contextPath}/collection/${slug}?page=${currentPage - 1}">
+                                        href="${pageContext.request.contextPath}/special-products?page=${currentPage - 1}">
                                         ← Trước
                                     </a>
                                 </c:if>
@@ -134,14 +115,14 @@
                                         </c:when>
                                         <c:otherwise>
                                             <a
-                                                href="${pageContext.request.contextPath}/collection/${slug}?page=${i}">${i}</a>
+                                                href="${pageContext.request.contextPath}/special-products?page=${i}">${i}</a>
                                         </c:otherwise>
                                     </c:choose>
                                 </c:forEach>
 
                                 <c:if test="${currentPage < totalPages}">
                                     <a
-                                        href="${pageContext.request.contextPath}/collection/${slug}?page=${currentPage + 1}">
+                                        href="${pageContext.request.contextPath}/special-products?page=${currentPage + 1}">
                                         Sau →
                                     </a>
                                 </c:if>
@@ -153,13 +134,19 @@
 
             <jsp:include page="Footer.jsp" />
 
+            <!--
+        - ionicon link
+        -->
             <script type="module" src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.esm.js"></script>
             <script nomodule src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.js"></script>
+
             <script src="${pageContext.request.contextPath}/assets/script/reponsive.js"></script>
+            <script src="${pageContext.request.contextPath}/assets/script/product-popup.js"></script>
             <script>
                 const CONTEXT_PATH = "${pageContext.request.contextPath}";
             </script>
             <script src="${pageContext.request.contextPath}/assets/script/search-autocomplete.js"></script>
+
         </body>
 
         </html>
