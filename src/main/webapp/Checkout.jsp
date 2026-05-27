@@ -14,6 +14,10 @@
 
 <jsp:include page="Header.jsp"/>
 
+<div class="container">
+  <jsp:include page="Breadcrumb.jsp" />
+</div>
+
 <c:if test="${not empty errorMessage}">
   <div class="checkout-alert">
   <strong>Không thể đặt hàng:</strong><br>

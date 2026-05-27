@@ -31,6 +31,9 @@
 
             <body>
                 <jsp:include page="Header.jsp" />
+                <div class="container">
+                    <jsp:include page="Breadcrumb.jsp" />
+                </div>
                 <div class="banner-slide">
                     <div class="swiper-container">
                         <div class="swiper-wrapper">

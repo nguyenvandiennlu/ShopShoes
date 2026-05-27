@@ -31,6 +31,10 @@
         <body>
             <jsp:include page="Header.jsp" />
 
+            <div class="container">
+                <jsp:include page="Breadcrumb.jsp" />
+            </div>
+
             <!-- Collection Banner với hình ảnh động -->
             <c:choose>
                 <c:when test="${not empty banner}">
