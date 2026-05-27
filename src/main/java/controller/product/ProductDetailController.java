@@ -1,6 +1,7 @@
 package controller.product;
 
 import DTO.ProductDetailDTO;
+import com.google.gson.Gson;
 import dao.user.WishlistDao;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
@@ -11,6 +12,8 @@ import model.user.User;
 import services.product.ProductDetailService;
 
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 
 @WebServlet("/product")
 public class ProductDetailController extends HttpServlet {
@@ -71,8 +74,19 @@ public class ProductDetailController extends HttpServlet {
         req.setAttribute("product", dto);
         req.setAttribute("isInWishlist", isInWishlist);
 
-        req.getRequestDispatcher("/ProductDetail.jsp")
-                .forward(req, resp);
+        if ("XMLHttpRequest".equals(req.getHeader("X-Requested-With"))) {
+            resp.setContentType("application/json;charset=UTF-8");
+            Map<String, Object> res = new HashMap<>();
+            res.put("stock", dto.getStock());
+            res.put("images", dto.getProductImg());
+            res.put("sizes", dto.getProductSizeList());
+            res.put("available", dto.getStock() > 0);
+            resp.getWriter().write(new Gson().toJson(res));
+        } else {
+            req.setAttribute("product", dto);
+            req.setAttribute("isInWishlist", isInWishlist);
+            req.getRequestDispatcher("/ProductDetail.jsp").forward(req, resp);
+        }
     }
 }
 

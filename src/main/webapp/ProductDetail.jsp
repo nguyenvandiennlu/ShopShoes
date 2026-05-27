@@ -67,7 +67,7 @@
             </div>
 
             <!-- INFO -->
-            <div class="product-info-box">
+            <div class="product-info-box" data-product-id="${product.productDTO.id}" data-context-path="${pageContext.request.contextPath}">
               <h1 class="product-title">${product.productDTO.name}</h1>
 
               <div class="product-meta">
@@ -103,23 +103,13 @@
                 <div class="filter-group-body">
                   <ul class="filter-list-color">
                     <c:forEach var="c" items="${product.productColorList}">
-                      <c:url var="colorUrl" value="/product">
-                        <c:param name="id" value="${product.productDTO.id}" />
-                        <c:param name="colorId" value="${c.id}" />
-                        <c:if test="${not empty param.sizeId}">
-                          <c:param name="sizeId" value="${param.sizeId}" />
-                        </c:if>
-                      </c:url>
-                      <c:set var="colorClass" value="color-dot" />
-                      <c:if test="${product.currentColorId == c.id}">
-                        <c:set var="colorClass" value="${colorClass} selected" />
-                      </c:if>
                       <li>
-                        <a href="${colorUrl}">
-                          <span class="${colorClass}"
-                            style="background-color: ${c.hexCode};" title="${c.name}">
-                          </span>
-                        </a>
+                        <button type="button"
+                                class="color-dot ${product.currentColorId == c.id ? 'selected' : ''}"
+                                style="background:${c.hexCode}"
+                                title="${c.name}"
+                                data-color-id="${c.id}">
+                        </button>
                       </li>
                     </c:forEach>
                   </ul>
@@ -130,14 +120,11 @@
                 <label>Kích thước:</label>
                 <div class="size-list">
                   <c:forEach var="s" items="${product.productSizeList}">
-                    <c:url var="sizeUrl" value="/product">
-                      <c:param name="id" value="${product.productDTO.id}" />
-                      <c:param name="colorId" value="${product.currentColorId}" />
-                      <c:param name="sizeId" value="${s.id}" />
-                    </c:url>
-                    <a href="${sizeUrl}" class="size-btn ${product.currentSizeId == s.id ? 'selected' : ''}">
-                      ${s.name}
-                    </a>
+                    <button type="button"
+                            class="size-btn ${product.currentSizeId == s.id ? 'selected' : ''}"
+                            data-size-id="${s.id}">
+                        ${s.name}
+                    </button>
                   </c:forEach>
                 </div>
               </div>
@@ -147,9 +134,9 @@
                 <input type="hidden" name="productId" value="${product.productDTO.id}" />
                 <input type="hidden" name="colorId" value="${product.currentColorId}" />
 
-                <c:if test="${not empty product.currentSizeId}">
+<%--                <c:if test="${not empty product.currentSizeId}">--%>
                   <input type="hidden" name="sizeId" value="${product.currentSizeId}" />
-                </c:if>
+<%--                </c:if>--%>
 
                 <!-- QUANTITY -->
                 <div class="qty-row">
@@ -267,31 +254,31 @@
       <script src="${pageContext.request.contextPath}/assets/script/search-autocomplete.js"></script>
       <script>
         // Hàm hiển thị toast
-        function showToast(message) {
-          const toast = document.getElementById("toast-message");
-          toast.querySelector("span").textContent = message;
-          toast.classList.add("show");
-          setTimeout(() => toast.classList.remove("show"), 3000);
-        }
+        // function showToast(message) {
+        //   const toast = document.getElementById("toast-message");
+        //   toast.querySelector("span").textContent = message;
+        //   toast.classList.add("show");
+        //   setTimeout(() => toast.classList.remove("show"), 3000);
+        // }
 
         // Kiểm tra tham số msg để hiển thị thông báo
-        document.addEventListener("DOMContentLoaded", () => {
-          const urlParams = new URLSearchParams(window.location.search);
-          const msg = urlParams.get("msg");
-
-          if (msg === "cart_added") {
-            showToast("🛒 Đã thêm sản phẩm vào Giỏ hàng thành công!");
-            // Xóa tham số msg khỏi URL để tránh hiển thị lại khi refresh
-            urlParams.delete("msg");
-            const newUrl = window.location.pathname + (urlParams.toString() ? "?" + urlParams.toString() : "");
-            window.history.replaceState({}, document.title, newUrl);
-          } else if (msg === "wishlist_added") {
-            showToast("❤️ Đã thêm sản phẩm vào Yêu thích thành công!");
-            urlParams.delete("msg");
-            const newUrl = window.location.pathname + (urlParams.toString() ? "?" + urlParams.toString() : "");
-            window.history.replaceState({}, document.title, newUrl);
-          }
-        });
+        // document.addEventListener("DOMContentLoaded", () => {
+        //   const urlParams = new URLSearchParams(window.location.search);
+        //   const msg = urlParams.get("msg");
+        //
+        //   if (msg === "cart_added") {
+        //     showToast("🛒 Đã thêm sản phẩm vào Giỏ hàng thành công!");
+        //     // Xóa tham số msg khỏi URL để tránh hiển thị lại khi refresh
+        //     urlParams.delete("msg");
+        //     const newUrl = window.location.pathname + (urlParams.toString() ? "?" + urlParams.toString() : "");
+        //     window.history.replaceState({}, document.title, newUrl);
+        //   } else if (msg === "wishlist_added") {
+        //     showToast("❤️ Đã thêm sản phẩm vào Yêu thích thành công!");
+        //     urlParams.delete("msg");
+        //     const newUrl = window.location.pathname + (urlParams.toString() ? "?" + urlParams.toString() : "");
+        //     window.history.replaceState({}, document.title, newUrl);
+        //   }
+        // });
       </script>
 
       <!--
