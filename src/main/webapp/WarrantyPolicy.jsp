@@ -35,17 +35,7 @@
 
     <jsp:include page="Header.jsp" />
     <div class="container">
-      <div class="breadcrumb-container">
-        <nav aria-label="breadcrumb">
-          <ol class="breadcrumb">
-            <li class="breadcrumb-item"><a href="${pageContext.request.contextPath}/menu">Trang Chủ</a></li>
-
-            <li class="breadcrumb-item active" aria-current="page">
-              Chính sách bảo hành
-            </li>
-          </ol>
-        </nav>
-      </div>
+      <jsp:include page="Breadcrumb.jsp" />
     </div>
     <main class="ChinhSachBaoHanh">
       <div class="container policy-content">
