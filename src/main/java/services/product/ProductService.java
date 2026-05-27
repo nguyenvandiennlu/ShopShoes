@@ -56,7 +56,7 @@ public class ProductService {
         return result;
     }
 
-    public List<ProductDTO> findTopCheapestProductsInPromotion(int limit) {
+    public List<ProductDTO> findAllProductsInPromotion() {
 
         List<Product> products =
                 productDao.findProductsInPromotion();
@@ -65,6 +65,13 @@ public class ProductService {
                 mapToProductDTOList(products);
 
         result.sort(Comparator.comparing(ProductDTO::getFinalPrice));
+
+        return result;
+    }
+
+    public List<ProductDTO> findTopCheapestProductsInPromotion(int limit) {
+
+        List<ProductDTO> result = findAllProductsInPromotion();
 
         if (result.size() > limit) {
             return result.subList(0, limit);

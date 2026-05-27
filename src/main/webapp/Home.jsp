@@ -104,6 +104,85 @@
 
 
           <!--
+        - #SPECIAL
+      -->
+          <section class="section special">
+            <div class="container">
+              <div class="special-banner" style="
+                background-image: url('./assets/images/special-banner.jpg');
+              ">
+                <h2 class="h3 banner-title">${menu.bannerSpecialP.slogan}</h2>
+
+                <a href="${pageContext.request.contextPath}/special-products" class="btn btn-link">
+                  <span>Khám phá ngay</span>
+
+                  <ion-icon name="arrow-forward-outline" aria-hidden="true"></ion-icon>
+                </a>
+              </div>
+
+              <div class="special-product">
+                <h2 class="h2 section-title">
+                  <span class="text">${menu.bannerSpecialP.title}</span>
+
+                  <span class="line"></span>
+                </h2>
+
+                <ul class="has-scrollbar">
+
+                  <c:forEach items="${menu.specialProduct}" var="p">
+                    <li class="product-item">
+                      <div class="product-card" tabindex="0">
+
+                        <!-- IMAGE -->
+                        <figure class="card-banner">
+                          <img src="${p.mainImageUrl}" width="312" height="350" loading="lazy" alt="${p.name}"
+                            class="image-contain" />
+                          <!-- BADGE NEW -->
+                          <c:if test="${p.isNew}">
+                            <div class="card-badge">New</div>
+                          </c:if>
+                        </figure>
+
+                        <!-- CONTENT -->
+                        <div class="card-content">
+                          <h3 class="h3 card-title">
+                            <a href="${pageContext.request.contextPath}/product?id=${p.id}">
+                              ${p.name}
+                            </a>
+                          </h3>
+
+                          <div class="product-card-price">
+                            <c:choose>
+                              <c:when test="${p.price eq p.finalPrice}">
+                                <span class="discounted-price">${p.price}</span>
+                              </c:when>
+                              <c:otherwise>
+                                <div class="price-row">
+                                  <span class="discounted-price">${p.finalPrice}</span>
+                                  <span class="original-price">${p.price}</span>
+                                </div>
+
+                                <c:if test="${not empty p.discountValue}">
+                                  <div class="discount-badge-wrapper">
+                                    <span class="discount-value">
+                                      Giảm: ${p.discountValue}
+                                    </span>
+                                  </div>
+                                </c:if>
+                              </c:otherwise>
+                            </c:choose>
+                          </div>
+                        </div>
+
+                      </div>
+                    </li>
+                  </c:forEach>
+                </ul>
+              </div>
+            </div>
+          </section>
+
+          <!--
         - #PRODUCT
       -->
           <section class="section product">
@@ -179,84 +258,6 @@
                   </li>
                 </c:forEach>
               </ul>
-            </div>
-          </section>
-          <!--
-        - #SPECIAL
-      -->
-          <section class="section special">
-            <div class="container">
-              <div class="special-banner" style="
-                background-image: url('./assets/images/special-banner.jpg');
-              ">
-                <h2 class="h3 banner-title">${menu.bannerSpecialP.slogan}</h2>
-
-                <a href="${menu.bannerSpecialP.linkUrl}" class="btn btn-link">
-                  <span>Khám phá ngay</span>
-
-                  <ion-icon name="arrow-forward-outline" aria-hidden="true"></ion-icon>
-                </a>
-              </div>
-
-              <div class="special-product">
-                <h2 class="h2 section-title">
-                  <span class="text">${menu.bannerSpecialP.title}</span>
-
-                  <span class="line"></span>
-                </h2>
-
-                <ul class="has-scrollbar">
-
-                  <c:forEach items="${menu.specialProduct}" var="p">
-                    <li class="product-item">
-                      <div class="product-card" tabindex="0">
-
-                        <!-- IMAGE -->
-                        <figure class="card-banner">
-                          <img src="${p.mainImageUrl}" width="312" height="350" loading="lazy" alt="${p.name}"
-                            class="image-contain" />
-                          <!-- BADGE NEW -->
-                          <c:if test="${p.isNew}">
-                            <div class="card-badge">New</div>
-                          </c:if>
-                        </figure>
-
-                        <!-- CONTENT -->
-                        <div class="card-content">
-                          <h3 class="h3 card-title">
-                            <a href="${pageContext.request.contextPath}/product?id=${p.id}">
-                              ${p.name}
-                            </a>
-                          </h3>
-
-                          <div class="product-card-price">
-                            <c:choose>
-                              <c:when test="${p.price eq p.finalPrice}">
-                                <span class="discounted-price">${p.price}</span>
-                              </c:when>
-                              <c:otherwise>
-                                <div class="price-row">
-                                  <span class="discounted-price">${p.finalPrice}</span>
-                                  <span class="original-price">${p.price}</span>
-                                </div>
-
-                                <c:if test="${not empty p.discountValue}">
-                                  <div class="discount-badge-wrapper">
-                                    <span class="discount-value">
-                                      Giảm: ${p.discountValue}
-                                    </span>
-                                  </div>
-                                </c:if>
-                              </c:otherwise>
-                            </c:choose>
-                          </div>
-                        </div>
-
-                      </div>
-                    </li>
-                  </c:forEach>
-                </ul>
-              </div>
             </div>
           </section>
         </article>
