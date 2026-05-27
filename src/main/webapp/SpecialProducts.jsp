@@ -31,6 +31,10 @@
         <body>
             <jsp:include page="Header.jsp" />
 
+            <div class="container">
+                <jsp:include page="Breadcrumb.jsp" />
+            </div>
+
             <!-- Special Products Banner -->
             <div class="collection-header">
                 <h1>Ưu đãi đặc biệt</h1>

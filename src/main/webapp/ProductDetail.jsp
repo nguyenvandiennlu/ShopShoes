@@ -1,6 +1,5 @@
-﻿<%@ page contentType="text/html;charset=UTF-8" language="java" %>
-  <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
-
+﻿<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+  <%@ page contentType="text/html;charset=UTF-8" language="java" %>
     <!DOCTYPE html>
     <html lang="vi">
 
@@ -8,19 +7,30 @@
       <meta charset="UTF-8" />
       <meta http-equiv="X-UA-Compatible" content="IE=edge" />
       <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-      <title>${product.productDTO.name}</title>
+      <title>${product.productDTO.name} - BHD SPORT SHOES</title>
+      <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css"
+        integrity="sha512-2SwdPD6INVrV/lHTZbO2nodKhrnDdJK9/kg2XD1r9uGqPo1cUbujc+IYdlYdEErWNu69gVcYgdxlmVmzTWnetw=="
+        crossorigin="anonymous" referrerpolicy="no-referrer" />
 
+      <!--
+    - favicon
+  -->
       <link rel="icon" href="${pageContext.request.contextPath}/assets/favicon_io/favicon.ico" />
 
+      <!--
+    -  css link
+  -->
       <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/style.css" />
       <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/search-autocomplete.css" />
       <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/chitietsanpham.css" />
-      <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/products.css" />
-
-      <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css" />
-
-      <script type="module" src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.esm.js"></script>
-      <script nomodule src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.js"></script>
+      <!--
+    - google font link
+  -->
+      <link rel="preconnect" href="https://fonts.googleapis.com" />
+      <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+      <link
+        href="https://fonts.googleapis.com/css2?family=Josefin+Sans:wght@300;400;500;600;700&family=Roboto:wght@400;500;700&display=swap"
+        rel="stylesheet" />
     </head>
 
     <body id="top">
@@ -31,11 +41,13 @@
 
           <!-- BREADCRUMB -->
           <div class="breadcrumb-container">
-            <ul class="breadcrumb">
-              <li><a href="${pageContext.request.contextPath}/menu">Trang Chủ</a></li>
-              <li><a href="${pageContext.request.contextPath}/products">Sản Phẩm</a></li>
-              <li class="current-page">${product.productDTO.name}</li>
-            </ul>
+            <nav aria-label="breadcrumb">
+              <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="${pageContext.request.contextPath}/menu">Trang Chủ</a></li>
+                <li class="breadcrumb-item"><a href="${pageContext.request.contextPath}/products">Sản Phẩm</a></li>
+                <li class="breadcrumb-item active" aria-current="page">${product.productDTO.name}</li>
+              </ol>
+            </nav>
           </div>
 
           <!-- PRODUCT DETAIL -->
@@ -98,10 +110,14 @@
                           <c:param name="sizeId" value="${param.sizeId}" />
                         </c:if>
                       </c:url>
+                      <c:set var="colorClass" value="color-dot" />
+                      <c:if test="${product.currentColorId == c.id}">
+                        <c:set var="colorClass" value="${colorClass} selected" />
+                      </c:if>
                       <li>
                         <a href="${colorUrl}">
-                          <span class="color-dot ${product.currentColorId == c.id ? 'selected' : ''}"
-                            style="background:${c.hexCode}" title="${c.name}">
+                          <span class="${colorClass}"
+                            style="background-color: ${c.hexCode};" title="${c.name}">
                           </span>
                         </a>
                       </li>
@@ -246,7 +262,7 @@
       <script src="${pageContext.request.contextPath}/assets/script/reponsive.js"></script>
       <script src="${pageContext.request.contextPath}/assets/script/chitietsanpham.js"></script>
       <script>
-        const CONTEXT_PATH = "${pageContext.request.contextPath}";
+        window.CONTEXT_PATH = window.CONTEXT_PATH || "${pageContext.request.contextPath}";
       </script>
       <script src="${pageContext.request.contextPath}/assets/script/search-autocomplete.js"></script>
       <script>
@@ -277,6 +293,18 @@
           }
         });
       </script>
+
+      <!--
+    - ionicon link
+  -->
+      <script type="module" src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.esm.js"></script>
+      <script nomodule src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.js"></script>
+
+      <script src="${pageContext.request.contextPath}/assets/script/product-popup.js"></script>
+      <script>
+        window.CONTEXT_PATH = window.CONTEXT_PATH || "${pageContext.request.contextPath}";
+      </script>
+      <script src="${pageContext.request.contextPath}/assets/script/search-autocomplete.js"></script>
     </body>
 
     </html>
