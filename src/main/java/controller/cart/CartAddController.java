@@ -34,15 +34,27 @@ public class CartAddController extends HttpServlet {
 
         int sizeId = Integer.parseInt(sizeRaw);
         User currentUser = (User) session.getAttribute("currentUser") ;
-        if(currentUser == null){
-            cartService.addToCart(session, productId, colorId, sizeId, qty);
+        try {
+            if (currentUser == null) {
+                cartService.addToCart(session, productId, colorId, sizeId, qty);
+            } else {
+                cartService.syncAdd(session, currentUser.getId(), productId, colorId, sizeId, qty);
+            }
+        } catch (Exception e) {
+            e.printStackTrace(); // ← in ra IntelliJ console
+            resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+            resp.setContentType("application/json;charset=UTF-8");
+            resp.getWriter().write("{\"success\":false, \"error\":\"" + e.getMessage() + "\"}");
+            return;
+        }
 
+        if ("XMLHttpRequest".equals(req.getHeader("X-Requested-With"))) {
+            resp.setContentType("application/json;charset=UTF-8");
+            resp.getWriter().write("{\"success\":true}");
+        } else {
+            resp.sendRedirect(req.getContextPath() + "/product?id=" + productId
+                    + "&colorId=" + colorId + "&sizeId=" + sizeId + "&msg=cart_added");
         }
-        else{
-            cartService.syncAdd(session,currentUser.getId(), productId, colorId, sizeId, qty);
-        }
-        resp.sendRedirect(req.getContextPath() + "/product?id=" + productId + "&colorId=" + colorId + "&sizeId="
-                + sizeId + "&msg=cart_added");
     }
 
     @Override

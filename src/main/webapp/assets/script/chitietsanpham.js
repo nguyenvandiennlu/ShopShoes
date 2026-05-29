@@ -16,6 +16,48 @@ document.addEventListener("DOMContentLoaded", () => {
     let currentColorId = document.querySelector(".color-dot.selected")?.dataset.colorId ?? null;
     let currentSizeId  = document.querySelector(".size-btn.selected")?.dataset.sizeId  ?? null;
 
+    if (btnAddCart) {
+        btnAddCart.addEventListener("click", (e) => {
+            e.preventDefault();
+
+            const colorId  = hiddenColorId.value;
+            const sizeId   = hiddenSizeId.value;
+            const quantity = document.querySelector("input[name='quantity']").value;
+
+            if (!sizeId) {
+                showToast("⚠️ Vui lòng chọn size!");
+                return;
+            }
+
+            const params = new URLSearchParams();
+            params.append("productId", productId);
+            params.append("colorId",   colorId);
+            params.append("sizeId",    sizeId);
+            params.append("quantity",  quantity);
+
+            fetch(`${contextPath}/cart/add`, {
+                method:  "POST",
+                headers: {
+                    "X-Requested-With": "XMLHttpRequest",
+                    "Content-Type": "application/x-www-form-urlencoded"
+                },
+                body: params
+            })
+                .then(res => {
+                    if (!res.ok) throw new Error();
+                    return res.json();
+                })
+                .then(data => {
+                    if (data.success) {
+                        showToast("🛒 Đã thêm sản phẩm vào Giỏ hàng thành công!");
+                    }
+                })
+                .catch(() => {
+                    showToast("❌ Có lỗi xảy ra, vui lòng thử lại!");
+                });
+        });
+    }
+
     document.querySelectorAll(".color-dot").forEach(btn => {
         btn.addEventListener("click", () => {
             const newColorId = btn.dataset.colorId;
@@ -70,7 +112,6 @@ document.addEventListener("DOMContentLoaded", () => {
                 if (newSizeId === currentSizeId) return;
 
                 const prevSizeId = currentSizeId;
-
                 currentSizeId = newSizeId;
 
                 document.querySelectorAll(".size-btn")
@@ -111,15 +152,16 @@ document.addEventListener("DOMContentLoaded", () => {
 
     attachSizeListeners();
 
-
     function setActionButtons(enabled) {
-        btnAddCart.disabled = !enabled;
-        btnBuyNow.disabled  = !enabled;
+        if(btnAddCart) btnAddCart.disabled = !enabled;
+        if(btnBuyNow) btnBuyNow.disabled  = !enabled;
     }
 
     function updateStock(stock) {
-        stockEl.textContent      = stock;
-        stockEl.dataset.stock    = stock;
+        if(stockEl) {
+            stockEl.textContent      = stock;
+            stockEl.dataset.stock    = stock;
+        }
     }
 
     function updateGallery(images) {
@@ -152,16 +194,17 @@ document.addEventListener("DOMContentLoaded", () => {
         attachSizeListeners();
     }
 
-
     window.changeImage = (img) => {
         mainImg.src = img.src;
     };
 
     window.showToast = (message) => {
         const toast = document.getElementById("toast-message");
-        toast.querySelector("span").textContent = message;
-        toast.classList.add("show");
-        setTimeout(() => toast.classList.remove("show"), 3000);
+        if(toast) {
+            toast.querySelector("span").textContent = message;
+            toast.classList.add("show");
+            setTimeout(() => toast.classList.remove("show"), 3000);
+        }
     };
 
     const navOpenBtn  = document.querySelector(".nav-open-btn");
@@ -193,4 +236,214 @@ document.addEventListener("DOMContentLoaded", () => {
         window.history.replaceState({}, document.title, newUrl);
     }
 
+    const btnWriteReview    = document.querySelector(".btn-write-review");
+    const btnCancelReview   = document.getElementById("btn-cancel-review");
+    const reviewFormWrapper = document.getElementById("review-form-wrapper");
+    const commentForm       = document.getElementById("commentForm");
+    const stars             = document.querySelectorAll(".rating-input-stars i");
+    const ratingInput       = document.getElementById("selected-rating");
+    const ratingText        = document.getElementById("rating-text");
+
+    const ratingLabels = {
+        1: "Tệ",
+        2: "Không hài lòng",
+        3: "Bình thường",
+        4: "Hài lòng",
+        5: "Tuyệt vời quá!"
+    };
+
+    if (btnWriteReview) {
+        btnWriteReview.addEventListener("click", () => {
+            reviewFormWrapper.style.display = "block";
+            reviewFormWrapper.scrollIntoView({ behavior: "smooth", block: "center" });
+        });
+    }
+
+    if (btnCancelReview) {
+        btnCancelReview.addEventListener("click", () => {
+            reviewFormWrapper.style.display = "none";
+            commentForm.reset();
+            resetStars();
+        });
+    }
+
+    stars.forEach(star => {
+        star.addEventListener("mouseover", function () {
+            const val = parseInt(this.dataset.value);
+            highlightStars(val, "hovered");
+        });
+
+        star.addEventListener("mouseout", () => {
+            stars.forEach(s => s.classList.remove("hovered"));
+        });
+
+        star.addEventListener("click", function () {
+            const val = parseInt(this.dataset.value);
+            ratingInput.value = val;
+            ratingText.innerText = ratingLabels[val];
+            ratingText.style.color = "#ffb800";
+            ratingText.style.fontWeight = "bold";
+
+            stars.forEach((s, idx) => {
+                s.className = idx < val ? "fas fa-star" : "far fa-star";
+            });
+        });
+    });
+
+    function highlightStars(val, className) {
+        stars.forEach((star, idx) => {
+            if (idx < val) star.classList.add(className);
+            else star.classList.remove(className);
+        });
+    }
+
+    function resetStars() {
+        if(ratingInput) ratingInput.value = "";
+        if(ratingText) {
+            ratingText.innerText = "Vui lòng chọn số sao";
+            ratingText.style.color = "#888";
+            ratingText.style.fontWeight = "normal";
+        }
+        stars.forEach(star => star.className = "far fa-star");
+    }
+
+    if (commentForm) {
+        commentForm.addEventListener("submit", (e) => {
+            e.preventDefault();
+
+            const rating  = ratingInput.value;
+            const content = commentForm.querySelector("textarea[name='content']").value.trim();
+
+            if (!rating) {
+                showToast("⚠️ Vui lòng chọn số sao đánh giá!");
+                ratingText.style.color = "#d90429";
+                ratingText.innerText = "Bắt buộc phải chọn số sao!";
+                return;
+            }
+
+            if (!content) {
+                showToast("⚠️ Vui lòng nhập nội dung nhận xét!");
+                return;
+            }
+
+            const params = new URLSearchParams();
+            params.append("productId", productId);
+            params.append("rating",    rating);
+            params.append("content",   content);
+
+            fetch(`${contextPath}/add-review`, {
+                method: "POST",
+                headers: {
+                    "X-Requested-With": "XMLHttpRequest",
+                    "Content-Type": "application/x-www-form-urlencoded"
+                },
+                body: params
+            })
+                .then(async res => {
+                    const data = await res.json();
+                    if (!res.ok) {
+                        throw new Error(data.message || data.error || "Có lỗi xảy ra!");
+                    }
+                    return data;
+                })
+                .then(data => {
+                    if (data.success) {
+                        showToast("🎉 " + data.message);
+
+                        const topScoreEl    = document.querySelector(".product-rating-overview .rating-score");
+                        const topCountEl    = document.querySelector(".product-rating-overview .review-count");
+                        const summaryScoreEl = document.querySelector(".average-score-box .score");
+                        const summaryCountEl = document.querySelector(".average-score-box p");
+
+                        if (topScoreEl && topCountEl) {
+                            let currentTotal = parseInt(topCountEl.innerText.replace(/[^0-9]/g, '')) || 0;
+                            let currentScore = parseFloat(summaryScoreEl ? summaryScoreEl.innerText.split('/')[0] : topScoreEl.innerText) || 0.0;
+
+                            let newTotal = currentTotal + 1;
+                            let newScore = ((currentScore * currentTotal) + parseInt(rating)) / newTotal;
+                            newScore = Math.round(newScore * 10) / 10; // Làm tròn 1 chữ số thập phân
+
+                            topScoreEl.innerText = newScore.toFixed(1);
+                            topCountEl.innerText = `(${newTotal} đánh giá)`;
+                            if (summaryScoreEl) summaryScoreEl.innerHTML = `${newScore.toFixed(1)}<span>/5</span>`;
+                            if (summaryCountEl) summaryCountEl.innerText = `${newTotal} đánh giá`;
+
+                            const barItems = document.querySelectorAll(".rating-bars .bar-item");
+                            let starCounts = [0, 0, 0, 0, 0, 0]; // Mảng chứa số lượng review của từng sao từ 1->5
+
+                            barItems.forEach(bar => {
+                                const starLabel = parseInt(bar.querySelector(".star-label").innerText);
+                                const percentText = bar.querySelector(".percent").innerText;
+                                let oldPercent = parseInt(percentText.replace('%', '')) || 0;
+                                let oldCount = Math.round((oldPercent * currentTotal) / 100);
+
+                                if (starLabel === parseInt(rating)) {
+                                    oldCount += 1;
+                                }
+                                starCounts[starLabel] = oldCount;
+                            });
+
+                            barItems.forEach(bar => {
+                                const starLabel = parseInt(bar.querySelector(".star-label").innerText);
+                                let newPercent = newTotal > 0 ? Math.round((starCounts[starLabel] / newTotal) * 100) : 0;
+
+                                bar.querySelector(".progress-fill").style.width = `${newPercent}%`;
+                                bar.querySelector(".percent").innerText = `${newPercent}%`;
+                            });
+                        }
+
+                        const reviewsContainer = document.querySelector(".reviews-list");
+
+                        if (reviewsContainer) {
+                            const noReviewEl = reviewsContainer.querySelector(".no-reviews");
+                            if (noReviewEl) noReviewEl.remove();
+
+                            let starsHtml = "";
+                            for (let i = 1; i <= 5; i++) {
+                                starsHtml += (i <= rating)
+                                    ? '<i class="fas fa-star" style="color: #ffb800; margin-right: 2px;"></i>'
+                                    : '<i class="far fa-star" style="color: #ccc; margin-right: 2px;"></i>';
+                            }
+
+                            const now = new Date();
+                            const formattedDate = `${String(now.getDate()).padStart(2, '0')}/${String(now.getMonth() + 1).padStart(2, '0')}/${now.getFullYear()}`;
+
+                            let verifiedBadgeHtml = "";
+                            if (data.verifiedPurchase) {
+                                verifiedBadgeHtml = '<span class="verified"><i class="fas fa-check-circle"></i> Đã mua hàng</span>';
+                            }
+
+                            const newReviewHtml = `
+                            <div class="review-item" style="animation: fadeIn 0.6s ease; background-color: #fffdb51a; padding: 15px; border-radius: 8px; margin-bottom: 15px; border: 1px dashed #ffb800;">
+                                <div class="review-header">
+                                    <div class="user-info">
+                                        <div class="avatar"><i class="fas fa-user" style="font-size: 0.8em; color: #fff;"></i></div>
+                                        <div class="user-meta">
+                                            <strong class="name" style="color: #2b2d42;">Bạn (Vừa đánh giá)</strong>
+                                            <span class="verified"><i class="fas fa-check-circle"></i> Đã mua hàng</span>
+                                        </div>
+                                    </div>
+                                    <span class="date">${formattedDate}</span>
+                                </div>
+                                <div class="review-stars" style="margin-bottom: 8px;">
+                                    ${starsHtml}
+                                </div>
+                                <div class="review-content" style="white-space: pre-wrap;">${content}</div>
+                            </div>
+                        `;
+
+                            reviewsContainer.insertAdjacentHTML("afterbegin", newReviewHtml);
+                            reviewsContainer.scrollIntoView({ behavior: "smooth", block: "nearest" });
+                        }
+
+                        reviewFormWrapper.style.display = "none";
+                        commentForm.reset();
+                        resetStars();
+                    }
+                })
+                .catch(err => {
+                    showToast("❌ " + err.message);
+                });
+        });
+    }
 });
