@@ -150,4 +150,27 @@ public class CartService {
         int sizeId = Integer.parseInt(p[2]);
         cartDao.removeItem(userId, productId, colorId, sizeId);
     }
+
+    public void removePurchasedItemsFromDb(int userId, Map<String, CartItem> purchasedCart) {
+        if (purchasedCart == null || purchasedCart.isEmpty()) {
+            return;
+        }
+        for (CartItem item : purchasedCart.values()) {
+            cartDao.removeItem(userId, item.getProductId(), item.getColorId(), item.getSizeId());
+        }
+    }
+
+    public void removePurchasedItemsFromSession(HttpSession session, Map<String, CartItem> purchasedCart) {
+        if (purchasedCart == null || purchasedCart.isEmpty()) {
+            return;
+        }
+        Map<String, CartItem> sessionCart = (Map<String, CartItem>) session.getAttribute("cart");
+        if (sessionCart == null || sessionCart.isEmpty()) {
+            return;
+        }
+        for (String key : purchasedCart.keySet()) {
+            sessionCart.remove(key);
+        }
+        session.setAttribute("cart", sessionCart);
+    }
 }

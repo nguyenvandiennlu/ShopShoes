@@ -7,7 +7,10 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import model.cart.CartItem;
+import dao.order.OrderDao;
+import services.cart.CartService;
 import services.checkout.CheckoutService;
+import utils.CheckoutSessionUtils;
 
 import java.io.IOException;
 import java.util.Map;
@@ -16,6 +19,8 @@ import java.util.Map;
 public class MomoReturnController extends HttpServlet {
 
     private final CheckoutService checkoutService = new CheckoutService();
+    private final CartService cartService = new CartService();
+    private final OrderDao orderDao = new OrderDao();
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
@@ -54,30 +59,29 @@ public class MomoReturnController extends HttpServlet {
         Map<String, CartItem> pendingCart = (Map<String, CartItem>) session.getAttribute("pendingCheckoutCart");
         String pendingMode = (String) session.getAttribute("pendingCheckoutMode");
 
-        try {
-            if (pendingOrderId != null && pendingCart != null && pendingOrderId == orderId) {
-                checkoutService.completeMomoPayment(orderId, pendingCart);
-
-                if ("BUY_NOW".equals(pendingMode)) {
-                    session.removeAttribute("checkoutCart");
-                    session.removeAttribute("checkoutMode");
-                } else {
-                    session.removeAttribute("cart");
-                }
-                session.removeAttribute("shippingFeeRaw");
-            }
-        } catch (RuntimeException ignored) {
+        if (pendingOrderId == null || pendingCart == null || pendingOrderId != orderId) {
+            resp.sendRedirect(req.getContextPath() + "/cart");
+            return;
         }
 
-        clearPending(session);
-        session.setAttribute("successMessage", "Thanh toan MoMo thanh cong. Don hang da duoc ghi nhan!");
-        resp.sendRedirect(req.getContextPath() + "/order-success");
-    }
+        try {
+            checkoutService.completeMomoPayment(orderId, pendingCart);
 
-    private void clearPending(HttpSession session) {
-        session.removeAttribute("pendingOrderId");
-        session.removeAttribute("pendingCheckoutCart");
-        session.removeAttribute("pendingCheckoutMode");
-        session.removeAttribute("pendingShippingFeeRaw");
+            Integer userId = orderDao.findUserIdByOrderId(orderId);
+            if (!"BUY_NOW".equals(pendingMode) && userId != null) {
+                CheckoutSessionUtils.removePurchasedAndReloadSession(session, pendingCart, cartService, userId);
+            } else {
+                CheckoutSessionUtils.clearCheckoutSession(session);
+            }
+
+            session.removeAttribute("shippingFeeRaw");
+            CheckoutSessionUtils.clearPending(session);
+            session.setAttribute("successMessage", "Thanh toan MoMo thanh cong. Don hang da duoc ghi nhan!");
+            resp.sendRedirect(req.getContextPath() + "/order-success");
+        } catch (RuntimeException ex) {
+            CheckoutSessionUtils.clearAllCheckoutRelated(session);
+            req.setAttribute("errorMessage", "Thanh toan MoMo thanh cong nhung xu ly don hang that bai: " + ex.getMessage());
+            req.getRequestDispatcher("/Checkout.jsp").forward(req, resp);
+        }
     }
 }

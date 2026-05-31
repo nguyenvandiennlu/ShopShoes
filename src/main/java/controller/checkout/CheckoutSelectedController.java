@@ -73,6 +73,7 @@ public class CheckoutSelectedController extends HttpServlet {
                 "checkoutCart",
                 checkoutCart
         );
+        session.setAttribute("checkoutMode", "CART_SELECTED");
 
         resp.sendRedirect(
                 req.getContextPath() + "/pr-checkout"

@@ -9,6 +9,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import model.cart.CartItem;
 import model.user.User;
+import services.cart.CartService;
 import services.checkout.CheckoutService;
 import services.checkout.MomoSandboxService;
 import services.product.PromotionService;
@@ -25,6 +26,7 @@ public class CheckoutController extends HttpServlet {
     private final MomoSandboxService momoSandboxService = new MomoSandboxService();
     private final PromotionService promotionService = new PromotionService();
     private final AccountServices accountServices = new AccountServices();
+    private final CartService cartService = new CartService();
 
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp)
@@ -39,12 +41,13 @@ public class CheckoutController extends HttpServlet {
         }
 
         String mode = (String) session.getAttribute("checkoutMode");
-        Map<String, CartItem> cart;
+        boolean isBuyNow = "BUY_NOW".equals(mode);
 
-        if ("BUY_NOW".equals(mode)) {
-            cart = (Map<String, CartItem>) session.getAttribute("checkoutCart");
-        } else {
+        Map<String, CartItem> checkoutCart = (Map<String, CartItem>) session.getAttribute("checkoutCart");
+        Map<String, CartItem> cart = checkoutCart;
+        if (cart == null || cart.isEmpty()) {
             cart = (Map<String, CartItem>) session.getAttribute("cart");
+            isBuyNow = false;
         }
 
         if (cart == null || cart.isEmpty()) {
@@ -102,7 +105,7 @@ public class CheckoutController extends HttpServlet {
             if (paymentMethod == PaymentMethod.MOMO) {
                 session.setAttribute("pendingOrderId", orderId);
                 session.setAttribute("pendingCheckoutCart", cart);
-                session.setAttribute("pendingCheckoutMode", mode);
+                session.setAttribute("pendingCheckoutMode", isBuyNow ? "BUY_NOW" : "CART_SELECTED");
                 session.setAttribute("pendingShippingFeeRaw", shippingFee);
 
                 long amount = calculateTotalAmount(cart, shippingFee);
@@ -128,11 +131,13 @@ public class CheckoutController extends HttpServlet {
                 return;
             }
 
-            if ("BUY_NOW".equals(mode)) {
+            if (isBuyNow) {
                 session.removeAttribute("checkoutCart");
                 session.removeAttribute("checkoutMode");
             } else {
-                session.removeAttribute("cart");
+                cartService.loadDbCartToSession(session, user.getId());
+                session.removeAttribute("checkoutCart");
+                session.removeAttribute("checkoutMode");
             }
 
             session.removeAttribute("shippingFeeRaw");

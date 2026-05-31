@@ -52,7 +52,12 @@ public class MomoCallbackController extends HttpServlet {
                 int orderId = parseOrderId(orderIdRaw);
                 checkoutService.failMomoPayment(orderId);
             }
-        } catch (Exception ignored) {
+        } catch (Exception ex) {
+            System.out.println("[MomoCallbackController] IPN processing failed: " + ex.getMessage());
+            resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+            resp.setContentType("application/json;charset=UTF-8");
+            resp.getWriter().write("{\"message\":\"Xu ly IPN MoMo that bai\"}");
+            return;
         }
 
         resp.setStatus(HttpServletResponse.SC_OK);
