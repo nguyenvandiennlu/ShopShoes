@@ -178,4 +178,23 @@ public class OrderDao {
                 .mapTo(BigDecimal.class)
                 .one());
     }
+
+    public boolean checkUserPurchasedProduct(int userId, int productId) {
+        String sql = """
+                SELECT COUNT(*)
+                FROM orders o
+                JOIN order_detail od ON o.id = od.order_id
+                WHERE o.user_id = :userId
+                  AND od.product_id = :productId
+                  AND o.order_status IN ('DELIVERED', 'COMPLETED')
+                """;
+
+        int count = jdbi.withHandle(handle -> handle.createQuery(sql)
+                .bind("userId", userId)
+                .bind("productId", productId)
+                .mapTo(Integer.class)
+                .one());
+
+        return count > 0;
+    }
 }

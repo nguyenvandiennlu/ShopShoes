@@ -1,0 +1,16 @@
+CREATE TABLE `product_review` (
+  `id` int unsigned NOT NULL AUTO_INCREMENT,
+  `product_id` int unsigned NOT NULL,
+  `user_id` int unsigned NOT NULL,
+  `rating` tinyint unsigned NOT NULL COMMENT 'Số sao đánh giá (1-5)',
+  `content` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `created_at` datetime DEFAULT CURRENT_TIMESTAMP,
+  `is_verified_purchase` tinyint(1) DEFAULT '0' COMMENT '0: Chưa mua, 1: Đã mua hàng',
+
+  PRIMARY KEY (`id`) USING BTREE,
+  KEY `idx_product_id` (`product_id`) USING BTREE,
+  KEY `idx_user_id` (`user_id`) USING BTREE,
+
+  CONSTRAINT `fk_review_product` FOREIGN KEY (`product_id`) REFERENCES `product` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `fk_review_user` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci ROW_FORMAT=DYNAMIC;

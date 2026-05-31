@@ -70,6 +70,26 @@
             <div class="product-info-box" data-product-id="${product.productDTO.id}" data-context-path="${pageContext.request.contextPath}">
               <h1 class="product-title">${product.productDTO.name}</h1>
 
+              <div class="product-rating-overview">
+                <div class="stars">
+                  <c:forEach begin="1" end="5" var="i">
+                    <c:choose>
+                      <c:when test="${i <= averageRating}">
+                        <i class="fas fa-star" style="color: #ffb800;"></i>
+                      </c:when>
+                      <c:when test="${i - 0.5 <= averageRating}">
+                        <i class="fas fa-star-half-alt" style="color: #ffb800;"></i>
+                      </c:when>
+                      <c:otherwise>
+                        <i class="far fa-star" style="color: #ccc;"></i>
+                      </c:otherwise>
+                    </c:choose>
+                  </c:forEach>
+                </div>
+                <span class="rating-score">${totalReviews > 0 ? averageRating : "0.0"}</span>
+                <a href="#review-section" class="review-count">(${totalReviews} đánh giá)</a>
+              </div>
+
               <div class="product-meta">
                 <p class="brand-info">
                   Thương hiệu:
@@ -186,6 +206,130 @@
             </div>
           </section>
 
+          <section id="review-section" class="product-reviews-section">
+            <h2 class="section-title-desc">Đánh giá & Nhận xét</h2>
+
+            <div class="reviews-container">
+              <div class="reviews-summary">
+                <div class="average-score-box">
+                  <div class="score">${totalReviews > 0 ? averageRating : "0.0"}<span>/5</span></div>
+                  <div class="stars">
+                    <c:forEach begin="1" end="5" var="i">
+                      <c:choose>
+                        <c:when test="${i <= averageRating}">
+                          <i class="fas fa-star" style="color: #ffb800;"></i>
+                        </c:when>
+                        <c:when test="${i - 0.5 <= averageRating}">
+                          <i class="fas fa-star-half-alt" style="color: #ffb800;"></i>
+                        </c:when>
+                        <c:otherwise>
+                          <i class="far fa-star" style="color: #ccc;"></i>
+                        </c:otherwise>
+                      </c:choose>
+                    </c:forEach>
+                  </div>
+                  <p>${totalReviews} đánh giá</p>
+                </div>
+
+                <div class="rating-bars">
+                  <c:forEach begin="1" end="5" var="idx">
+                    <c:set var="starLevel" value="${6 - idx}" />
+                    <div class="bar-item">
+                      <span class="star-label">${starLevel} <i class="fas fa-star"></i></span>
+                      <div class="progress">
+                        <div class="progress-fill" style="width: ${starPercentages[starLevel]}%"></div>
+                      </div>
+                      <span class="percent">${starPercentages[starLevel]}%</span>
+                    </div>
+                  </c:forEach>
+                </div>
+
+                <div class="review-action">
+                  <p>Bạn đã trải nghiệm sản phẩm này?</p>
+                  <button class="btn-write-review">Viết đánh giá</button>
+                </div>
+              </div>
+
+              <div class="reviews-list">
+                <c:if test="${empty reviews}">
+                  <div class="no-reviews" style="text-align: center; padding: 30px; color: #888;">
+                    <i class="far fa-comment-dots" style="font-size: 3em; margin-bottom: 10px; color: #ddd;"></i>
+                    <p>Chưa có đánh giá nào cho sản phẩm này. Hãy là người đầu tiên đánh giá!</p>
+                  </div>
+                </c:if>
+
+                <c:forEach var="review" items="${reviews}">
+                  <div class="review-item">
+                    <div class="review-header">
+                      <div class="user-info">
+                        <div class="avatar">
+                          <i class="fas fa-user" style="font-size: 0.8em; color: #fff;"></i>
+                        </div>
+                        <div class="user-meta">
+                          <span class="name">Khách hàng #${review.userId}</span>
+
+                          <c:if test="${review.verifiedPurchase}">
+                            <span class="verified"><i class="fas fa-check-circle"></i> Đã mua hàng</span>
+                          </c:if>
+                        </div>
+                      </div>
+
+                      <%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %>
+                      <span class="date">${review.createdAt.toLocalDate()}</span>
+                    </div>
+
+                    <div class="review-stars">
+                      <c:forEach begin="1" end="5" var="i">
+                        <c:choose>
+                          <c:when test="${i <= review.rating}">
+                            <i class="fas fa-star" style="color: #ffb800;"></i>
+                          </c:when>
+                          <c:otherwise>
+                            <i class="far fa-star" style="color: #ccc;"></i>
+                          </c:otherwise>
+                        </c:choose>
+                      </c:forEach>
+                    </div>
+
+                    <div class="review-content">
+                        ${review.content}
+                    </div>
+                  </div>
+                </c:forEach>
+              </div>
+            </div>
+
+            <div id="review-form-wrapper" class="review-form-wrapper" style="display: none;">
+              <h3>Viết đánh giá của bạn</h3>
+              <form id="commentForm" action="${pageContext.request.contextPath}/add-review" method="POST">
+                <input type="hidden" name="productId" value="${product.productDTO.id}">
+
+                <div class="form-group">
+                  <label>Mức độ hài lòng của bạn: <span style="display: inline" class="required">*</span></label>
+                  <div class="rating-input-stars">
+                    <i class="far fa-star" data-value="1"></i>
+                    <i class="far fa-star" data-value="2"></i>
+                    <i class="far fa-star" data-value="3"></i>
+                    <i class="far fa-star" data-value="4"></i>
+                    <i class="far fa-star" data-value="5"></i>
+                  </div>
+                  <input type="hidden" id="selected-rating" name="rating" value="0" required>
+                  <span id="rating-text" class="rating-hint-text">Vui lòng chọn số sao</span>
+                </div>
+
+                <div class="form-group">
+                  <label for="review-content">Nội dung nhận xét: <span style="display: inline" class="required">*</span></label>
+                  <textarea id="review-content" name="content" rows="4" placeholder="Chia sẻ trải nghiệm thực tế của bạn về sản phẩm này (chất lượng, form dáng, dịch vụ giao hàng...)" required></textarea>
+                </div>
+
+                <div class="form-form-actions">
+                  <button type="submit" class="btn-submit-review">Gửi đánh giá</button>
+                  <button type="button" id="btn-cancel-review" class="btn-cancel-review">Hủy bỏ</button>
+                </div>
+              </form>
+            </div>
+          </section>
+
           <!-- RELATED -->
           <section class="related-products section">
             <h2 class="h2 section-title" style="text-align: center; margin-bottom: 40px">
@@ -252,35 +396,6 @@
         window.CONTEXT_PATH = window.CONTEXT_PATH || "${pageContext.request.contextPath}";
       </script>
       <script src="${pageContext.request.contextPath}/assets/script/search-autocomplete.js"></script>
-      <script>
-        // Hàm hiển thị toast
-        // function showToast(message) {
-        //   const toast = document.getElementById("toast-message");
-        //   toast.querySelector("span").textContent = message;
-        //   toast.classList.add("show");
-        //   setTimeout(() => toast.classList.remove("show"), 3000);
-        // }
-
-        // Kiểm tra tham số msg để hiển thị thông báo
-        // document.addEventListener("DOMContentLoaded", () => {
-        //   const urlParams = new URLSearchParams(window.location.search);
-        //   const msg = urlParams.get("msg");
-        //
-        //   if (msg === "cart_added") {
-        //     showToast("🛒 Đã thêm sản phẩm vào Giỏ hàng thành công!");
-        //     // Xóa tham số msg khỏi URL để tránh hiển thị lại khi refresh
-        //     urlParams.delete("msg");
-        //     const newUrl = window.location.pathname + (urlParams.toString() ? "?" + urlParams.toString() : "");
-        //     window.history.replaceState({}, document.title, newUrl);
-        //   } else if (msg === "wishlist_added") {
-        //     showToast("❤️ Đã thêm sản phẩm vào Yêu thích thành công!");
-        //     urlParams.delete("msg");
-        //     const newUrl = window.location.pathname + (urlParams.toString() ? "?" + urlParams.toString() : "");
-        //     window.history.replaceState({}, document.title, newUrl);
-        //   }
-        // });
-      </script>
-
       <!--
     - ionicon link
   -->
