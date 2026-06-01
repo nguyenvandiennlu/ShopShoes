@@ -15,6 +15,7 @@ import model.user.User;
 import services.auth.AuthService;
 import services.cart.CartService;
 import utils.CookieUtil;
+import utils.ResourceNotFoundException;
 import utils.TokenGenerator;
 import utils.URLPath;
 
@@ -62,8 +63,7 @@ public class AuthFilter implements Filter {
 
                         if (autoLoginUser != null) {
                             session = httpRequest.getSession(true);
-                            Map<String, CartItem> guestCart =
-                                    (Map<String, CartItem>) session.getAttribute("cart");
+                            Map<String, CartItem> guestCart = (Map<String, CartItem>) session.getAttribute("cart");
 
                             session.setAttribute(SESSION_USER, autoLoginUser);
 
@@ -87,6 +87,10 @@ public class AuthFilter implements Filter {
             e.printStackTrace();
         }
 
-        chain.doFilter(httpRequest, httpResponse);
+        try {
+            chain.doFilter(httpRequest, httpResponse);
+        } catch (ResourceNotFoundException e) {
+            httpResponse.sendError(HttpServletResponse.SC_NOT_FOUND);
+        }
     }
 }

@@ -12,6 +12,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import model.product.ProductReview; // Đã thêm import
 import model.user.User;
 import services.product.ProductDetailService;
+import utils.ResourceNotFoundException;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -64,10 +65,11 @@ public class ProductDetailController extends HttpServlet {
             }
         } catch (NumberFormatException ignored) {}
 
-        ProductDetailDTO dto =
-                productDetailService.buildProductDetailPage(
-                        productId, colorId, sizeId
-                );
+        ProductDetailDTO dto = productDetailService.buildProductDetailPage(productId, colorId, sizeId);
+
+        if (dto.getProductDTO() == null) {
+            throw new ResourceNotFoundException("Product not found: " + productId);
+        }
 
         User user = (User) req.getSession().getAttribute("currentUser");
 
