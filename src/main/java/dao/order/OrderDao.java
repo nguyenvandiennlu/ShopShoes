@@ -165,6 +165,22 @@ public class OrderDao {
                 .one());
     }
 
+    public Integer findUserIdByOrderId(Handle handle, int orderId) {
+        return handle.createQuery("""
+                    SELECT user_id
+                    FROM orders
+                    WHERE id = :orderId
+                """)
+                .bind("orderId", orderId)
+                .mapTo(Integer.class)
+                .findOne()
+                .orElse(null);
+    }
+
+    public Integer findUserIdByOrderId(int orderId) {
+        return jdbi.withHandle(handle -> findUserIdByOrderId(handle, orderId));
+    }
+
     public BigDecimal todayRevenue() {
         String sql = """
                     SELECT COALESCE(SUM(grand_total), 0)

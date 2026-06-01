@@ -1,5 +1,6 @@
 package dao.cart;
 import dao.JDBIConnector;
+import org.jdbi.v3.core.Handle;
 import org.jdbi.v3.core.Jdbi;
 
 import java.math.BigDecimal;
@@ -100,6 +101,23 @@ public class CartDao {
                 .bind("colorId", colorId)
                 .bind("sizeId", sizeId)
                 .execute());
+    }
+
+    public void removeItem(Handle handle, int userId, int productId, int colorId, int sizeId) {
+        String sql = """
+            DELETE ci FROM cart_items ci
+            JOIN carts c ON c.id = ci.cart_id
+            WHERE c.user_id = :userId
+              AND ci.product_id = :productId
+              AND ci.color_id = :colorId
+              AND ci.size_id = :sizeId
+        """;
+        handle.createUpdate(sql)
+                .bind("userId", userId)
+                .bind("productId", productId)
+                .bind("colorId", colorId)
+                .bind("sizeId", sizeId)
+                .execute();
     }
 
     public void clearCart(int userId) {

@@ -1,6 +1,7 @@
 package services.checkout;
 
 import dao.JDBIConnector;
+import dao.cart.CartDao;
 import dao.order.OrderDao;
 import dao.order.OrderDetailDao;
 import dao.product.ProductVariantDao;
@@ -18,6 +19,7 @@ import java.util.Map;
 public class CheckoutService {
 
     private final ProductVariantDao variantDao = new ProductVariantDao();
+    private final CartDao cartDao = new CartDao();
     private final OrderDao orderDao = new OrderDao();
     private final OrderDetailDao orderDetailDao = new OrderDetailDao();
     private final PromotionService promotionService = new PromotionService();
@@ -87,6 +89,17 @@ public class CheckoutService {
                             item.getSizeId(),
                             item.getQuantity()
                     );
+                    System.out.println("[CheckoutService] Removing cart item from DB for userId=" + userId
+                            + ", product=" + item.getProductId()
+                            + ", color=" + item.getColorId()
+                            + ", size=" + item.getSizeId());
+                    cartDao.removeItem(
+                            handle,
+                            userId,
+                            item.getProductId(),
+                            item.getColorId(),
+                            item.getSizeId()
+                    );
                 }
             }
 
@@ -115,6 +128,23 @@ public class CheckoutService {
                         item.getSizeId(),
                         item.getQuantity()
                 );
+            }
+
+            Integer userId = orderDao.findUserIdByOrderId(handle, orderId);
+            if (userId != null) {
+                for (CartItem item : cart.values()) {
+                    System.out.println("[CheckoutService] (MoMo) Removing cart item from DB for userId=" + userId
+                            + ", product=" + item.getProductId()
+                            + ", color=" + item.getColorId()
+                            + ", size=" + item.getSizeId());
+                    cartDao.removeItem(
+                            handle,
+                            userId,
+                            item.getProductId(),
+                            item.getColorId(),
+                            item.getSizeId()
+                    );
+                }
             }
 
             orderDao.updatePaymentStatus(handle, orderId, PaymentStatus.PAID);
