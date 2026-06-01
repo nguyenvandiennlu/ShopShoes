@@ -31,9 +31,9 @@ public class CartViewController extends HttpServlet {
 
         Map<String, CartItem> cart =
                 (Map<String, CartItem>) session.getAttribute("cart");
-        if(currentUser != null && ( cart == null || cart.isEmpty()) ){
-        cartService.loadDbCartToSession(session, currentUser.getId());
-        cart =(Map<String, CartItem>) session.getAttribute("cart");
+        if (currentUser != null) {
+            cartService.loadDbCartToSession(session, currentUser.getId());
+            cart = (Map<String, CartItem>) session.getAttribute("cart");
         }
         if(cart==null){
             cart = new LinkedHashMap<>();
