@@ -579,9 +579,17 @@ input:checked+.brand-label .brand-icon {
     }
 }
 
-/* ================================================= */
-/* # Banner Slider
-/* ================================================= */
+.banner-slide {
+    width: 100%;
+    overflow: hidden;
+    box-sizing: border-box;
+}
+
+.swiper-container {
+    width: 100%;
+    overflow: hidden;
+    box-sizing: border-box;
+}
 
 .swiper-wrapper {
     height: 100%;

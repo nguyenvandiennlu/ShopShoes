@@ -12,12 +12,6 @@ import jakarta.servlet.http.HttpServletResponse;
 import model.Collection.Collection;
 import services.product.CollectionService;
 
-/**
- * Controller xử lý hiển thị sản phẩm theo Collection
- * 
- * URL pattern: /collection/{slug}
- * VD: /collection/nike-collection, /collection/summer-collection
- */
 @WebServlet("/collection/*")
 public class CollectionController extends HttpServlet {
 
@@ -35,7 +29,6 @@ public class CollectionController extends HttpServlet {
     protected void doGet(HttpServletRequest req, HttpServletResponse resp)
             throws ServletException, IOException {
 
-        // Lấy slug từ URL: /collection/nike-collection -> nike-collection
         String pathInfo = req.getPathInfo();
         if (pathInfo == null || pathInfo.equals("/")) {
             resp.sendRedirect(req.getContextPath() + "/products");
@@ -44,16 +37,13 @@ public class CollectionController extends HttpServlet {
 
         String slug = pathInfo.substring(1); // Bỏ dấu "/" đầu tiên
 
-        // Tìm collection theo slug
         Collection collection = collectionService.findBySlug(slug);
 
         if (collection == null) {
-            // Không tìm thấy collection -> redirect về trang products
             resp.sendRedirect(req.getContextPath() + "/products");
             return;
         }
 
-        // Lấy page number
         int page = 1;
         try {
             page = Integer.parseInt(req.getParameter("page"));
@@ -62,12 +52,10 @@ public class CollectionController extends HttpServlet {
         } catch (Exception ignored) {
         }
 
-        // Lấy sản phẩm trong collection
         String ruleSetType = collection.getRuleSetType();
         List<ProductDTO> productList = collectionService.getProductsInCollectionPaged(
                 collection.getId(), ruleSetType, page, PAGE_SIZE);
 
-        // Tính tổng số trang
         int totalPages = collectionService.getTotalPages(
                 collection.getId(), ruleSetType, PAGE_SIZE);
         if (totalPages < 1)
@@ -75,14 +63,11 @@ public class CollectionController extends HttpServlet {
         if (page > totalPages)
             page = totalPages;
 
-        // Đếm số sản phẩm
         int totalProducts = collectionService.countProductsInCollection(
                 collection.getId(), ruleSetType);
 
-        // Lấy banner của collection (nếu có)
         // Banner banner = bannerDao.findByCollectionId(collection.getId()); // TODO: BannerDao not found
 
-        // Set attributes cho JSP
         req.setAttribute("collection", collection);
         req.setAttribute("productList", productList);
         req.setAttribute("currentPage", page);
@@ -91,7 +76,6 @@ public class CollectionController extends HttpServlet {
         req.setAttribute("slug", slug);
         // req.setAttribute("banner", banner); // TODO: BannerDao not found
 
-        // Forward đến JSP
         req.getRequestDispatcher("/Collection.jsp").forward(req, resp);
     }
 }
