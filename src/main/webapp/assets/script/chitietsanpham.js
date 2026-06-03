@@ -1,8 +1,17 @@
 document.addEventListener("DOMContentLoaded", () => {
+    console.log("[JS] chitietsanpham.js DOMContentLoaded fired");
 
     const infoBox       = document.querySelector(".product-info-box");
+    console.log("[JS] infoBox:", infoBox);
+
+    if (!infoBox) {
+        console.error("[JS] FATAL: .product-info-box not found! JS will not work.");
+        return;
+    }
+
     const productId     = infoBox.dataset.productId;
     const contextPath   = infoBox.dataset.contextPath;
+    console.log("[JS] productId:", productId, "| contextPath:", contextPath);
 
     const stockEl           = document.querySelector("[data-stock]");
     const sizeListEl        = document.querySelector(".size-list");
@@ -12,12 +21,14 @@ document.addEventListener("DOMContentLoaded", () => {
     const hiddenSizeId      = document.querySelector("input[name='sizeId']");
     const btnAddCart        = document.querySelector(".btn-add-cart");
     const btnBuyNow         = document.querySelector(".btn-buy-now");
+    console.log("[JS] btnAddCart:", btnAddCart);
 
     let currentColorId = document.querySelector(".color-dot.selected")?.dataset.colorId ?? null;
     let currentSizeId  = document.querySelector(".size-btn.selected")?.dataset.sizeId  ?? null;
 
     if (btnAddCart) {
         btnAddCart.addEventListener("click", (e) => {
+            console.log("[JS] btnAddCart clicked! Calling preventDefault...");
             e.preventDefault();
 
             const colorId  = hiddenColorId.value;
@@ -50,8 +61,35 @@ document.addEventListener("DOMContentLoaded", () => {
                 .then(data => {
                     if (data.success) {
                         showToast("🛒 Đã thêm sản phẩm vào Giỏ hàng thành công!");
+
+                        // Cập nhật badge giỏ hàng
+                        const addedQty = parseInt(quantity) || 1;
+                        const existingBadges = document.querySelectorAll(".cart-badge");
+                        const currentCount = parseInt(existingBadges[0]?.textContent) || 0;
+
+                        console.log("[Cart] data.cartCount:", data.cartCount, "| currentCount:", currentCount, "| addedQty:", addedQty);
+
+                        // Dùng server count nếu lớn hơn current, nếu không thì cộng local
+                        const newCount = (data.cartCount && data.cartCount > currentCount)
+                            ? data.cartCount
+                            : currentCount + addedQty;
+
+                        console.log("[Cart] newCount →", newCount);
+
+                        if (existingBadges.length > 0) {
+                            existingBadges.forEach(b => { b.textContent = newCount; });
+                        } else {
+                            document.querySelectorAll(".cart-btn").forEach(cartBtn => {
+                                const b = document.createElement("span");
+                                b.className = "cart-badge";
+                                b.textContent = newCount;
+                                cartBtn.appendChild(b);
+                            });
+                        }
                     }
                 })
+
+
                 .catch(() => {
                     showToast("❌ Có lỗi xảy ra, vui lòng thử lại!");
                 });
@@ -207,19 +245,41 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     };
 
-    const navOpenBtn  = document.querySelector(".nav-open-btn");
-    const navCloseBtn = document.querySelector(".nav-close-btn");
-    const navbar      = document.querySelector(".navbar");
-    const overlay     = document.querySelector(".overlay");
+    // WISHLIST – gửi colorId/sizeId hiện tại (không dùng form submit để tránh gửi giá trị cũ)
+    const btnWishlistAdd = document.getElementById("btn-wishlist-add");
+    if (btnWishlistAdd) {
+        btnWishlistAdd.addEventListener("click", () => {
+            const params = new URLSearchParams();
+            params.append("productId", productId);
+            params.append("colorId",   hiddenColorId.value || "");
+            params.append("sizeId",    hiddenSizeId.value  || "");
 
-    const toggleNav = () => {
-        navbar?.classList.toggle("active");
-        overlay?.classList.toggle("active");
-    };
+            fetch(`${contextPath}/wishlist`, {
+                method:  "POST",
+                headers: {
+                    "X-Requested-With": "XMLHttpRequest",
+                    "Content-Type": "application/x-www-form-urlencoded"
+                },
+                body: params
+            })
+                .then(res => {
+                    if (res.status === 401) {
+                        window.location.href = `${contextPath}/login`;
+                        return null;
+                    }
+                    return res.json().catch(() => ({}));
+                })
+                .then(data => {
+                    if (!data) return;
+                    showToast("❤️ Đã thêm sản phẩm vào Yêu thích thành công!");
+                    btnWishlistAdd.disabled = true;
+                    btnWishlistAdd.classList.add("active");
+                    btnWishlistAdd.querySelector("ion-icon").setAttribute("name", "heart");
+                })
+                .catch(() => showToast("❌ Có lỗi xảy ra, vui lòng thử lại!"));
+        });
+    }
 
-    navOpenBtn?.addEventListener("click", toggleNav);
-    navCloseBtn?.addEventListener("click", toggleNav);
-    overlay?.addEventListener("click", toggleNav);
 
     const urlParams = new URLSearchParams(window.location.search);
     const msg = urlParams.get("msg");
