@@ -177,16 +177,16 @@
                     class="btn-main btn-buy-now" <c:if test="${empty product.currentSizeId}">disabled</c:if>>
                     MUA NGAY
                   </button>
-
-                  <!-- WISHLIST -->
                   <c:choose>
                     <c:when test="${isInWishlist}">
-                      <button class="btn-wishlist active" disabled>
+                      <button type="button" class="btn-wishlist active" id="btn-wishlist-toggle"
+                        data-action="remove" title="Bỏ yêu thích">
                         <ion-icon name="heart"></ion-icon>
                       </button>
                     </c:when>
                     <c:otherwise>
-                      <button type="button" class="btn-wishlist" id="btn-wishlist-add">
+                      <button type="button" class="btn-wishlist" id="btn-wishlist-toggle"
+                        data-action="add" title="Thêm vào yêu thích">
                         <ion-icon name="heart-outline"></ion-icon>
                       </button>
                     </c:otherwise>

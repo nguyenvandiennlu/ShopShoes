@@ -245,14 +245,18 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     };
 
-    // WISHLIST – gửi colorId/sizeId hiện tại (không dùng form submit để tránh gửi giá trị cũ)
-    const btnWishlistAdd = document.getElementById("btn-wishlist-add");
-    if (btnWishlistAdd) {
-        btnWishlistAdd.addEventListener("click", () => {
+    // WISHLIST TOGGLE – thêm/hủy yêu thích không reload trang
+    const btnWishlistToggle = document.getElementById("btn-wishlist-toggle");
+    if (btnWishlistToggle) {
+        btnWishlistToggle.addEventListener("click", () => {
+            const action = btnWishlistToggle.dataset.action; // "add" hoặc "remove"
+
             const params = new URLSearchParams();
             params.append("productId", productId);
-            params.append("colorId",   hiddenColorId.value || "");
-            params.append("sizeId",    hiddenSizeId.value  || "");
+            params.append("action",    action);
+
+            // Disable tạm để tránh double click
+            btnWishlistToggle.disabled = true;
 
             fetch(`${contextPath}/wishlist`, {
                 method:  "POST",
@@ -270,15 +274,36 @@ document.addEventListener("DOMContentLoaded", () => {
                     return res.json().catch(() => ({}));
                 })
                 .then(data => {
-                    if (!data) return;
-                    showToast("❤️ Đã thêm sản phẩm vào Yêu thích thành công!");
-                    btnWishlistAdd.disabled = true;
-                    btnWishlistAdd.classList.add("active");
-                    btnWishlistAdd.querySelector("ion-icon").setAttribute("name", "heart");
+                    if (!data || !data.success) {
+                        showToast("❌ Có lỗi xảy ra, vui lòng thử lại!");
+                        btnWishlistToggle.disabled = false;
+                        return;
+                    }
+
+                    if (data.action === "added") {
+                        // Vừa thêm vào → đổi sang trạng thái "đã yêu thích"
+                        btnWishlistToggle.dataset.action = "remove";
+                        btnWishlistToggle.classList.add("active");
+                        btnWishlistToggle.title = "Bỏ yêu thích";
+                        btnWishlistToggle.querySelector("ion-icon").setAttribute("name", "heart");
+                        showToast("❤️ Đã thêm vào danh sách yêu thích!");
+                    } else {
+                        // Vừa xóa → đổi sang trạng thái "chưa yêu thích"
+                        btnWishlistToggle.dataset.action = "add";
+                        btnWishlistToggle.classList.remove("active");
+                        btnWishlistToggle.title = "Thêm vào yêu thích";
+                        btnWishlistToggle.querySelector("ion-icon").setAttribute("name", "heart-outline");
+                        showToast("💔 Đã bỏ khỏi danh sách yêu thích!");
+                    }
+                    btnWishlistToggle.disabled = false;
                 })
-                .catch(() => showToast("❌ Có lỗi xảy ra, vui lòng thử lại!"));
+                .catch(() => {
+                    showToast("❌ Có lỗi xảy ra, vui lòng thử lại!");
+                    btnWishlistToggle.disabled = false;
+                });
         });
     }
+
 
 
     const urlParams = new URLSearchParams(window.location.search);
