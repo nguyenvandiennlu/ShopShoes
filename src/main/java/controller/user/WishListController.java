@@ -70,17 +70,21 @@ public class WishListController extends HttpServlet {
         try {
             if ("remove".equals(action)) {
                 wishlistDao.remove(userId, productId);
+                int newCount = wishlistDao.countByUser(userId);
+                session.setAttribute("wishlistCount", newCount);
                 if (isAjax) {
                     resp.setContentType("application/json;charset=UTF-8");
-                    resp.getWriter().write("{\"success\":true,\"action\":\"removed\"}");
+                    resp.getWriter().write("{\"success\":true,\"action\":\"removed\",\"wishlistCount\":" + newCount + "}");
                 } else {
                     resp.sendRedirect(req.getContextPath() + "/wishlist");
                 }
             } else {
                 wishlistDao.add(userId, productId);
+                int newCount = wishlistDao.countByUser(userId);
+                session.setAttribute("wishlistCount", newCount);
                 if (isAjax) {
                     resp.setContentType("application/json;charset=UTF-8");
-                    resp.getWriter().write("{\"success\":true,\"action\":\"added\"}");
+                    resp.getWriter().write("{\"success\":true,\"action\":\"added\",\"wishlistCount\":" + newCount + "}");
                 } else {
                     resp.sendRedirect(req.getContextPath() + "/product?id=" + productId);
                 }

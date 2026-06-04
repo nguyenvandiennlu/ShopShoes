@@ -245,6 +245,29 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     };
 
+    // Cập nhật badge wishlist trên header
+    window.updateWishlistBadge = (count) => {
+        const badges = document.querySelectorAll(".wishlist-badge");
+        const wishlistBtns = document.querySelectorAll(".wishlist-btn");
+
+        if (count > 0) {
+            if (badges.length > 0) {
+                badges.forEach(b => { b.textContent = count; });
+            } else {
+                // Tạo badge mới nếu chưa có
+                wishlistBtns.forEach(btn => {
+                    const b = document.createElement("span");
+                    b.className = "cart-badge wishlist-badge";
+                    b.textContent = count;
+                    btn.appendChild(b);
+                });
+            }
+        } else {
+            // Xóa badge nếu count = 0
+            badges.forEach(b => b.remove());
+        }
+    };
+
     // WISHLIST TOGGLE – thêm/hủy yêu thích không reload trang
     const btnWishlistToggle = document.getElementById("btn-wishlist-toggle");
     if (btnWishlistToggle) {
@@ -295,6 +318,8 @@ document.addEventListener("DOMContentLoaded", () => {
                         btnWishlistToggle.querySelector("ion-icon").setAttribute("name", "heart-outline");
                         showToast("💔 Đã bỏ khỏi danh sách yêu thích!");
                     }
+                    // Cập nhật badge wishlist trên header
+                    updateWishlistBadge(data.wishlistCount);
                     btnWishlistToggle.disabled = false;
                 })
                 .catch(() => {

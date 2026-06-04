@@ -95,9 +95,12 @@
                         </li>
 
                         <!-- WISHLIST -->
-                        <li class="nav-action-item">
-                            <a href="${pageContext.request.contextPath}/wishlist" class="nav-action-btn" title="Yêu thích">
+                        <li class="nav-action-item" style="position:relative">
+                            <a href="${pageContext.request.contextPath}/wishlist" class="nav-action-btn wishlist-btn" title="Yêu thích">
                                 <ion-icon name="heart-outline"></ion-icon>
+                                <c:if test="${not empty sessionScope.wishlistCount and sessionScope.wishlistCount > 0}">
+                                    <span class="cart-badge wishlist-badge">${sessionScope.wishlistCount}</span>
+                                </c:if>
                             </a>
                         </li>
 
@@ -198,9 +201,12 @@
                         </li>
 
                         <!-- WISHLIST -->
-                        <li class="nav-action-item">
-                            <a href="${pageContext.request.contextPath}/wishlist" class="nav-action-btn">
+                        <li class="nav-action-item" style="position:relative">
+                            <a href="${pageContext.request.contextPath}/wishlist" class="nav-action-btn wishlist-btn">
                                 <ion-icon name="heart-outline"></ion-icon>
+                                <c:if test="${not empty sessionScope.wishlistCount and sessionScope.wishlistCount > 0}">
+                                    <span class="cart-badge wishlist-badge">${sessionScope.wishlistCount}</span>
+                                </c:if>
                             </a>
                         </li>
 

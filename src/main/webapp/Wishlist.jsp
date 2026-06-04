@@ -99,6 +99,25 @@
         }, 2500);
     }
 
+    function updateWishlistBadgeHeader(count) {
+        const badges = document.querySelectorAll(".wishlist-badge");
+        const wishlistBtns = document.querySelectorAll(".wishlist-btn");
+        if (count > 0) {
+            if (badges.length > 0) {
+                badges.forEach(b => { b.textContent = count; });
+            } else {
+                wishlistBtns.forEach(btn => {
+                    const b = document.createElement("span");
+                    b.className = "cart-badge wishlist-badge";
+                    b.textContent = count;
+                    btn.appendChild(b);
+                });
+            }
+        } else {
+            badges.forEach(b => b.remove());
+        }
+    }
+
     function removeWishlistItem(btn, productId) {
         btn.disabled = true;
         btn.textContent = "Đang xoá...";
@@ -124,8 +143,7 @@
             return res.json();
         })
         .then(data => {
-            if (data.success) {
-                // Xóa dòng sản phẩm + separator khỏi DOM không reload trang
+            if (data && data.success) {
                 const item = document.getElementById("wishlist-item-" + productId);
                 const sep  = document.getElementById("wishlist-sep-"  + productId);
                 if (item) item.remove();
@@ -133,7 +151,9 @@
 
                 showWishlistToast("💔 Đã xoá khỏi danh sách yêu thích!");
 
-                // Nếu danh sách trống → hiện thông báo trống
+                // Cập nhật badge trên header
+                updateWishlistBadgeHeader(data.wishlistCount || 0);
+
                 const remaining = document.querySelectorAll(".product-item");
                 if (remaining.length === 0) {
                     document.getElementById("wishlist-items-list").innerHTML =
