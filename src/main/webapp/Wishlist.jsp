@@ -69,7 +69,7 @@
                             Xem sản phẩm
                         </a>
                         <button type="button" class="action-btn delete-btn"
-                                onclick="removeWishlistItem(this, ${p.id})">
+                                onclick="confirmRemoveWishlist(this, ${p.id}, '${p.name}')">
                             Xoá
                         </button>
                     </div>
@@ -83,10 +83,27 @@
 
 <jsp:include page="Footer.jsp" />
 <jsp:include page="body-scripts.jsp" />
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
 <script>
-    // Lấy context path từ thẻ meta trong head-resources hoặc từ URL hiện tại
-    const WISHLIST_URL = window.location.pathname; // luôn là /ShopShoes/wishlist
+    const WISHLIST_URL = window.location.pathname;
+
+    function confirmRemoveWishlist(btn, productId, productName) {
+        Swal.fire({
+            title: 'Xác nhận xóa?',
+            html: 'Bạn có chắc chắn muốn xóa <b>' + productName + '</b> khỏi danh sách yêu thích?',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#d33',
+            cancelButtonColor: '#3085d6',
+            confirmButtonText: 'Có, xóa ngay!',
+            cancelButtonText: 'Hủy bỏ'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                removeWishlistItem(btn, productId);
+            }
+        });
+    }
 
     function showWishlistToast(msg) {
         const toast = document.getElementById("wishlist-toast");
