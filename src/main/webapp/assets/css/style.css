@@ -560,11 +560,32 @@ body {
   visibility: visible;
 }
 
+/* Icon wishlist + cart cho compact mobile header — mặc định ẨN, chỉ hiện trên mobile */
+.mobile-compact-icons {
+  display: none;
+  align-items: center;
+  gap: 4px;
+}
+
+.mobile-compact-icons .nav-action-btn {
+  font-size: 24px;
+  color: var(--eerie-black);
+  padding: 6px;
+  position: relative;
+}
+
 .nav-open-btn {
   font-size: 30px;
   background: black;
   color: var(--white);
   padding: 8px;
+}
+
+/* Hiện compact icons trên mobile (<992px) */
+@media (max-width: 991px) {
+  .mobile-compact-icons {
+    display: flex !important;
+  }
 }
 
 .nav-open-btn:is(:hover, :focus) {
@@ -689,6 +710,22 @@ body {
   display: grid;
   place-items: center;
   border-radius: 50%;
+}
+
+/* Badge số hiện sau text trong mobile drawer (Yêu thích 1, Giỏ hàng 10) */
+.nav-badge-count {
+  margin-left: auto;
+  background: var(--bittersweet, #e84343);
+  color: #fff;
+  font-size: 11px;
+  font-weight: 700;
+  min-width: 20px;
+  height: 20px;
+  border-radius: 10px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 5px;
 }
 
 /* Cart Badge */
@@ -1379,7 +1416,7 @@ a.footer-link:is(:hover, :focus) {
   .navbar .logo,
   .navbar,
   .overlay {
-    display: none;
+    display: none !important;
   }
 
   /* Show desktop elements */
