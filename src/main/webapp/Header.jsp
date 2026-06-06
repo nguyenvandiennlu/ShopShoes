@@ -95,9 +95,12 @@
                         </li>
 
                         <!-- WISHLIST -->
-                        <li class="nav-action-item">
-                            <a href="${pageContext.request.contextPath}/wishlist" class="nav-action-btn" title="Yêu thích">
+                        <li class="nav-action-item" style="position:relative">
+                            <a href="${pageContext.request.contextPath}/wishlist" class="nav-action-btn wishlist-btn" title="Yêu thích">
                                 <ion-icon name="heart-outline"></ion-icon>
+                                <c:if test="${not empty sessionScope.wishlistCount and sessionScope.wishlistCount > 0}">
+                                    <span class="cart-badge wishlist-badge">${sessionScope.wishlistCount}</span>
+                                </c:if>
                             </a>
                         </li>
 
@@ -199,8 +202,12 @@
 
                         <!-- WISHLIST -->
                         <li class="nav-action-item">
-                            <a href="${pageContext.request.contextPath}/wishlist" class="nav-action-btn">
+                            <a href="${pageContext.request.contextPath}/wishlist" class="nav-action-btn wishlist-btn">
                                 <ion-icon name="heart-outline"></ion-icon>
+                                <span class="nav-action-text">Yêu thích</span>
+                                <c:if test="${not empty sessionScope.wishlistCount and sessionScope.wishlistCount > 0}">
+                                    <span class="nav-badge-count">${sessionScope.wishlistCount}</span>
+                                </c:if>
                             </a>
                         </li>
 
@@ -208,6 +215,7 @@
                         <li class="nav-action-item">
                             <a href="${pageContext.request.contextPath}/cart" class="nav-action-btn cart-btn">
                                 <ion-icon name="bag-outline"></ion-icon>
+                                <span class="nav-action-text">Giỏ hàng</span>
                                 <c:set var="cartCountMobile" value="0" />
                                 <c:if test="${not empty sessionScope.cart}">
                                     <c:forEach var="entry" items="${sessionScope.cart}">
@@ -215,7 +223,7 @@
                                     </c:forEach>
                                 </c:if>
                                 <c:if test="${cartCountMobile > 0}">
-                                    <span class="cart-badge">${cartCountMobile}</span>
+                                    <span class="nav-badge-count">${cartCountMobile}</span>
                                 </c:if>
                             </a>
                         </li>

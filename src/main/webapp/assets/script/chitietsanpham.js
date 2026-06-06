@@ -1,15 +1,24 @@
 document.addEventListener("DOMContentLoaded", () => {
+    console.log("[JS] chitietsanpham.js DOMContentLoaded fired");
 
     const infoBox       = document.querySelector(".product-info-box");
-    
+
     // Nếu không có infoBox, skip script này
     if (!infoBox) {
         console.warn("product-info-box element not found. Skipping chitietsanpham.js");
         return;
     }
-    
+
+    console.log("[JS] infoBox:", infoBox);
+
+    if (!infoBox) {
+        console.error("[JS] FATAL: .product-info-box not found! JS will not work.");
+        return;
+    }
+
     const productId     = infoBox.dataset.productId;
     const contextPath   = infoBox.dataset.contextPath;
+    console.log("[JS] productId:", productId, "| contextPath:", contextPath);
 
     const stockEl           = document.querySelector("[data-stock]");
     const sizeListEl        = document.querySelector(".size-list");
@@ -19,12 +28,14 @@ document.addEventListener("DOMContentLoaded", () => {
     const hiddenSizeId      = document.querySelector("input[name='sizeId']");
     const btnAddCart        = document.querySelector(".btn-add-cart");
     const btnBuyNow         = document.querySelector(".btn-buy-now");
+    console.log("[JS] btnAddCart:", btnAddCart);
 
     let currentColorId = document.querySelector(".color-dot.selected")?.dataset.colorId ?? null;
     let currentSizeId  = document.querySelector(".size-btn.selected")?.dataset.sizeId  ?? null;
 
     if (btnAddCart) {
         btnAddCart.addEventListener("click", (e) => {
+            console.log("[JS] btnAddCart clicked! Calling preventDefault...");
             e.preventDefault();
 
             const colorId  = hiddenColorId.value;
@@ -57,8 +68,35 @@ document.addEventListener("DOMContentLoaded", () => {
                 .then(data => {
                     if (data.success) {
                         showToast("🛒 Đã thêm sản phẩm vào Giỏ hàng thành công!");
+
+                        // Cập nhật badge giỏ hàng
+                        const addedQty = parseInt(quantity) || 1;
+                        const existingBadges = document.querySelectorAll(".cart-badge");
+                        const currentCount = parseInt(existingBadges[0]?.textContent) || 0;
+
+                        console.log("[Cart] data.cartCount:", data.cartCount, "| currentCount:", currentCount, "| addedQty:", addedQty);
+
+                        // Dùng server count nếu lớn hơn current, nếu không thì cộng local
+                        const newCount = (data.cartCount && data.cartCount > currentCount)
+                            ? data.cartCount
+                            : currentCount + addedQty;
+
+                        console.log("[Cart] newCount →", newCount);
+
+                        if (existingBadges.length > 0) {
+                            existingBadges.forEach(b => { b.textContent = newCount; });
+                        } else {
+                            document.querySelectorAll(".cart-btn").forEach(cartBtn => {
+                                const b = document.createElement("span");
+                                b.className = "cart-badge";
+                                b.textContent = newCount;
+                                cartBtn.appendChild(b);
+                            });
+                        }
                     }
                 })
+
+
                 .catch(() => {
                     showToast("❌ Có lỗi xảy ra, vui lòng thử lại!");
                 });
@@ -214,19 +252,91 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     };
 
-    const navOpenBtn  = document.querySelector(".nav-open-btn");
-    const navCloseBtn = document.querySelector(".nav-close-btn");
-    const navbar      = document.querySelector(".navbar");
-    const overlay     = document.querySelector(".overlay");
+    // Cập nhật badge wishlist trên header
+    window.updateWishlistBadge = (count) => {
+        const badges = document.querySelectorAll(".wishlist-badge");
+        const wishlistBtns = document.querySelectorAll(".wishlist-btn");
 
-    const toggleNav = () => {
-        navbar?.classList.toggle("active");
-        overlay?.classList.toggle("active");
+        if (count > 0) {
+            if (badges.length > 0) {
+                badges.forEach(b => { b.textContent = count; });
+            } else {
+                // Tạo badge mới nếu chưa có
+                wishlistBtns.forEach(btn => {
+                    const b = document.createElement("span");
+                    b.className = "cart-badge wishlist-badge";
+                    b.textContent = count;
+                    btn.appendChild(b);
+                });
+            }
+        } else {
+            // Xóa badge nếu count = 0
+            badges.forEach(b => b.remove());
+        }
     };
 
-    navOpenBtn?.addEventListener("click", toggleNav);
-    navCloseBtn?.addEventListener("click", toggleNav);
-    overlay?.addEventListener("click", toggleNav);
+    // WISHLIST TOGGLE – thêm/hủy yêu thích không reload trang
+    const btnWishlistToggle = document.getElementById("btn-wishlist-toggle");
+    if (btnWishlistToggle) {
+        btnWishlistToggle.addEventListener("click", () => {
+            const action = btnWishlistToggle.dataset.action; // "add" hoặc "remove"
+
+            const params = new URLSearchParams();
+            params.append("productId", productId);
+            params.append("action",    action);
+
+            // Disable tạm để tránh double click
+            btnWishlistToggle.disabled = true;
+
+            fetch(`${contextPath}/wishlist`, {
+                method:  "POST",
+                headers: {
+                    "X-Requested-With": "XMLHttpRequest",
+                    "Content-Type": "application/x-www-form-urlencoded"
+                },
+                body: params
+            })
+                .then(res => {
+                    if (res.status === 401) {
+                        window.location.href = `${contextPath}/login`;
+                        return null;
+                    }
+                    return res.json().catch(() => ({}));
+                })
+                .then(data => {
+                    if (!data || !data.success) {
+                        showToast("❌ Có lỗi xảy ra, vui lòng thử lại!");
+                        btnWishlistToggle.disabled = false;
+                        return;
+                    }
+
+                    if (data.action === "added") {
+                        // Vừa thêm vào → đổi sang trạng thái "đã yêu thích"
+                        btnWishlistToggle.dataset.action = "remove";
+                        btnWishlistToggle.classList.add("active");
+                        btnWishlistToggle.title = "Bỏ yêu thích";
+                        btnWishlistToggle.querySelector("ion-icon").setAttribute("name", "heart");
+                        showToast("❤️ Đã thêm vào danh sách yêu thích!");
+                    } else {
+                        // Vừa xóa → đổi sang trạng thái "chưa yêu thích"
+                        btnWishlistToggle.dataset.action = "add";
+                        btnWishlistToggle.classList.remove("active");
+                        btnWishlistToggle.title = "Thêm vào yêu thích";
+                        btnWishlistToggle.querySelector("ion-icon").setAttribute("name", "heart-outline");
+                        showToast("💔 Đã bỏ khỏi danh sách yêu thích!");
+                    }
+                    // Cập nhật badge wishlist trên header
+                    updateWishlistBadge(data.wishlistCount);
+                    btnWishlistToggle.disabled = false;
+                })
+                .catch(() => {
+                    showToast("❌ Có lỗi xảy ra, vui lòng thử lại!");
+                    btnWishlistToggle.disabled = false;
+                });
+        });
+    }
+
+
 
     const urlParams = new URLSearchParams(window.location.search);
     const msg = urlParams.get("msg");

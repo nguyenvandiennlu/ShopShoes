@@ -6,6 +6,7 @@ import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
+import dao.user.WishlistDao;
 import model.user.User;
 import services.cart.CartService;
 import services.user.UserServices;
@@ -98,6 +99,7 @@ public class LoginController extends HttpServlet {
             LoginAttemptTracker.resetAttempts(session);
             session.setAttribute("currentUser", user);
             cartService.mergeSessionIntoDbThenReload(session, user.getId());
+            session.setAttribute("wishlistCount", new WishlistDao().countByUser(user.getId()));
             session.setMaxInactiveInterval(30 * 60);
 
             String rememberMe = req.getParameter("rememberMe");
