@@ -1,6 +1,13 @@
 document.addEventListener("DOMContentLoaded", () => {
 
     const infoBox       = document.querySelector(".product-info-box");
+    
+    // Nếu không có infoBox, skip script này
+    if (!infoBox) {
+        console.warn("product-info-box element not found. Skipping chitietsanpham.js");
+        return;
+    }
+    
     const productId     = infoBox.dataset.productId;
     const contextPath   = infoBox.dataset.contextPath;
 
