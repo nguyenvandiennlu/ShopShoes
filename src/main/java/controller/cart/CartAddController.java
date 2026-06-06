@@ -6,9 +6,11 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import services.cart.CartService;
+import model.cart.CartItem;
 import model.user.User;
 
 import java.io.IOException;
+import java.util.Map;
 
 @WebServlet("/cart/add")
 public class CartAddController extends HttpServlet {
@@ -49,8 +51,18 @@ public class CartAddController extends HttpServlet {
         }
 
         if ("XMLHttpRequest".equals(req.getHeader("X-Requested-With"))) {
+            // Tính tổng số lượng thực tế trong giỏ hàng từ session
+            @SuppressWarnings("unchecked")
+            Map<String, CartItem> cart = (Map<String, CartItem>) session.getAttribute("cart");
+            int cartCount = 0;
+            if (cart != null) {
+                for (CartItem item : cart.values()) {
+                    cartCount += item.getQuantity();
+                }
+            }
             resp.setContentType("application/json;charset=UTF-8");
-            resp.getWriter().write("{\"success\":true}");
+            resp.getWriter().write("{\"success\":true,\"cartCount\":" + cartCount + "}");
+
         } else {
             resp.sendRedirect(req.getContextPath() + "/product?id=" + productId
                     + "&colorId=" + colorId + "&sizeId=" + sizeId + "&msg=cart_added");

@@ -85,6 +85,21 @@ public class WishlistDao {
         }
     }
 
+    public int countByUser(int userId) {
+        try {
+            String sql = "SELECT COUNT(*) FROM wishlist WHERE user_id = :userId";
+            return jdbi.withHandle(handle ->
+                    handle.createQuery(sql)
+                            .bind("userId", userId)
+                            .mapTo(Integer.class)
+                            .one()
+            );
+        } catch (Exception e) {
+            e.printStackTrace();
+            return 0;
+        }
+    }
+
     public List<WishList> findByUser(int userId) {
         try {
             String sql = """

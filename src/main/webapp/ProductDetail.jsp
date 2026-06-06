@@ -1,5 +1,5 @@
-﻿<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
-  <%@ page contentType="text/html;charset=UTF-8" language="java" %>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+<%@ page contentType="text/html;charset=UTF-8" language="java" %>
     <!DOCTYPE html>
     <html lang="vi">
 
@@ -8,8 +8,7 @@
       <meta http-equiv="X-UA-Compatible" content="IE=edge" />
       <meta name="viewport" content="width=device-width, initial-scale=1.0" />
       <title>${product.productDTO.name} - BHD SPORT SHOES</title>
-      <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css"
-        integrity="sha512-2SwdPD6INVrV/lHTZbO2nodKhrnDdJK9/kg2XD1r9uGqPo1cUbujc+IYdlYdEErWNu69gVcYgdxlmVmzTWnetw=="
+      <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css"
         crossorigin="anonymous" referrerpolicy="no-referrer" />
 
       <!--
@@ -178,17 +177,16 @@
                     class="btn-main btn-buy-now" <c:if test="${empty product.currentSizeId}">disabled</c:if>>
                     MUA NGAY
                   </button>
-
-                  <!-- WISHLIST -->
                   <c:choose>
                     <c:when test="${isInWishlist}">
-                      <button class="btn-wishlist active" disabled>
+                      <button type="button" class="btn-wishlist active" id="btn-wishlist-toggle"
+                        data-action="remove" title="Bỏ yêu thích">
                         <ion-icon name="heart"></ion-icon>
                       </button>
                     </c:when>
                     <c:otherwise>
-                      <button type="submit" formaction="${pageContext.request.contextPath}/wishlist"
-                        class="btn-wishlist">
+                      <button type="button" class="btn-wishlist" id="btn-wishlist-toggle"
+                        data-action="add" title="Thêm vào yêu thích">
                         <ion-icon name="heart-outline"></ion-icon>
                       </button>
                     </c:otherwise>
@@ -274,8 +272,7 @@
                         </div>
                       </div>
 
-                      <%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %>
-                      <span class="date">${review.createdAt.toLocalDate()}</span>
+                      <span class="date">${review.createdAt}</span>
                     </div>
 
                     <div class="review-stars">
@@ -402,11 +399,6 @@
       <script type="module" src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.esm.js"></script>
       <script nomodule src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.js"></script>
 
-      <script src="${pageContext.request.contextPath}/assets/script/product-popup.js"></script>
-      <script>
-        window.CONTEXT_PATH = window.CONTEXT_PATH || "${pageContext.request.contextPath}";
-      </script>
-      <script src="${pageContext.request.contextPath}/assets/script/search-autocomplete.js"></script>
     </body>
 
     </html>

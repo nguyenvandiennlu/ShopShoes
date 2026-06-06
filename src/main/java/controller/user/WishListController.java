@@ -48,9 +48,16 @@ public class WishListController extends HttpServlet {
     protected void doPost(HttpServletRequest req, HttpServletResponse resp)
             throws ServletException, IOException {
 
+        boolean isAjax = "XMLHttpRequest".equals(req.getHeader("X-Requested-With"));
         HttpSession session = req.getSession(false);
         if (session == null || session.getAttribute("currentUser") == null) {
-            resp.sendRedirect(req.getContextPath() + "/login");
+            if (isAjax) {
+                resp.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                resp.setContentType("application/json;charset=UTF-8");
+                resp.getWriter().write("{\"success\":false,\"message\":\"Vui lòng đăng nhập!\"}");
+            } else {
+                resp.sendRedirect(req.getContextPath() + "/login");
+            }
             return;
         }
 
@@ -60,13 +67,39 @@ public class WishListController extends HttpServlet {
 
         String action = req.getParameter("action");
 
-        if ("remove".equals(action)) {
-            wishlistDao.remove(userId, productId);
-            resp.sendRedirect(req.getContextPath() + "/wishlist");
-        } else {
-            wishlistDao.add(userId, productId);
-            resp.sendRedirect(req.getContextPath() + "/product?id=" + productId);
+        try {
+            if ("remove".equals(action)) {
+                wishlistDao.remove(userId, productId);
+                int newCount = wishlistDao.countByUser(userId);
+                session.setAttribute("wishlistCount", newCount);
+                if (isAjax) {
+                    resp.setContentType("application/json;charset=UTF-8");
+                    resp.getWriter().write("{\"success\":true,\"action\":\"removed\",\"wishlistCount\":" + newCount + "}");
+                } else {
+                    resp.sendRedirect(req.getContextPath() + "/wishlist");
+                }
+            } else {
+                wishlistDao.add(userId, productId);
+                int newCount = wishlistDao.countByUser(userId);
+                session.setAttribute("wishlistCount", newCount);
+                if (isAjax) {
+                    resp.setContentType("application/json;charset=UTF-8");
+                    resp.getWriter().write("{\"success\":true,\"action\":\"added\",\"wishlistCount\":" + newCount + "}");
+                } else {
+                    resp.sendRedirect(req.getContextPath() + "/product?id=" + productId);
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            if (isAjax) {
+                resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+                resp.setContentType("application/json;charset=UTF-8");
+                resp.getWriter().write("{\"success\":false,\"message\":\"" + e.getMessage() + "\"}");
+            } else {
+                resp.sendRedirect(req.getContextPath() + "/product?id=" + productId);
+            }
         }
+
     }
 
 }

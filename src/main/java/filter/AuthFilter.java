@@ -10,6 +10,7 @@ import jakarta.servlet.annotation.WebFilter;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
+import dao.user.WishlistDao;
 import model.cart.CartItem;
 import model.user.User;
 import services.auth.AuthService;
@@ -66,6 +67,7 @@ public class AuthFilter implements Filter {
                             Map<String, CartItem> guestCart = (Map<String, CartItem>) session.getAttribute("cart");
 
                             session.setAttribute(SESSION_USER, autoLoginUser);
+                            session.setAttribute("wishlistCount", new WishlistDao().countByUser(autoLoginUser.getId()));
 
                             if (guestCart != null && !guestCart.isEmpty()) {
                                 cartService.mergeSessionIntoDbThenReload(session, autoLoginUser.getId());
@@ -81,11 +83,15 @@ public class AuthFilter implements Filter {
                         CookieUtil.removeCookie(httpResponse, REMEMBER_TOKEN_COOKIE);
                     }
                 }
+            } else if (session != null && session.getAttribute("wishlistCount") == null) {
+                // User đã login nhưng session cũ chưa có wishlistCount → lazy-load
+                session.setAttribute("wishlistCount", new WishlistDao().countByUser(currentUser.getId()));
             }
         } catch (Exception e) {
             System.err.println("[AuthFilter] Error in filter: " + e.getMessage());
             e.printStackTrace();
         }
+
 
         try {
             chain.doFilter(httpRequest, httpResponse);
