@@ -25,7 +25,6 @@ public class OtpVerificationController extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp)
             throws ServletException, IOException {
-        // Hiển thị trang xác nhận OTP
         req.getRequestDispatcher("/OtpVerification.jsp").forward(req, resp);
     }
 
@@ -37,19 +36,16 @@ public class OtpVerificationController extends HttpServlet {
 
         String action = req.getParameter("action");
 
-        // Nếu người dùng bỏ qua xác nhận OTP
         if ("skip".equalsIgnoreCase(action)) {
             resp.sendRedirect(req.getContextPath() + "/menufilter?brandId=all");
             return;
         }
 
-        // Nếu người dùng xác nhận OTP
         if ("verify".equalsIgnoreCase(action)) {
             String email = req.getParameter("email");
             String token = req.getParameter("token");
             String otp = req.getParameter("otp");
 
-            // Kiểm tra và xác nhận token
             if (tokenTypeService.verifyEmailByToken(token)) {
                 req.setAttribute("success", "Email đã được xác thực thành công!");
                 resp.sendRedirect(req.getContextPath() + "/menufilter?brandId=all");

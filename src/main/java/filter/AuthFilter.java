@@ -84,7 +84,6 @@ public class AuthFilter implements Filter {
                     }
                 }
             } else if (session != null && session.getAttribute("wishlistCount") == null) {
-                // User đã login nhưng session cũ chưa có wishlistCount → lazy-load
                 session.setAttribute("wishlistCount", new WishlistDao().countByUser(currentUser.getId()));
             }
         } catch (Exception e) {
