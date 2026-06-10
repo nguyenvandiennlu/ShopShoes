@@ -6,9 +6,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Quên mật khẩu - BHD SPORT SHOES</title>
 
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/style.css" />
+    <jsp:include page="head-resources.jsp" />
     <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/forgotpass.css" />
-    <link rel="icon" href="${pageContext.request.contextPath}/assets/favicon_io/favicon.ico" />
 
     <script src="https://www.google.com/recaptcha/api.js" async defer></script>
 

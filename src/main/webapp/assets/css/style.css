@@ -507,6 +507,7 @@ body {
   color: var(--rich-black-fogra-29);
   border-radius: 50%;
   transition: var(--transition-1);
+  vertical-align: middle;
 }
 
 .nav-action-list-desktop .nav-action-btn:is(:hover, :focus) {
@@ -538,6 +539,16 @@ body {
   opacity: 0;
   visibility: hidden;
   transition: opacity 0.2s ease, visibility 0.2s ease;
+}
+
+/* Invisible bridge to prevent gap between icon and dropdown */
+.nav-action-list-desktop .nav-action-dropdown::after {
+  content: "";
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  height: 10px;
 }
 
 .nav-action-list-desktop .dropdown-content a {
@@ -775,6 +786,7 @@ body {
   top: 100%;
   left: 50%;
   transform: translateX(-50%);
+  padding-top: 10px;
 
   background-color: #333;
   min-width: 160px;
@@ -1463,15 +1475,16 @@ a.footer-link:is(:hover, :focus) {
   }
 
   /* Desktop actions */
-  .nav-action-list-desktop {
-    flex-direction: row;
-    gap: 20px;
-  }
+.nav-action-list-desktop {
+  flex-direction: row;
+  gap: 20px;
+  align-items: center;
+}
 
-  .nav-action-list-desktop .nav-action-btn {
-    width: 45px;
-    height: 45px;
-  }
+.nav-action-list-desktop .nav-action-btn {
+  width: 45px;
+  height: 45px;
+}
 
   .nav-action-list-desktop .cart-btn {
     position: relative;

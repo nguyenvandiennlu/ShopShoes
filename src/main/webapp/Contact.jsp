@@ -6,16 +6,8 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Liên Hệ - BHD SPORT SHOES</title>
-
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/style.css" />
+    <jsp:include page="head-resources.jsp" />
     <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/lienhe.css" />
-
-    <link rel="icon" href="${pageContext.request.contextPath}/assets/favicon_io/favicon.ico" />
-
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Josefin+Sans:wght@300;400;500;600;700&family=Roboto:wght@400;500;700&display=swap" rel="stylesheet"/>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css" />
 </head>
 
 <body>

@@ -6,4 +6,3 @@
 
 <!-- Core Scripts -->
 <script src="${pageContext.request.contextPath}/assets/script/reponsive.js"></script>
-<script src="${pageContext.request.contextPath}/assets/script/search-autocomplete.js"></script>

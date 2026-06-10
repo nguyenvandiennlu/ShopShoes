@@ -11,9 +11,8 @@
 <head>
     <meta charset="UTF-8" />
     <title>Đặt lại mật khẩu</title>
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/style.css" />
+    <jsp:include page="head-resources.jsp" />
     <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/reset-password.css" />
-
 </head>
 <body>
 <jsp:include page="Header.jsp"/>
