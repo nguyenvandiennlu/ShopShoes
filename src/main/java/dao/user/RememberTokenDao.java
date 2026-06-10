@@ -26,16 +26,18 @@ public class RememberTokenDao {
 
         try {
             // Bước 1: Tạo handle (connection)
-            int rows = jdbi.withHandle(handle ->
+                Object expiryValue = token.getExpiryDate() == null ? null : java.sql.Timestamp.valueOf(token.getExpiryDate());
+
+                int rows = jdbi.withHandle(handle ->
                     // Bước 2: Tạo update statement
                     handle.createUpdate(sql)
-                            // Bước 3: Bind parameters
-                            .bind("user_id", token.getUserId())
-                            .bind("token", token.getToken())
-                            .bind("expiry_date", token.getExpiryDate())
-                            // Bước 4: Execute
-                            .execute()
-            );
+                        // Bước 3: Bind parameters
+                        .bind("user_id", token.getUserId())
+                        .bind("token", token.getToken())
+                        .bind("expiry_date", expiryValue)
+                        // Bước 4: Execute
+                        .execute()
+                );
 
             System.out.println("✓ [RememberTokenDao] Token inserted for user_id: " + token.getUserId());
             return rows;
