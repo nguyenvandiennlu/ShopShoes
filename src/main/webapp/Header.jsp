@@ -46,8 +46,8 @@
                         method="get">
                         <div class="search-input-wrapper">
                             <input type="search" name="q" id="search-input" placeholder="Tìm kiếm sản phẩm..." />
-                            <button type="button" class="search-close-btn" id="searchCloseBtn">
-                                <ion-icon name="close-outline"></ion-icon>
+                            <button type="submit" class="search-submit-btn" id="searchSubmitBtn">
+                                <ion-icon name="search-outline"></ion-icon>
                             </button>
                         </div>
                         <!-- SEARCH SUGGESTIONS DROPDOWN -->
@@ -63,13 +63,6 @@
                 <!-- RIGHT SECTION: DESKTOP ACTION BUTTONS -->
                 <div class="header-right">
                     <ul class="nav-action-list-desktop">
-                        <!-- SEARCH -->
-                        <li>
-                            <button class="nav-action-btn" id="searchToggleBtn" title="Tìm kiếm">
-                                <ion-icon name="search-outline"></ion-icon>
-                            </button>
-                        </li>
-
                         <!-- USER -->
                         <li class="nav-action-item nav-action-dropdown">
                             <c:choose>
