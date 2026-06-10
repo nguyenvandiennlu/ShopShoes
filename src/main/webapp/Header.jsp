@@ -225,3 +225,8 @@
                 </nav>
             </div>
         </header>
+
+<script>
+    var CONTEXT_PATH = CONTEXT_PATH || "${pageContext.request.contextPath}";
+</script>
+<script src="${pageContext.request.contextPath}/assets/script/search-autocomplete.js"></script>

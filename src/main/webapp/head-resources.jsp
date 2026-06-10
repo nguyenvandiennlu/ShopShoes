@@ -1,7 +1,12 @@
 <%-- Common Head Resources for all pages --%>
+<meta charset="UTF-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+<!-- Favicon -->
+<link rel="icon" href="${pageContext.request.contextPath}/assets/favicon_io/favicon.ico" />
 
 <!-- CSS Links -->
-<link rel="icon" href="${pageContext.request.contextPath}/assets/favicon_io/favicon.ico" />
 <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/style.css" />
 <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/search-autocomplete.css" />
 

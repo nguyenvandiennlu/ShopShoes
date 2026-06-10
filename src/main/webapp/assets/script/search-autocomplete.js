@@ -3,7 +3,7 @@
  * Xử lý hiển thị suggestions khi người dùng gõ từ khóa tìm kiếm
  */
 
-document.addEventListener("DOMContentLoaded", function () {
+function initSearchAutocomplete() {
     const searchInput = document.getElementById("search-input");
     const suggestionsContainer = document.getElementById("search-suggestions");
     const suggestionsList = document.getElementById("suggestions-list");
@@ -52,7 +52,7 @@ document.addEventListener("DOMContentLoaded", function () {
             const keyword = searchInput.value.trim();
             if (keyword) {
                 // Redirect to products page with search query
-                window.location.href = `${CONTEXT_PATH}/products?q=${encodeURIComponent(keyword)}`;
+                window.location.href = CONTEXT_PATH + "/products?q=" + encodeURIComponent(keyword);
             }
         });
     }
@@ -72,7 +72,7 @@ document.addEventListener("DOMContentLoaded", function () {
     function fetchSuggestions(keyword) {
         currentKeyword = keyword;
 
-        fetch(`${CONTEXT_PATH}/search-ajax?q=${encodeURIComponent(keyword)}`)
+        fetch(CONTEXT_PATH + "/search-ajax?q=" + encodeURIComponent(keyword))
             .then(response => {
                 if (!response.ok) {
                     throw new Error("Network response was not ok");
@@ -121,24 +121,18 @@ document.addEventListener("DOMContentLoaded", function () {
         const li = document.createElement("li");
         li.className = "suggestion-item";
 
-        // Scroll arrow (hiện nếu không phải item cuối)
-        const scrollArrow = index === 4 ? "" : "";
-
-        const html = `
-            <a href="${CONTEXT_PATH}/product?id=${product.id}" class="suggestion-link">
-                <div class="suggestion-image">
-                    <img src="${product.mainImageUrl || CONTEXT_PATH + '/assets/images/placeholder.jpg'}" 
-                         alt="${product.name}" />
-                </div>
-                <div class="suggestion-info">
-                    <div class="suggestion-name">${escapeHtml(product.name)}</div>
-                    <div class="suggestion-price">
-                        <span class="final-price">${product.finalPrice}</span>
-                        ${product.price !== product.finalPrice ? `<span class="original-price">${product.price}</span>` : ""}
-                    </div>
-                </div>
-            </a>
-        `;
+        var html = '<a href="' + CONTEXT_PATH + '/product?id=' + product.id + '" class="suggestion-link">' +
+            '<div class="suggestion-image">' +
+            '<img src="' + (product.mainImageUrl || CONTEXT_PATH + '/assets/images/placeholder.jpg') + '" alt="' + escapeHtml(product.name) + '" />' +
+            '</div>' +
+            '<div class="suggestion-info">' +
+            '<div class="suggestion-name">' + escapeHtml(product.name) + '</div>' +
+            '<div class="suggestion-price">' +
+            '<span class="final-price">' + product.finalPrice + '</span>' +
+            (product.price !== product.finalPrice ? '<span class="original-price">' + product.price + '</span>' : '') +
+            '</div>' +
+            '</div>' +
+            '</a>';
 
         li.innerHTML = html;
 
@@ -150,13 +144,6 @@ document.addEventListener("DOMContentLoaded", function () {
             li.classList.add("hover");
         });
 
-        // Click to product detail
-        li.addEventListener("click", function (e) {
-            if (e.target.closest(".suggestion-link")) {
-                // Default behavior - navigate to product
-            }
-        });
-
         return li;
     }
 
@@ -166,8 +153,8 @@ document.addEventListener("DOMContentLoaded", function () {
     function updateFooter(keyword, totalResults, suggestionsCount) {
         if (viewAllLink && suggestionsFooter) {
             let displayCount = totalResults > suggestionsCount ? totalResults : suggestionsCount;
-            viewAllLink.href = `${CONTEXT_PATH}/products?q=${encodeURIComponent(keyword)}`;
-            viewAllLink.innerHTML = `Xem tất cả ${displayCount} sản phẩm`;
+            viewAllLink.href = CONTEXT_PATH + "/products?q=" + encodeURIComponent(keyword);
+            viewAllLink.innerHTML = "Xem tất cả " + displayCount + " sản phẩm";
             suggestionsFooter.style.display = "block";
             viewAllLink.style.display = "block";
         }
@@ -177,13 +164,12 @@ document.addEventListener("DOMContentLoaded", function () {
      * Hiển thị thông báo khi không có kết quả
      */
     function showNoResults(keyword) {
-        suggestionsList.innerHTML = `
-            <li class="suggestion-item no-results">
-                <div class="no-results-message">
-                    Không tìm thấy sản phẩm nào cho "<strong>${escapeHtml(keyword)}</strong>"
-                </div>
-            </li>
-        `;
+        suggestionsList.innerHTML =
+            '<li class="suggestion-item no-results">' +
+            '<div class="no-results-message">' +
+            'Không tìm thấy sản phẩm nào cho "<strong>' + escapeHtml(keyword) + '</strong>"' +
+            '</div>' +
+            '</li>';
 
         // Hide footer
         if (suggestionsFooter) {
@@ -197,11 +183,10 @@ document.addEventListener("DOMContentLoaded", function () {
      * Hiển thị thông báo lỗi
      */
     function showErrorMessage() {
-        suggestionsList.innerHTML = `
-            <li class="suggestion-item error">
-                <div class="error-message">Có lỗi xảy ra khi tìm kiếm</div>
-            </li>
-        `;
+        suggestionsList.innerHTML =
+            '<li class="suggestion-item error">' +
+            '<div class="error-message">Có lỗi xảy ra khi tìm kiếm</div>' +
+            '</li>';
 
         if (suggestionsFooter) {
             suggestionsFooter.style.display = "none";
@@ -232,13 +217,15 @@ document.addEventListener("DOMContentLoaded", function () {
      * Escape HTML để tránh XSS
      */
     function escapeHtml(text) {
-        const map = {
-            "&": "&amp;",
-            "<": "&lt;",
-            ">": "&gt;",
-            '"': "&quot;",
-            "'": "&#039;"
-        };
-        return text.replace(/[&<>"']/g, m => map[m]);
+        var div = document.createElement("div");
+        div.appendChild(document.createTextNode(text));
+        return div.innerHTML;
     }
-});
+}
+
+// Initialize on DOM ready or immediately if already loaded
+if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", initSearchAutocomplete);
+} else {
+    initSearchAutocomplete();
+}
