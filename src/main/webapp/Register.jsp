@@ -192,6 +192,14 @@
     </main>
   <jsp:include page="Footer.jsp" />
 
+  <!-- Loading Overlay -->
+  <div id="registerLoadingOverlay" class="loading-overlay">
+      <div class="loading-container">
+          <div class="spinner"></div>
+          <div class="loading-text">Đang đăng ký...</div>
+      </div>
+  </div>
+
   <jsp:include page="body-scripts.jsp"></jsp:include>
   <script src="${pageContext.request.contextPath}/assets/script/register.js?v=20260406-4"></script>
 

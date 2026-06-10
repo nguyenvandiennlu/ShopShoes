@@ -52,7 +52,8 @@ public class UserServices {
         user.setRole(Role.USER);
         user.setIsActive(true);
         user.setCreatedAt(LocalDateTime.now());
-        user.setFirebaseUID(null);
+        user.setFirebaseUID("");
+        user.setEmailVerified(false);
 
         return userDao.insertUser(user) > 0;
     }
