@@ -217,12 +217,20 @@ public class UserDao {
                 .bind("firebaseUID", firebaseUID)
                 .mapToBean(User.class)
                 .findOne()
-                .orElseThrow(() -> new RuntimeException("Không tìm thấy user")));
+                .orElse(null));
     }
     public boolean updateFirebaseUID(int userId, String firebaseUID) {
         String sql = "UPDATE users SET firebase_uid = :firebaseUID WHERE id = :id";
         return jdbi.withHandle(handle -> handle.createUpdate(sql)
                 .bind("firebaseUID", firebaseUID)
+                .bind("id", userId)
+                .execute()) > 0;
+    }
+
+    public boolean updateAvatarUrl(int userId, String avatarUrl) {
+        String sql = "UPDATE users SET avatar_url = :avatarUrl WHERE id = :id";
+        return jdbi.withHandle(handle -> handle.createUpdate(sql)
+                .bind("avatarUrl", avatarUrl)
                 .bind("id", userId)
                 .execute()) > 0;
     }

@@ -77,6 +77,11 @@ public class UserServices {
             if (user.getFullName() == null || user.getFullName().isBlank()) {
                 user.setFullName(name);
             }
+            if ((user.getAvatarUrl() == null || user.getAvatarUrl().isBlank())
+                    && picture != null && !picture.isBlank()) {
+                user.setAvatarUrl(picture);
+                userDao.updateAvatarUrl(user.getId(), picture);
+            }
             userDao.update(user);
             return userDao.findById(user.getId());
         }
@@ -90,9 +95,14 @@ public class UserServices {
         newUser.setIsActive(true);
         newUser.setPasswordHash("");
         newUser.setAddress("");
+        newUser.setAvatarUrl(picture);
         newUser.setCreatedAt(LocalDateTime.now());
 
         userDao.insertUser(newUser);
+        User createdUser = userDao.findByEmail(email);
+        if (createdUser != null && picture != null && !picture.isBlank()) {
+            userDao.updateAvatarUrl(createdUser.getId(), picture);
+        }
         return userDao.findByEmail(email);
     }
 }

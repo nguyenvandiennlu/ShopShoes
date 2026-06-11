@@ -1,3 +1,0 @@
-ALTER TABLE remember_token
-ADD COLUMN is_active BOOLEAN DEFAULT true,
-ADD COLUMN invalidated_at TIMESTAMP NULL;

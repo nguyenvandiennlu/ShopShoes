@@ -1,4 +1,4 @@
-﻿<%@ page contentType="text/html;charset=UTF-8" language="java" %>
+<%@ page contentType="text/html;charset=UTF-8" language="java" %>
     <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
         <%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %>
             <%@ page import="model.user.User" %>
@@ -15,6 +15,7 @@
                         <title>BHD - SPORT SHOES</title>
                         <jsp:include page="head-resources.jsp" />
                         <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/account.css" />
+                        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css" />
                     </head>
 
                     <body id="top">
@@ -31,6 +32,25 @@
                                 <div class="account-layout">
                                     <aside class="account-sidebar">
                                         <div class="user-info-summary">
+                                            <!-- AVATAR UPLOAD -->
+                                            <div class="avatar-wrapper" id="avatarWrapper" title="Nhấn để thay đổi ảnh">
+                                                <img
+                                                    id="avatarPreview"
+                                                    src="<c:choose><c:when test='${not empty sessionScope.currentUser.avatarUrl}'>${sessionScope.currentUser.avatarUrl}</c:when><c:otherwise>data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='100' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='50' fill='%23e8e8e8'/%3E%3Ccircle cx='50' cy='38' r='18' fill='%23bbb'/%3E%3Cellipse cx='50' cy='85' rx='28' ry='20' fill='%23bbb'/%3E%3C/svg%3E</c:otherwise></c:choose>"
+                                                    alt="Ảnh đại diện"
+                                                    class="avatar-img"
+                                                    onerror="this.onerror=null;this.src='data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'100\' height=\'100\' viewBox=\'0 0 100 100\'%3E%3Ccircle cx=\'50\' cy=\'50\' r=\'50\' fill=\'%23e8e8e8\'/%3E%3Ccircle cx=\'50\' cy=\'38\' r=\'18\' fill=\'%23bbb\'/%3E%3Cellipse cx=\'50\' cy=\'85\' rx=\'28\' ry=\'20\' fill=\'%23bbb\'/%3E%3C/svg%3E'"
+                                                />
+                                                <div class="avatar-overlay">
+                                                    <ion-icon name="camera-outline"></ion-icon>
+                                                    <span>Đổi ảnh</span>
+                                                </div>
+                                                <div class="avatar-loading" id="avatarLoading" style="display:none">
+                                                    <div class="avatar-spinner"></div>
+                                                </div>
+                                            </div>
+                                            <input type="file" id="avatarInput" accept="image/jpeg,image/png,image/webp,image/gif" style="display:none" />
+
                                             <p class="user-name-display">
                                                 Xin chào, <strong>
                                                     <c:out value="${sessionScope.currentUser.fullName}"
@@ -72,11 +92,11 @@
                                                     data-content="info">
                                                     <h3 class="h3 content-title">Thông Tin Cá Nhân</h3>
                                                     <p>Quản lý tên, email và số điện thoại của bạn.</p>
-                                                    <form class="account-form" method="post"
+                                                    <form id="profileForm" class="account-form" method="post"
                                                         action="${pageContext.request.contextPath}/account">
                                                         <input type="hidden" name="action" value="update-profile" />
                                                         <div class="input-group">
-                                                            <label for="full-name">Họ và Tên</label>
+                                                            <label for="full-name">Họ và Tên <span class="required-star">*</span></label>
                                                             <input type="text" id="full-name" name="fullName"
                                                                 value="<c:out value='${sessionScope.currentUser.fullName}'/>"
                                                                 required />
@@ -88,7 +108,7 @@
                                                                 readonly required />
                                                         </div>
                                                         <div class="input-group">
-                                                            <label for="phone">Số điện thoại</label>
+                                                            <label for="phone">Số điện thoại <span class="required-star">*</span></label>
                                                             <input type="tel" id="phone" name="phoneNumber"
                                                                 value="<c:out value='${sessionScope.currentUser.phoneNumber}'/>"
                                                                 required />
@@ -108,26 +128,31 @@
                                                     <h3 class="h3 content-title">Đổi Mật Khẩu</h3>
                                                     <p>Đặt mật khẩu mới để tăng cường bảo mật tài khoản.</p>
 
-                                                    <form class="account-form" method="post"
+                                                    <div class="password-security-notice">
+                                                        <ion-icon name="shield-half-outline"></ion-icon>
+                                                        <span>Để đổi mật khẩu, bạn bắt buộc phải nhập chính xác <strong>Mật khẩu cũ (Mật khẩu hiện tại)</strong> để xác thực.</span>
+                                                    </div>
+
+                                                    <form id="passwordForm" class="account-form" method="post"
                                                         action="${pageContext.request.contextPath}/account">
                                                         <input type="hidden" name="action" value="change-password" />
 
-                                                        <div class="input-group">
-                                                            <label for="current-password">Mật khẩu hiện tại</label>
+                                                        <div class="input-group highlighted-group">
+                                                            <label for="current-password" class="highlight-label">Mật khẩu cũ (Mật khẩu hiện tại) <span class="required-star">*</span></label>
                                                             <input type="password" id="current-password"
-                                                                name="currentPassword" required />
+                                                                name="currentPassword" placeholder="Nhập mật khẩu bạn đang sử dụng" required />
                                                         </div>
 
                                                         <div class="input-group">
-                                                            <label for="new-password">Mật khẩu mới</label>
+                                                            <label for="new-password">Mật khẩu mới <span class="required-star">*</span></label>
                                                             <input type="password" id="new-password" name="newPassword"
-                                                                required />
+                                                                placeholder="Tối thiểu 8 ký tự, gồm chữ hoa, thường, số, ký tự đặc biệt" required />
                                                         </div>
 
                                                         <div class="input-group">
-                                                            <label for="confirm-password">Xác nhận mật khẩu mới</label>
+                                                            <label for="confirm-password">Xác nhận mật khẩu mới <span class="required-star">*</span></label>
                                                             <input type="password" id="confirm-password"
-                                                                name="confirmPassword" required />
+                                                                name="confirmPassword" placeholder="Nhập lại mật khẩu mới ở trên" required />
                                                         </div>
 
                                                         <button type="submit" class="btn btn-primary btn-save">Đổi Mật
@@ -315,9 +340,13 @@
                         <jsp:include page="Footer.jsp" />
 
                         <jsp:include page="body-scripts.jsp"></jsp:include>
+                        <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+                        <script>
+                            // Inject context path từ server vào JS
+                            const CONTEXT_PATH = "${pageContext.request.contextPath}";
+                        </script>
                         <script src="${pageContext.request.contextPath}/assets/script/pageaccount.js"></script>
                         <script src="${pageContext.request.contextPath}/assets/script/account.js"></script>
-
 
                     </body>
 

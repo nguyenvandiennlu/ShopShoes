@@ -77,7 +77,19 @@
                                 </c:when>
                                 <c:otherwise>
                                     <a href="#" class="nav-action-btn" title="Tài khoản">
-                                        <ion-icon name="person-outline"></ion-icon>
+                                        <c:choose>
+                                            <c:when test="${not empty sessionScope.currentUser.avatarUrl}">
+                                                <img
+                                                    src="${sessionScope.currentUser.avatarUrl}"
+                                                    alt="${sessionScope.currentUser.fullName}"
+                                                    class="header-avatar"
+                                                    onerror="this.style.display='none'; this.nextElementSibling.style.display='block';" />
+                                                <ion-icon name="person-outline" style="display:none"></ion-icon>
+                                            </c:when>
+                                            <c:otherwise>
+                                                <ion-icon name="person-outline"></ion-icon>
+                                            </c:otherwise>
+                                        </c:choose>
                                     </a>
                                     <div class="dropdown-content">
                                         <a href="${pageContext.request.contextPath}/account">Tài khoản</a>
@@ -180,7 +192,19 @@
                                 </c:when>
                                 <c:otherwise>
                                     <a href="#" class="nav-action-btn">
-                                        <ion-icon name="person-outline"></ion-icon>
+                                        <c:choose>
+                                            <c:when test="${not empty sessionScope.currentUser.avatarUrl}">
+                                                <img
+                                                    src="${sessionScope.currentUser.avatarUrl}"
+                                                    alt="${sessionScope.currentUser.fullName}"
+                                                    class="header-avatar header-avatar-mobile"
+                                                    onerror="this.style.display='none'; this.nextElementSibling.style.display='block';" />
+                                                <ion-icon name="person-outline" style="display:none"></ion-icon>
+                                            </c:when>
+                                            <c:otherwise>
+                                                <ion-icon name="person-outline"></ion-icon>
+                                            </c:otherwise>
+                                        </c:choose>
                                         <span class="nav-action-text">
                                             ${sessionScope.currentUser.fullName}
                                         </span>
