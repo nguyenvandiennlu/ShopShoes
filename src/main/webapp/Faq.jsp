@@ -213,17 +213,7 @@
 - #FOOTER
 -->
     <jsp:include page="Footer.jsp" />
-    <!-
-- ionicon link
--->
-    <script
-      type="module"
-      src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.esm.js"
-    ></script>
-    <script
-      nomodule
-      src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.js"
-    ></script>
+    <jsp:include page="body-scripts.jsp" />
     <script>
       document.addEventListener("DOMContentLoaded", function () {
         const faqItems = document.querySelectorAll(".faq-item");
@@ -247,6 +237,5 @@
         });
       });
     </script>
-    <script src="${pageContext.request.contextPath}/assets/script/reponsive.js"></script>
   </body>
 </html>
