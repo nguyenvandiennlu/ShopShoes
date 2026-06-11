@@ -217,7 +217,7 @@ public class UserDao {
                 .bind("firebaseUID", firebaseUID)
                 .mapToBean(User.class)
                 .findOne()
-                .orElseThrow(() -> new RuntimeException("Không tìm thấy user")));
+                .orElse(null));
     }
     public boolean updateFirebaseUID(int userId, String firebaseUID) {
         String sql = "UPDATE users SET firebase_uid = :firebaseUID WHERE id = :id";
