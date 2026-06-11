@@ -197,4 +197,101 @@
             alert(message);
         }
     }
+
+    // ─── PROFILE UPDATE AJAX ───────────────────────────────────────────────────
+    const profileForm = document.getElementById("profileForm");
+    if (profileForm) {
+        profileForm.addEventListener("submit", function (e) {
+            e.preventDefault();
+
+            const submitBtn = profileForm.querySelector("button[type='submit']");
+            if (submitBtn) submitBtn.disabled = true;
+
+            const formData = new URLSearchParams(new FormData(profileForm));
+            const actionUrl = profileForm.getAttribute("action") || ((typeof CONTEXT_PATH !== "undefined" ? CONTEXT_PATH : "") + "/account");
+
+            fetch(actionUrl, {
+                method: "POST",
+                headers: {
+                    "X-Requested-With": "XMLHttpRequest",
+                    "Content-Type": "application/x-www-form-urlencoded"
+                },
+                body: formData.toString()
+            })
+            .then(r => {
+                if (!r.ok) {
+                    throw new Error("Server trả về mã lỗi: " + r.status);
+                }
+                return r.json();
+            })
+            .then(data => {
+                if (data.success) {
+                    // Cập nhật tên hiển thị ở sidebar và lời chào
+                    const nameStrong = document.querySelector(".user-name-display strong");
+                    if (nameStrong) nameStrong.textContent = data.fullName;
+
+                    showAvatarToast(data.message || "Cập nhật thông tin thành công!", "success");
+                } else {
+                    showAvatarToast(data.message || "Cập nhật thất bại!", "error");
+                }
+            })
+            .catch(err => {
+                showAvatarToast("Lỗi kết nối: " + err.message, "error");
+            })
+            .finally(() => {
+                if (submitBtn) submitBtn.disabled = false;
+            });
+        });
+    }
+
+    // ─── PASSWORD CHANGE AJAX ──────────────────────────────────────────────────
+    const passwordForm = document.getElementById("passwordForm");
+    if (passwordForm) {
+        passwordForm.addEventListener("submit", function (e) {
+            e.preventDefault();
+
+            const newPass = document.getElementById("new-password").value;
+            const confirmPass = document.getElementById("confirm-password").value;
+
+            if (newPass !== confirmPass) {
+                showAvatarToast("Xác nhận mật khẩu mới không khớp!", "error");
+                return;
+            }
+
+            const submitBtn = passwordForm.querySelector("button[type='submit']");
+            if (submitBtn) submitBtn.disabled = true;
+
+            const formData = new URLSearchParams(new FormData(passwordForm));
+            const actionUrl = passwordForm.getAttribute("action") || ((typeof CONTEXT_PATH !== "undefined" ? CONTEXT_PATH : "") + "/account");
+
+            fetch(actionUrl, {
+                method: "POST",
+                headers: {
+                    "X-Requested-With": "XMLHttpRequest",
+                    "Content-Type": "application/x-www-form-urlencoded"
+                },
+                body: formData.toString()
+            })
+            .then(r => {
+                if (!r.ok) {
+                    throw new Error("Server trả về mã lỗi: " + r.status);
+                }
+                return r.json();
+            })
+            .then(data => {
+                if (data.success) {
+                    showAvatarToast(data.message || "Đổi mật khẩu thành công!", "success");
+                    passwordForm.reset(); // Clear all password fields upon success
+                } else {
+                    showAvatarToast(data.message || "Đổi mật khẩu thất bại!", "error");
+                }
+            })
+            .catch(err => {
+                showAvatarToast("Lỗi kết nối: " + err.message, "error");
+            })
+            .finally(() => {
+                if (submitBtn) submitBtn.disabled = false;
+            });
+        });
+    }
 });

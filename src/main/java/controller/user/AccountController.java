@@ -135,7 +135,15 @@ public class AccountController extends HttpServlet {
         String phoneNumber = safe(req.getParameter("phoneNumber"));
         String address = safe(req.getParameter("address"));
 
+        String requestedWith = req.getHeader("X-Requested-With");
+        boolean isAjax = "XMLHttpRequest".equals(requestedWith);
+
         if (fullName.isBlank()) {
+            if (isAjax) {
+                resp.setContentType("application/json;charset=UTF-8");
+                resp.getWriter().print("{\"success\":false,\"message\":\"Họ tên không được để trống.\"}");
+                return;
+            }
             setFlash(req, "Họ tên không được để trống.", "danger");
             resp.sendRedirect(req.getContextPath() + "/account");
             return;
@@ -145,14 +153,25 @@ public class AccountController extends HttpServlet {
                 currentUser.getId(), fullName, phoneNumber, address);
 
         if (success) {
-
             currentUser.setFullName(fullName);
             currentUser.setPhoneNumber(phoneNumber);
             currentUser.setAddress(address);
 
-            setFlash(req, "Cập nhật thông tin thành công!", "success");
+            if (isAjax) {
+                resp.setContentType("application/json;charset=UTF-8");
+                resp.getWriter().print("{\"success\":true,\"message\":\"Cập nhật thông tin thành công!\",\"fullName\":\"" + fullName + "\"}");
+                return;
+            } else {
+                setFlash(req, "Cập nhật thông tin thành công!", "success");
+            }
         } else {
-            setFlash(req, "Cập nhật thất bại. Vui lòng thử lại.", "danger");
+            if (isAjax) {
+                resp.setContentType("application/json;charset=UTF-8");
+                resp.getWriter().print("{\"success\":false,\"message\":\"Cập nhật thất bại. Vui lòng thử lại.\"}");
+                return;
+            } else {
+                setFlash(req, "Cập nhật thất bại. Vui lòng thử lại.", "danger");
+            }
         }
 
         resp.sendRedirect(req.getContextPath() + "/account");
@@ -165,7 +184,15 @@ public class AccountController extends HttpServlet {
         String newPassword = safe(req.getParameter("newPassword"));
         String confirmPassword = safe(req.getParameter("confirmPassword"));
 
+        String requestedWith = req.getHeader("X-Requested-With");
+        boolean isAjax = "XMLHttpRequest".equals(requestedWith);
+
         if (currentPassword.isBlank() || newPassword.isBlank() || confirmPassword.isBlank()) {
+            if (isAjax) {
+                resp.setContentType("application/json;charset=UTF-8");
+                resp.getWriter().print("{\"success\":false,\"message\":\"Vui lòng nhập đầy đủ thông tin mật khẩu.\"}");
+                return;
+            }
             setFlash(req, "Vui lòng nhập đầy đủ thông tin mật khẩu.", "danger");
             resp.sendRedirect(req.getContextPath() + "/account");
             return;
@@ -175,10 +202,21 @@ public class AccountController extends HttpServlet {
                 currentUser.getEmail(), currentPassword, newPassword, confirmPassword);
 
         if ("SUCCESS".equals(result)) {
-            setFlash(req, "Đổi mật khẩu thành công!", "success");
-
+            if (isAjax) {
+                resp.setContentType("application/json;charset=UTF-8");
+                resp.getWriter().print("{\"success\":true,\"message\":\"Đổi mật khẩu thành công!\"}");
+                return;
+            } else {
+                setFlash(req, "Đổi mật khẩu thành công!", "success");
+            }
         } else {
-            setFlash(req, result, "danger");
+            if (isAjax) {
+                resp.setContentType("application/json;charset=UTF-8");
+                resp.getWriter().print("{\"success\":false,\"message\":\"" + result.replace("\"", "\\\"") + "\"}");
+                return;
+            } else {
+                setFlash(req, result, "danger");
+            }
         }
 
         resp.sendRedirect(req.getContextPath() + "/account");

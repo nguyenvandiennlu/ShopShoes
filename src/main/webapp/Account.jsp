@@ -92,11 +92,11 @@
                                                     data-content="info">
                                                     <h3 class="h3 content-title">Thông Tin Cá Nhân</h3>
                                                     <p>Quản lý tên, email và số điện thoại của bạn.</p>
-                                                    <form class="account-form" method="post"
+                                                    <form id="profileForm" class="account-form" method="post"
                                                         action="${pageContext.request.contextPath}/account">
                                                         <input type="hidden" name="action" value="update-profile" />
                                                         <div class="input-group">
-                                                            <label for="full-name">Họ và Tên</label>
+                                                            <label for="full-name">Họ và Tên <span class="required-star">*</span></label>
                                                             <input type="text" id="full-name" name="fullName"
                                                                 value="<c:out value='${sessionScope.currentUser.fullName}'/>"
                                                                 required />
@@ -108,7 +108,7 @@
                                                                 readonly required />
                                                         </div>
                                                         <div class="input-group">
-                                                            <label for="phone">Số điện thoại</label>
+                                                            <label for="phone">Số điện thoại <span class="required-star">*</span></label>
                                                             <input type="tel" id="phone" name="phoneNumber"
                                                                 value="<c:out value='${sessionScope.currentUser.phoneNumber}'/>"
                                                                 required />
@@ -128,26 +128,31 @@
                                                     <h3 class="h3 content-title">Đổi Mật Khẩu</h3>
                                                     <p>Đặt mật khẩu mới để tăng cường bảo mật tài khoản.</p>
 
-                                                    <form class="account-form" method="post"
+                                                    <div class="password-security-notice">
+                                                        <ion-icon name="shield-half-outline"></ion-icon>
+                                                        <span>Để đổi mật khẩu, bạn bắt buộc phải nhập chính xác <strong>Mật khẩu cũ (Mật khẩu hiện tại)</strong> để xác thực.</span>
+                                                    </div>
+
+                                                    <form id="passwordForm" class="account-form" method="post"
                                                         action="${pageContext.request.contextPath}/account">
                                                         <input type="hidden" name="action" value="change-password" />
 
-                                                        <div class="input-group">
-                                                            <label for="current-password">Mật khẩu hiện tại</label>
+                                                        <div class="input-group highlighted-group">
+                                                            <label for="current-password" class="highlight-label">Mật khẩu cũ (Mật khẩu hiện tại) <span class="required-star">*</span></label>
                                                             <input type="password" id="current-password"
-                                                                name="currentPassword" required />
+                                                                name="currentPassword" placeholder="Nhập mật khẩu bạn đang sử dụng" required />
                                                         </div>
 
                                                         <div class="input-group">
-                                                            <label for="new-password">Mật khẩu mới</label>
+                                                            <label for="new-password">Mật khẩu mới <span class="required-star">*</span></label>
                                                             <input type="password" id="new-password" name="newPassword"
-                                                                required />
+                                                                placeholder="Tối thiểu 8 ký tự, gồm chữ hoa, thường, số, ký tự đặc biệt" required />
                                                         </div>
 
                                                         <div class="input-group">
-                                                            <label for="confirm-password">Xác nhận mật khẩu mới</label>
+                                                            <label for="confirm-password">Xác nhận mật khẩu mới <span class="required-star">*</span></label>
                                                             <input type="password" id="confirm-password"
-                                                                name="confirmPassword" required />
+                                                                name="confirmPassword" placeholder="Nhập lại mật khẩu mới ở trên" required />
                                                         </div>
 
                                                         <button type="submit" class="btn btn-primary btn-save">Đổi Mật
