@@ -7,7 +7,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Đăng ký - BHD SPORT SHOES</title>
 
-    <jsp:include page="head-resources.jsp" />
+  <jsp:include page="head-resources.jsp" />
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/loading-overlay.css"/>
     <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/dangnhapvadangki.css" />
     <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/otp-verification.css" />
   </head>
