@@ -143,11 +143,10 @@ public class OrderDao {
         String sql = """
                 SELECT COALESCE(SUM(grand_total), 0)
                 FROM orders
-                WHERE order_status = :status
+                WHERE payment_status = 'PAID'
                 """;
 
         return jdbi.withHandle(handle -> handle.createQuery(sql)
-                .bind("status", enums.OrderStatus.COMPLETED.name())
                 .mapTo(BigDecimal.class)
                 .one());
     }
@@ -185,12 +184,11 @@ public class OrderDao {
         String sql = """
                     SELECT COALESCE(SUM(grand_total), 0)
                     FROM orders
-                    WHERE order_status = :status
+                    WHERE payment_status = 'PAID'
                       AND DATE(created_at) = CURRENT_DATE
                 """;
 
         return jdbi.withHandle(handle -> handle.createQuery(sql)
-                .bind("status", enums.OrderStatus.COMPLETED.name())
                 .mapTo(BigDecimal.class)
                 .one());
     }
