@@ -8,6 +8,7 @@
     <title>Xác thực OTP - BHD SPORT SHOES</title>
 
     <jsp:include page="head-resources.jsp" />
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/loading-overlay.css"/>
     <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/dangnhapvadangki.css" />
     <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/otp-verification.css" />
 </head>
@@ -122,13 +123,8 @@
 
     <jsp:include page="body-scripts.jsp" />
 
-    <!-- Loading Overlay -->
-    <div id="loadingOverlay" class="loading-overlay">
-        <div class="loading-container">
-            <div class="spinner"></div>
-            <div class="loading-text">Đang xử lý...</div>
-        </div>
-    </div>
+    <jsp:include page="LoadingOverlay.jsp"/>
+    <script src="${pageContext.request.contextPath}/assets/script/loading-overlay.js"></script>
 
     <script>
         var CONTEXT_PATH = CONTEXT_PATH || "${pageContext.request.contextPath}";
@@ -152,7 +148,7 @@
                     return;
                 }
                 
-                document.getElementById('loadingOverlay').classList.add('active');
+                showLoadingOverlay('loadingOverlay', 'Đang xác thực OTP...');
             }
         });
 
@@ -211,7 +207,6 @@
                 try {
                     var data = JSON.parse(xhr.responseText);
                     if (data.success) {
-                        // Update token if new one was generated
                         if (data.token) {
                             document.getElementById('otpToken').value = data.token;
                         }

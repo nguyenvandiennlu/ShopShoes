@@ -6,6 +6,7 @@
   <meta charset="UTF-8"/>
   <title>Thanh toán</title>
   <jsp:include page="head-resources.jsp"/>
+  <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/loading-overlay.css"/>
   <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/checkout.css"/>
   <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/order-success.css"/>
 </head>
@@ -136,9 +137,22 @@
 
 <jsp:include page="body-scripts.jsp"/>
 
+<jsp:include page="LoadingOverlay.jsp"/>
+<script src="${pageContext.request.contextPath}/assets/script/loading-overlay.js"></script>
+
 <script>
   const contextPath = '${pageContext.request.contextPath}';
   const subTotalRaw = parseFloat('${subTotalRaw != null ? subTotalRaw : 0}') || 0;
+
+  // Show loading overlay when checkout form is submitted
+  document.addEventListener('DOMContentLoaded', function() {
+    var checkoutForm = document.querySelector('.checkout-form');
+    if (checkoutForm) {
+      checkoutForm.addEventListener('submit', function(e) {
+        showLoadingOverlay('loadingOverlay', 'Đang xử lý đơn hàng...');
+      });
+    }
+  });
 </script>
 
 <script src="${pageContext.request.contextPath}/assets/script/checkout.js"></script>
