@@ -226,4 +226,12 @@ public class UserDao {
                 .bind("id", userId)
                 .execute()) > 0;
     }
+
+    public boolean updateAvatarUrl(int userId, String avatarUrl) {
+        String sql = "UPDATE users SET avatar_url = :avatarUrl WHERE id = :id";
+        return jdbi.withHandle(handle -> handle.createUpdate(sql)
+                .bind("avatarUrl", avatarUrl)
+                .bind("id", userId)
+                .execute()) > 0;
+    }
 }

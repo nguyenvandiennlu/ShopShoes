@@ -1,17 +1,31 @@
 package controller.user;
 
+import com.cloudinary.Cloudinary;
+import com.cloudinary.utils.ObjectUtils;
 import jakarta.servlet.ServletException;
+import jakarta.servlet.annotation.MultipartConfig;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
+import jakarta.servlet.http.Part;
 import model.user.User;
 import services.user.AccountServices;
+import utils.CloudinaryUtil;
 
 import java.io.IOException;
+import java.io.PrintWriter;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
 
 @WebServlet("/account")
+@MultipartConfig(
+        fileSizeThreshold = 1024 * 1024,
+        maxFileSize      = 5 * 1024 * 1024,
+        maxRequestSize   = 6 * 1024 * 1024
+)
 public class AccountController extends HttpServlet {
 
     private AccountServices accountServices;
@@ -58,8 +72,59 @@ public class AccountController extends HttpServlet {
 
         switch (action) {
             case "change-password" -> handlePasswordChange(req, resp, currentUser);
-            case "update-profile" -> handleProfileUpdate(req, resp, currentUser);
+            case "update-profile"  -> handleProfileUpdate(req, resp, currentUser);
+            case "upload-avatar"   -> handleAvatarUpload(req, resp, currentUser);
             default -> resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Invalid action");
+        }
+    }
+    private void handleAvatarUpload(HttpServletRequest req, HttpServletResponse resp, User currentUser)
+            throws IOException, ServletException {
+
+        resp.setContentType("application/json;charset=UTF-8");
+        PrintWriter out = resp.getWriter();
+
+        try {
+            Part filePart = req.getPart("avatar");
+            if (filePart == null || filePart.getSize() == 0) {
+                out.print("{\"success\":false,\"message\":\"Vui lòng chọn ảnh.\"}");
+                return;
+            }
+
+            String contentType = filePart.getContentType();
+            List<String> allowedTypes = Arrays.asList("image/jpeg", "image/png", "image/webp", "image/gif");
+            if (contentType == null || !allowedTypes.contains(contentType.toLowerCase())) {
+                out.print("{\"success\":false,\"message\":\"Chỉ chấp nhận ảnh JPG, PNG, WEBP hoặc GIF.\"}");
+                return;
+            }
+
+            Cloudinary cloudinary = CloudinaryUtil.getInstance();
+            byte[] fileBytes = filePart.getInputStream().readAllBytes();
+
+            Map uploadResult = cloudinary.uploader().upload(fileBytes, ObjectUtils.asMap(
+                    "folder", "avatars",
+                    "public_id", "user_" + currentUser.getId(),
+                    "overwrite", true,
+                    "resource_type", "image"
+            ));
+
+            String avatarUrl = (String) uploadResult.get("secure_url");
+            if (avatarUrl == null || avatarUrl.isBlank()) {
+                out.print("{\"success\":false,\"message\":\"Upload thất bại, vui lòng thử lại.\"}");
+                return;
+            }
+
+            boolean updated = accountServices.updateAvatarUrl(currentUser.getId(), avatarUrl);
+            if (!updated) {
+                out.print("{\"success\":false,\"message\":\"Lưu ảnh vào cơ sở dữ liệu thất bại.\"}");
+                return;
+            }
+            currentUser.setAvatarUrl(avatarUrl);
+
+            out.print("{\"success\":true,\"avatarUrl\":\"" + avatarUrl + "\"}");
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            out.print("{\"success\":false,\"message\":\"Lỗi hệ thống: " + e.getMessage().replace("\"", "'") + "\"}");
         }
     }
 

@@ -36,6 +36,10 @@ public class AccountServices {
         return userDao.updateProfile(userId, fullName, phone, address);
     }
 
+    public boolean updateAvatarUrl(int userId, String avatarUrl) {
+        return userDao.updateAvatarUrl(userId, avatarUrl);
+    }
+
     public String changePassword(String email, String currentPassword, String newPassword, String confirmPassword) {
         if (newPassword == null || !newPassword.equals(confirmPassword)) {
             return "Mật khẩu xác nhận không khớp!";

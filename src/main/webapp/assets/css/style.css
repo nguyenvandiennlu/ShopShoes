@@ -520,6 +520,26 @@ body {
   --ionicon-stroke-width: 30px;
 }
 
+.header-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  object-fit: cover;
+  display: block;
+  border: 1px solid var(--gainsboro);
+}
+
+.nav-action-list-desktop .header-avatar {
+  width: 34px;
+  height: 34px;
+}
+
+.header-avatar-mobile {
+  flex: 0 0 auto;
+  width: 28px;
+  height: 28px;
+}
+
 /* DESKTOP DROPDOWN */
 .nav-action-list-desktop .nav-action-dropdown {
   position: relative;
