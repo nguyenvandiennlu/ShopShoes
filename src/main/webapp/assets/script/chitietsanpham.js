@@ -61,22 +61,23 @@ document.addEventListener("DOMContentLoaded", () => {
                 },
                 body: params
             })
-                .then(res => {
-                    if (!res.ok) throw new Error();
+                .then(async res => {
+                    if (!res.ok) {
+                        const data = await res.json().catch(() => ({}));
+                        throw new Error(data.error || "Có lỗi xảy ra, vui lòng thử lại!");
+                    }
                     return res.json();
                 })
                 .then(data => {
                     if (data.success) {
                         showToast("🛒 Đã thêm sản phẩm vào Giỏ hàng thành công!");
 
-                        // Cập nhật badge giỏ hàng
                         const addedQty = parseInt(quantity) || 1;
                         const existingBadges = document.querySelectorAll(".cart-badge");
                         const currentCount = parseInt(existingBadges[0]?.textContent) || 0;
 
                         console.log("[Cart] data.cartCount:", data.cartCount, "| currentCount:", currentCount, "| addedQty:", addedQty);
 
-                        // Dùng server count nếu lớn hơn current, nếu không thì cộng local
                         const newCount = (data.cartCount && data.cartCount > currentCount)
                             ? data.cartCount
                             : currentCount + addedQty;
@@ -95,7 +96,6 @@ document.addEventListener("DOMContentLoaded", () => {
                         }
                     }
                 })
-
 
                 .catch(() => {
                     showToast("❌ Có lỗi xảy ra, vui lòng thử lại!");
@@ -252,7 +252,6 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     };
 
-    // Cập nhật badge wishlist trên header
     window.updateWishlistBadge = (count) => {
         const badges = document.querySelectorAll(".wishlist-badge");
         const wishlistBtns = document.querySelectorAll(".wishlist-btn");
@@ -261,7 +260,6 @@ document.addEventListener("DOMContentLoaded", () => {
             if (badges.length > 0) {
                 badges.forEach(b => { b.textContent = count; });
             } else {
-                // Tạo badge mới nếu chưa có
                 wishlistBtns.forEach(btn => {
                     const b = document.createElement("span");
                     b.className = "cart-badge wishlist-badge";
@@ -270,12 +268,10 @@ document.addEventListener("DOMContentLoaded", () => {
                 });
             }
         } else {
-            // Xóa badge nếu count = 0
             badges.forEach(b => b.remove());
         }
     };
 
-    // WISHLIST TOGGLE – thêm/hủy yêu thích không reload trang
     const btnWishlistToggle = document.getElementById("btn-wishlist-toggle");
     if (btnWishlistToggle) {
         btnWishlistToggle.addEventListener("click", () => {
@@ -285,7 +281,6 @@ document.addEventListener("DOMContentLoaded", () => {
             params.append("productId", productId);
             params.append("action",    action);
 
-            // Disable tạm để tránh double click
             btnWishlistToggle.disabled = true;
 
             fetch(`${contextPath}/wishlist`, {
@@ -311,21 +306,18 @@ document.addEventListener("DOMContentLoaded", () => {
                     }
 
                     if (data.action === "added") {
-                        // Vừa thêm vào → đổi sang trạng thái "đã yêu thích"
                         btnWishlistToggle.dataset.action = "remove";
                         btnWishlistToggle.classList.add("active");
                         btnWishlistToggle.title = "Bỏ yêu thích";
                         btnWishlistToggle.querySelector("ion-icon").setAttribute("name", "heart");
                         showToast("❤️ Đã thêm vào danh sách yêu thích!");
                     } else {
-                        // Vừa xóa → đổi sang trạng thái "chưa yêu thích"
                         btnWishlistToggle.dataset.action = "add";
                         btnWishlistToggle.classList.remove("active");
                         btnWishlistToggle.title = "Thêm vào yêu thích";
                         btnWishlistToggle.querySelector("ion-icon").setAttribute("name", "heart-outline");
                         showToast("💔 Đã bỏ khỏi danh sách yêu thích!");
                     }
-                    // Cập nhật badge wishlist trên header
                     updateWishlistBadge(data.wishlistCount);
                     btnWishlistToggle.disabled = false;
                 })
@@ -478,7 +470,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
                             let newTotal = currentTotal + 1;
                             let newScore = ((currentScore * currentTotal) + parseInt(rating)) / newTotal;
-                            newScore = Math.round(newScore * 10) / 10; // Làm tròn 1 chữ số thập phân
+                            newScore = Math.round(newScore * 10) / 10;
 
                             topScoreEl.innerText = newScore.toFixed(1);
                             topCountEl.innerText = `(${newTotal} đánh giá)`;
@@ -486,7 +478,7 @@ document.addEventListener("DOMContentLoaded", () => {
                             if (summaryCountEl) summaryCountEl.innerText = `${newTotal} đánh giá`;
 
                             const barItems = document.querySelectorAll(".rating-bars .bar-item");
-                            let starCounts = [0, 0, 0, 0, 0, 0]; // Mảng chứa số lượng review của từng sao từ 1->5
+                            let starCounts = [0, 0, 0, 0, 0, 0];
 
                             barItems.forEach(bar => {
                                 const starLabel = parseInt(bar.querySelector(".star-label").innerText);
