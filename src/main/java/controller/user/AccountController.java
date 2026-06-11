@@ -201,7 +201,7 @@ public class AccountController extends HttpServlet {
     private void setFlash(HttpServletRequest req, String msg, String type) {
         HttpSession session = req.getSession();
         session.setAttribute("flashMsg", msg);
-        session.setAttribute("flashType", type); // success | danger | warning | info
+        session.setAttribute("flashType", type);
     }
 
     private String safe(String s) {
