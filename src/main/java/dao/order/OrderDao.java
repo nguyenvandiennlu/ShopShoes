@@ -89,7 +89,9 @@ public class OrderDao {
                     o.payment_status,
                     o.shipping_status,
                     o.orders_id,
-                    o.created_at
+                    o.created_at,
+                    o.shipping_address,
+                    o.phone_number
                 FROM orders o
                 WHERE 1 = 1
                 """);

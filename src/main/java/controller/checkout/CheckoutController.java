@@ -142,6 +142,9 @@ public class CheckoutController extends HttpServlet {
 
             session.removeAttribute("shippingFeeRaw");
             session.setAttribute("successMessage", "Dat hang thanh cong! Don hang COD cho xu ly.");
+
+            checkoutService.sendOrderConfirmationEmail(orderId, paymentMethod);
+
             resp.sendRedirect(req.getContextPath() + "/order-success");
 
         } catch (RuntimeException e) {

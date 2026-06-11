@@ -1,5 +1,6 @@
 package controller.checkout;
 
+import enums.PaymentMethod;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
@@ -66,6 +67,8 @@ public class MomoReturnController extends HttpServlet {
 
         try {
             checkoutService.completeMomoPayment(orderId, pendingCart);
+
+            checkoutService.sendOrderConfirmationEmail(orderId, PaymentMethod.MOMO);
 
             Integer userId = orderDao.findUserIdByOrderId(orderId);
             if (!"BUY_NOW".equals(pendingMode) && userId != null) {
