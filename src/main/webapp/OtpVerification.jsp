@@ -3,9 +3,9 @@
 <html lang="vi">
 <head>
     <meta charset="UTF-8" />
-    <meta http-equiv="X-UA-Compatible" content="IE-edge" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Xác thực OTP - ShopShoes</title>
+    <title>Xác thực OTP - BHD SPORT SHOES</title>
 
     <jsp:include page="head-resources.jsp" />
     <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/dangnhapvadangki.css" />
@@ -69,8 +69,8 @@
                                 OTP đã được gửi tới email: <strong><%= email != null ? email : "" %></strong>
                             </div>
 
-                            <input type="hidden" name="email" value="<%= email != null ? email : "" %>">
-                            <input type="hidden" name="token" value="<%= token != null ? token : "" %>">
+                            <input type="hidden" name="email" id="otpEmail" value="<%= email != null ? email : "" %>">
+                            <input type="hidden" name="token" id="otpToken" value="<%= token != null ? token : "" %>">
 
                             <fieldset class="form-auth">
                                 <label for="otp">Mã OTP (6 chữ số)</label>
@@ -104,11 +104,12 @@
                                 <button type="submit" name="action" value="verify" class="btn-primary">Xác thực OTP</button>
                             </div>
 
-                            <div class="resend-section">
+                            <div class="resend-section" id="resendSection">
                                 Chưa nhận được OTP? 
-                                <a href="javascript:void(0);" onclick="alert('Tính năng gửi lại OTP sẽ sớm được cập nhật')">
+                                <a href="javascript:void(0);" id="resendBtn" onclick="resendOtp()">
                                     Gửi lại
                                 </a>
+                                <span id="resendCountdown" style="display:none; color:#888;"></span>
                             </div>
                         </form>
                     </div>
@@ -119,24 +120,29 @@
 
     <jsp:include page="Footer.jsp" />
 
+    <jsp:include page="body-scripts.jsp" />
+
+    <!-- Loading Overlay -->
     <div id="loadingOverlay" class="loading-overlay">
         <div class="loading-container">
             <div class="spinner"></div>
-            <div class="loading-text">Đang tải...</div>
+            <div class="loading-text">Đang xử lý...</div>
         </div>
     </div>
 
     <script>
+        var CONTEXT_PATH = CONTEXT_PATH || "${pageContext.request.contextPath}";
+
         // Filter OTP input to only numbers
         document.getElementById('otp').addEventListener('input', function(e) {
             e.target.value = e.target.value.replace(/[^0-9]/g, '');
         });
 
-        // Show loading popup when form is submitted
+        // Show loading popup when form is submitted (verify action)
         document.getElementById('otpForm').addEventListener('submit', function(e) {
-            const action = e.submitter.value;
+            var action = e.submitter.value;
             if (action === 'verify') {
-                const otpValue = document.getElementById('otp').value;
+                var otpValue = document.getElementById('otp').value;
                  
                 if (!otpValue || otpValue.length !== 6) {
                     e.preventDefault();
@@ -156,6 +162,81 @@
                 this.classList.remove('input-invalid');
             }
         });
+
+        // Countdown timer for resend OTP
+        var resendTimer = null;
+        function startResendCountdown(seconds) {
+            var resendLink = document.getElementById('resendBtn');
+            var countdownSpan = document.getElementById('resendCountdown');
+            resendLink.style.display = 'none';
+            countdownSpan.style.display = 'inline';
+
+            var remaining = seconds;
+            countdownSpan.textContent = 'Gửi lại sau ' + remaining + 's';
+
+            resendTimer = setInterval(function() {
+                remaining--;
+                if (remaining <= 0) {
+                    clearInterval(resendTimer);
+                    resendLink.style.display = 'inline';
+                    countdownSpan.style.display = 'none';
+                } else {
+                    countdownSpan.textContent = 'Gửi lại sau ' + remaining + 's';
+                }
+            }, 1000);
+        }
+
+        // Start 60s countdown on page load
+        startResendCountdown(120);
+
+        // Resend OTP via AJAX
+        function resendOtp() {
+            var email = document.getElementById('otpEmail').value;
+            var token = document.getElementById('otpToken').value;
+
+            if (!email || !token) {
+                alert('Thiếu thông tin email hoặc token');
+                return;
+            }
+
+            var resendLink = document.getElementById('resendBtn');
+            resendLink.textContent = 'Đang gửi...';
+            resendLink.onclick = null;
+
+            var xhr = new XMLHttpRequest();
+            xhr.open('POST', CONTEXT_PATH + '/verify-otp', true);
+            xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+
+            xhr.onload = function() {
+                try {
+                    var data = JSON.parse(xhr.responseText);
+                    if (data.success) {
+                        // Update token if new one was generated
+                        if (data.token) {
+                            document.getElementById('otpToken').value = data.token;
+                        }
+                        alert(data.message);
+                        startResendCountdown(120);
+                    } else {
+                        alert(data.message || 'Gửi lại OTP thất bại');
+                        resendLink.textContent = 'Gửi lại';
+                        resendLink.onclick = resendOtp;
+                    }
+                } catch (ex) {
+                    alert('Có lỗi xảy ra. Vui lòng thử lại.');
+                    resendLink.textContent = 'Gửi lại';
+                    resendLink.onclick = resendOtp;
+                }
+            };
+
+            xhr.onerror = function() {
+                alert('Không thể kết nối server. Vui lòng thử lại.');
+                resendLink.textContent = 'Gửi lại';
+                resendLink.onclick = resendOtp;
+            };
+
+            xhr.send('action=resend&email=' + encodeURIComponent(email) + '&token=' + encodeURIComponent(token));
+        }
     </script>
 </body>
 </html>

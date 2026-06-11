@@ -5,8 +5,11 @@ import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
+import model.user.User;
 import services.auth.RegisterService;
 import services.common.EmailServices;
+import services.user.UserServices;
 import utils.EmailTemplateBuilder;
 
 import java.io.IOException;
@@ -15,10 +18,12 @@ import java.nio.charset.StandardCharsets;
 @WebServlet("/register")
 public class RegisterController extends HttpServlet {
     private RegisterService registerService;
+    private UserServices userServices;
 
     @Override
     public void init() {
         registerService = new RegisterService();
+        userServices = new UserServices();
     }
 
     @Override
@@ -58,6 +63,13 @@ public class RegisterController extends HttpServlet {
             req.setAttribute("error", result.message);
             req.getRequestDispatcher("/Register.jsp").forward(req, resp);
             return;
+        }
+
+        // Auto-login after successful registration
+        User newUser = userServices.getUserDao().findByEmail(email);
+        if (newUser != null) {
+            HttpSession session = req.getSession(true);
+            session.setAttribute("currentUser", newUser);
         }
 
         EmailServices emailService = new EmailServices();
