@@ -36,6 +36,9 @@ public class User implements Serializable {
     @ColumnName("email_verified")
     private boolean emailVerified;
 
+    @ColumnName("avatar_url")
+    private String avatarUrl;
+
     public User() {
 
     }
@@ -126,5 +129,13 @@ public class User implements Serializable {
 
     public void setEmailVerified(boolean emailVerified) {
         this.emailVerified = emailVerified;
+    }
+
+    public String getAvatarUrl() {
+        return avatarUrl;
+    }
+
+    public void setAvatarUrl(String avatarUrl) {
+        this.avatarUrl = avatarUrl;
     }
 }

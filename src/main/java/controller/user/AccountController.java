@@ -1,17 +1,31 @@
 package controller.user;
 
+import com.cloudinary.Cloudinary;
+import com.cloudinary.utils.ObjectUtils;
 import jakarta.servlet.ServletException;
+import jakarta.servlet.annotation.MultipartConfig;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
+import jakarta.servlet.http.Part;
 import model.user.User;
 import services.user.AccountServices;
+import utils.CloudinaryUtil;
 
 import java.io.IOException;
+import java.io.PrintWriter;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
 
 @WebServlet("/account")
+@MultipartConfig(
+        fileSizeThreshold = 1024 * 1024,
+        maxFileSize      = 5 * 1024 * 1024,
+        maxRequestSize   = 6 * 1024 * 1024
+)
 public class AccountController extends HttpServlet {
 
     private AccountServices accountServices;
@@ -58,8 +72,59 @@ public class AccountController extends HttpServlet {
 
         switch (action) {
             case "change-password" -> handlePasswordChange(req, resp, currentUser);
-            case "update-profile" -> handleProfileUpdate(req, resp, currentUser);
+            case "update-profile"  -> handleProfileUpdate(req, resp, currentUser);
+            case "upload-avatar"   -> handleAvatarUpload(req, resp, currentUser);
             default -> resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Invalid action");
+        }
+    }
+    private void handleAvatarUpload(HttpServletRequest req, HttpServletResponse resp, User currentUser)
+            throws IOException, ServletException {
+
+        resp.setContentType("application/json;charset=UTF-8");
+        PrintWriter out = resp.getWriter();
+
+        try {
+            Part filePart = req.getPart("avatar");
+            if (filePart == null || filePart.getSize() == 0) {
+                out.print("{\"success\":false,\"message\":\"Vui lòng chọn ảnh.\"}");
+                return;
+            }
+
+            String contentType = filePart.getContentType();
+            List<String> allowedTypes = Arrays.asList("image/jpeg", "image/png", "image/webp", "image/gif");
+            if (contentType == null || !allowedTypes.contains(contentType.toLowerCase())) {
+                out.print("{\"success\":false,\"message\":\"Chỉ chấp nhận ảnh JPG, PNG, WEBP hoặc GIF.\"}");
+                return;
+            }
+
+            Cloudinary cloudinary = CloudinaryUtil.getInstance();
+            byte[] fileBytes = filePart.getInputStream().readAllBytes();
+
+            Map uploadResult = cloudinary.uploader().upload(fileBytes, ObjectUtils.asMap(
+                    "folder", "avatars",
+                    "public_id", "user_" + currentUser.getId(),
+                    "overwrite", true,
+                    "resource_type", "image"
+            ));
+
+            String avatarUrl = (String) uploadResult.get("secure_url");
+            if (avatarUrl == null || avatarUrl.isBlank()) {
+                out.print("{\"success\":false,\"message\":\"Upload thất bại, vui lòng thử lại.\"}");
+                return;
+            }
+
+            boolean updated = accountServices.updateAvatarUrl(currentUser.getId(), avatarUrl);
+            if (!updated) {
+                out.print("{\"success\":false,\"message\":\"Lưu ảnh vào cơ sở dữ liệu thất bại.\"}");
+                return;
+            }
+            currentUser.setAvatarUrl(avatarUrl);
+
+            out.print("{\"success\":true,\"avatarUrl\":\"" + avatarUrl + "\"}");
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            out.print("{\"success\":false,\"message\":\"Lỗi hệ thống: " + e.getMessage().replace("\"", "'") + "\"}");
         }
     }
 
@@ -70,7 +135,15 @@ public class AccountController extends HttpServlet {
         String phoneNumber = safe(req.getParameter("phoneNumber"));
         String address = safe(req.getParameter("address"));
 
+        String requestedWith = req.getHeader("X-Requested-With");
+        boolean isAjax = "XMLHttpRequest".equals(requestedWith);
+
         if (fullName.isBlank()) {
+            if (isAjax) {
+                resp.setContentType("application/json;charset=UTF-8");
+                resp.getWriter().print("{\"success\":false,\"message\":\"Họ tên không được để trống.\"}");
+                return;
+            }
             setFlash(req, "Họ tên không được để trống.", "danger");
             resp.sendRedirect(req.getContextPath() + "/account");
             return;
@@ -80,14 +153,25 @@ public class AccountController extends HttpServlet {
                 currentUser.getId(), fullName, phoneNumber, address);
 
         if (success) {
-
             currentUser.setFullName(fullName);
             currentUser.setPhoneNumber(phoneNumber);
             currentUser.setAddress(address);
 
-            setFlash(req, "Cập nhật thông tin thành công!", "success");
+            if (isAjax) {
+                resp.setContentType("application/json;charset=UTF-8");
+                resp.getWriter().print("{\"success\":true,\"message\":\"Cập nhật thông tin thành công!\",\"fullName\":\"" + fullName + "\"}");
+                return;
+            } else {
+                setFlash(req, "Cập nhật thông tin thành công!", "success");
+            }
         } else {
-            setFlash(req, "Cập nhật thất bại. Vui lòng thử lại.", "danger");
+            if (isAjax) {
+                resp.setContentType("application/json;charset=UTF-8");
+                resp.getWriter().print("{\"success\":false,\"message\":\"Cập nhật thất bại. Vui lòng thử lại.\"}");
+                return;
+            } else {
+                setFlash(req, "Cập nhật thất bại. Vui lòng thử lại.", "danger");
+            }
         }
 
         resp.sendRedirect(req.getContextPath() + "/account");
@@ -100,7 +184,15 @@ public class AccountController extends HttpServlet {
         String newPassword = safe(req.getParameter("newPassword"));
         String confirmPassword = safe(req.getParameter("confirmPassword"));
 
+        String requestedWith = req.getHeader("X-Requested-With");
+        boolean isAjax = "XMLHttpRequest".equals(requestedWith);
+
         if (currentPassword.isBlank() || newPassword.isBlank() || confirmPassword.isBlank()) {
+            if (isAjax) {
+                resp.setContentType("application/json;charset=UTF-8");
+                resp.getWriter().print("{\"success\":false,\"message\":\"Vui lòng nhập đầy đủ thông tin mật khẩu.\"}");
+                return;
+            }
             setFlash(req, "Vui lòng nhập đầy đủ thông tin mật khẩu.", "danger");
             resp.sendRedirect(req.getContextPath() + "/account");
             return;
@@ -110,10 +202,21 @@ public class AccountController extends HttpServlet {
                 currentUser.getEmail(), currentPassword, newPassword, confirmPassword);
 
         if ("SUCCESS".equals(result)) {
-            setFlash(req, "Đổi mật khẩu thành công!", "success");
-
+            if (isAjax) {
+                resp.setContentType("application/json;charset=UTF-8");
+                resp.getWriter().print("{\"success\":true,\"message\":\"Đổi mật khẩu thành công!\"}");
+                return;
+            } else {
+                setFlash(req, "Đổi mật khẩu thành công!", "success");
+            }
         } else {
-            setFlash(req, result, "danger");
+            if (isAjax) {
+                resp.setContentType("application/json;charset=UTF-8");
+                resp.getWriter().print("{\"success\":false,\"message\":\"" + result.replace("\"", "\\\"") + "\"}");
+                return;
+            } else {
+                setFlash(req, result, "danger");
+            }
         }
 
         resp.sendRedirect(req.getContextPath() + "/account");
@@ -136,7 +239,7 @@ public class AccountController extends HttpServlet {
     private void setFlash(HttpServletRequest req, String msg, String type) {
         HttpSession session = req.getSession();
         session.setAttribute("flashMsg", msg);
-        session.setAttribute("flashType", type); // success | danger | warning | info
+        session.setAttribute("flashType", type);
     }
 
     private String safe(String s) {

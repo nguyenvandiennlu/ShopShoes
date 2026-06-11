@@ -46,8 +46,8 @@
                         method="get">
                         <div class="search-input-wrapper">
                             <input type="search" name="q" id="search-input" placeholder="Tìm kiếm sản phẩm..." />
-                            <button type="button" class="search-close-btn" id="searchCloseBtn">
-                                <ion-icon name="close-outline"></ion-icon>
+                            <button type="submit" class="search-submit-btn" id="searchSubmitBtn">
+                                <ion-icon name="search-outline"></ion-icon>
                             </button>
                         </div>
                         <!-- SEARCH SUGGESTIONS DROPDOWN -->
@@ -63,13 +63,6 @@
                 <!-- RIGHT SECTION: DESKTOP ACTION BUTTONS -->
                 <div class="header-right">
                     <ul class="nav-action-list-desktop">
-                        <!-- SEARCH -->
-                        <li>
-                            <button class="nav-action-btn" id="searchToggleBtn" title="Tìm kiếm">
-                                <ion-icon name="search-outline"></ion-icon>
-                            </button>
-                        </li>
-
                         <!-- USER -->
                         <li class="nav-action-item nav-action-dropdown">
                             <c:choose>
@@ -84,7 +77,19 @@
                                 </c:when>
                                 <c:otherwise>
                                     <a href="#" class="nav-action-btn" title="Tài khoản">
-                                        <ion-icon name="person-outline"></ion-icon>
+                                        <c:choose>
+                                            <c:when test="${not empty sessionScope.currentUser.avatarUrl}">
+                                                <img
+                                                    src="${sessionScope.currentUser.avatarUrl}"
+                                                    alt="${sessionScope.currentUser.fullName}"
+                                                    class="header-avatar"
+                                                    onerror="this.style.display='none'; this.nextElementSibling.style.display='block';" />
+                                                <ion-icon name="person-outline" style="display:none"></ion-icon>
+                                            </c:when>
+                                            <c:otherwise>
+                                                <ion-icon name="person-outline"></ion-icon>
+                                            </c:otherwise>
+                                        </c:choose>
                                     </a>
                                     <div class="dropdown-content">
                                         <a href="${pageContext.request.contextPath}/account">Tài khoản</a>
@@ -187,7 +192,19 @@
                                 </c:when>
                                 <c:otherwise>
                                     <a href="#" class="nav-action-btn">
-                                        <ion-icon name="person-outline"></ion-icon>
+                                        <c:choose>
+                                            <c:when test="${not empty sessionScope.currentUser.avatarUrl}">
+                                                <img
+                                                    src="${sessionScope.currentUser.avatarUrl}"
+                                                    alt="${sessionScope.currentUser.fullName}"
+                                                    class="header-avatar header-avatar-mobile"
+                                                    onerror="this.style.display='none'; this.nextElementSibling.style.display='block';" />
+                                                <ion-icon name="person-outline" style="display:none"></ion-icon>
+                                            </c:when>
+                                            <c:otherwise>
+                                                <ion-icon name="person-outline"></ion-icon>
+                                            </c:otherwise>
+                                        </c:choose>
                                         <span class="nav-action-text">
                                             ${sessionScope.currentUser.fullName}
                                         </span>
@@ -232,3 +249,8 @@
                 </nav>
             </div>
         </header>
+
+<script>
+    var CONTEXT_PATH = CONTEXT_PATH || "${pageContext.request.contextPath}";
+</script>
+<script src="${pageContext.request.contextPath}/assets/script/search-autocomplete.js"></script>

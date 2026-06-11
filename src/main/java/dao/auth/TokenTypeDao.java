@@ -1,6 +1,7 @@
 package dao.auth;
 
 import java.time.LocalDateTime;
+import java.sql.Timestamp;
 
 import org.jdbi.v3.core.Jdbi;
 
@@ -13,11 +14,13 @@ public class TokenTypeDao {
         public void saveToken(String email, String token, TokenType tokenType, LocalDateTime expiresAt) {
                 String sql = "INSERT INTO tokentype (email, token, token_type, created_at, expires_at) " +
                                 "VALUES (:email, :token, :tokenType, NOW(), :expiresAt)";
+                Object expiresAtValue = expiresAt == null ? null : Timestamp.valueOf(expiresAt);
+
                 jdbi.useHandle(h -> h.createUpdate(sql)
                                 .bind("email", email)
                                 .bind("token", token)
                                 .bind("tokenType", tokenType.name())
-                                .bind("expiresAt", expiresAt)
+                                .bind("expiresAt", expiresAtValue)
                                 .execute());
         }
 
@@ -92,10 +95,12 @@ public class TokenTypeDao {
                         "AND created_at > :after " +
                         "AND is_used = 0 " +
                         "AND expires_at > NOW()";
+                Object afterValue = after == null ? null : Timestamp.valueOf(after);
+
                 Integer count = jdbi.withHandle(handle -> handle.createQuery(sql)
                         .bind("email", email)
                         .bind("type", type.name())
-                        .bind("after", after)
+                        .bind("after", afterValue)
                         .mapTo(Integer.class)
                         .one());
                 return count != null && count > 0;
@@ -105,10 +110,12 @@ public class TokenTypeDao {
                         "WHERE email = :email " +
                         "AND token_type = :type " +
                         "AND created_at > :after";
+                Object afterValue = after == null ? null : Timestamp.valueOf(after);
+
                 Integer count = jdbi.withHandle(handle -> handle.createQuery(sql)
                         .bind("email", email)
                         .bind("type", type.name())
-                        .bind("after", after)
+                        .bind("after", afterValue)
                         .mapTo(Integer.class)
                         .one());
                 return count != null ? count : 0;

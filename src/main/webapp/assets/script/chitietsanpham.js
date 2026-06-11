@@ -2,6 +2,13 @@ document.addEventListener("DOMContentLoaded", () => {
     console.log("[JS] chitietsanpham.js DOMContentLoaded fired");
 
     const infoBox       = document.querySelector(".product-info-box");
+
+    // Nếu không có infoBox, skip script này
+    if (!infoBox) {
+        console.warn("product-info-box element not found. Skipping chitietsanpham.js");
+        return;
+    }
+
     console.log("[JS] infoBox:", infoBox);
 
     if (!infoBox) {

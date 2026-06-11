@@ -6,6 +6,7 @@ import org.jdbi.v3.core.Jdbi;
 
 import java.util.List;
 import java.util.Objects;
+import java.sql.Timestamp;
 
 public class UserDao {
 
@@ -64,7 +65,10 @@ public class UserDao {
                 """;
 
         try {
-            int rows = jdbi.withHandle(handle -> handle.createUpdate(sql)
+                // Convert LocalDateTime to SQL Timestamp for reliable JDBC binding
+                Object createdAtValue = user.getCreatedAt() == null ? null : Timestamp.valueOf(user.getCreatedAt());
+
+                int rows = jdbi.withHandle(handle -> handle.createUpdate(sql)
                     .bind("email", user.getEmail())
                     .bind("passwordHash", user.getPasswordHash())
                     .bind("phoneNumber", user.getPhoneNumber())
@@ -72,7 +76,7 @@ public class UserDao {
                     .bind("fullName", user.getFullName())
                     .bind("role", user.getRole() != null ? user.getRole().name() : null)
                     .bind("isActive", user.isActive())
-                    .bind("createdAt", user.getCreatedAt())
+                    .bind("createdAt", createdAtValue)
                     .bind("firebaseUID", user.getFirebaseUID())
                     .bind("emailVerified", user.isEmailVerified())
                     .execute());
@@ -213,12 +217,20 @@ public class UserDao {
                 .bind("firebaseUID", firebaseUID)
                 .mapToBean(User.class)
                 .findOne()
-                .orElseThrow(() -> new RuntimeException("Không tìm thấy user")));
+                .orElse(null));
     }
     public boolean updateFirebaseUID(int userId, String firebaseUID) {
         String sql = "UPDATE users SET firebase_uid = :firebaseUID WHERE id = :id";
         return jdbi.withHandle(handle -> handle.createUpdate(sql)
                 .bind("firebaseUID", firebaseUID)
+                .bind("id", userId)
+                .execute()) > 0;
+    }
+
+    public boolean updateAvatarUrl(int userId, String avatarUrl) {
+        String sql = "UPDATE users SET avatar_url = :avatarUrl WHERE id = :id";
+        return jdbi.withHandle(handle -> handle.createUpdate(sql)
+                .bind("avatarUrl", avatarUrl)
                 .bind("id", userId)
                 .execute()) > 0;
     }

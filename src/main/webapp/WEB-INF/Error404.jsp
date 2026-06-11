@@ -8,10 +8,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>404 - Trang Không Tìm Thấy | BHD Sport Shoes</title>
 
-    <link rel="icon" href="${pageContext.request.contextPath}/assets/favicon_io/favicon.ico" />
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/style.css" />
+    <jsp:include page="/head-resources.jsp" />
     <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/error404.css" />
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css" />
 
 </head>
 

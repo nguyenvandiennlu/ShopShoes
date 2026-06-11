@@ -11,9 +11,7 @@
 <head>
     <meta charset="UTF-8" />
     <title>Xác thực OTP</title>
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/verify-otp.css" />
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/style.css" />
-
+    <jsp:include page="head-resources.jsp" />
     <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/verify-otp.css" />
 
 </head>

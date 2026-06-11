@@ -33,11 +33,9 @@ public class BreadcrumbGenerator {
     public static List<BreadcrumbItem> generateBreadcrumb(String requestPath) {
         List<BreadcrumbItem> breadcrumb = new ArrayList<>();
 
-        // Luôn thêm Home ở đầu
-        breadcrumb.add(new BreadcrumbItem("Trang Chủ", "/menu", true));
-
         // Xử lý các path đặc biệt
         if (requestPath == null || requestPath.isEmpty() || requestPath.equals("/")) {
+            breadcrumb.add(new BreadcrumbItem("Trang Chủ", "/menu", true));
             return breadcrumb;
         }
 
