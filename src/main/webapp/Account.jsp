@@ -290,21 +290,32 @@
                                                                             </div>
                                                                         </div>
                                                                         <div class="order-footer">
-                                                                            <c:choose>
-                                                                                <c:when
-                                                                                    test="${order.paymentStatus == 'PAID'}">
-                                                                                    <span
-                                                                                        class="payment-status paid"><ion-icon
-                                                                                            name="checkmark-circle"></ion-icon>
-                                                                                        Đã thanh toán</span>
-                                                                                </c:when>
-                                                                                <c:otherwise>
-                                                                                    <span
-                                                                                        class="payment-status unpaid"><ion-icon
-                                                                                            name="time-outline"></ion-icon>
-                                                                                        Chưa thanh toán</span>
-                                                                                </c:otherwise>
-                                                                            </c:choose>
+                                                                            <div class="order-footer-left">
+                                                                                <c:choose>
+                                                                                    <c:when
+                                                                                        test="${order.paymentStatus == 'PAID'}">
+                                                                                        <span
+                                                                                            class="payment-status paid"><ion-icon
+                                                                                                name="checkmark-circle"></ion-icon>
+                                                                                            Đã thanh toán</span>
+                                                                                    </c:when>
+                                                                                    <c:otherwise>
+                                                                                        <span
+                                                                                            class="payment-status unpaid"><ion-icon
+                                                                                                name="time-outline"></ion-icon>
+                                                                                            Chưa thanh toán</span>
+                                                                                    </c:otherwise>
+                                                                                </c:choose>
+                                                                            </div>
+                                                                            <div class="order-footer-right">
+                                                                                <form action="${pageContext.request.contextPath}/reorder" method="post">
+                                                                                    <input type="hidden" name="orderId" value="${order.id}" />
+                                                                                    <button type="submit" class="btn-reorder">
+                                                                                        <ion-icon name="refresh-outline"></ion-icon>
+                                                                                        Mua lại
+                                                                                    </button>
+                                                                                </form>
+                                                                            </div>
                                                                         </div>
                                                                     </div>
                                                                 </c:forEach>
