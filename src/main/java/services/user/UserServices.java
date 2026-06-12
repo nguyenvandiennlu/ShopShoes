@@ -6,6 +6,7 @@ import model.user.User;
 import org.mindrot.jbcrypt.BCrypt;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 public class UserServices {
     private final UserDao userDao;
@@ -104,5 +105,32 @@ public class UserServices {
             userDao.updateAvatarUrl(createdUser.getId(), picture);
         }
         return userDao.findByEmail(email);
+    }
+    public List<User> getUsers(int page, int pageSize, String search, String role, String status) {
+        return userDao.findUsersWithPaginationAndFilters(page, pageSize, search, role, status);
+    }
+    public int countUsers(String search, String role, String status) {
+        return userDao.countUsersWithFilters(search, role, status);
+    }
+    public String toggleUserStatus(int currentAdminId, int targetUserId, boolean isActive) {
+        if (currentAdminId == targetUserId) {
+            return "Không thể tự khóa hoặc mở khóa tài khoản của chính mình.";
+        }
+        User targetUser = userDao.findById(targetUserId);
+        if (targetUser == null) {
+            return "Tài khoản người dùng không tồn tại.";
+        }
+        if (Role.ADMIN.equals(targetUser.getRole()) && !isActive) {
+            int activeAdminsCount = userDao.countUsersWithFilters(null, "ADMIN", "active");
+            if (activeAdminsCount <= 1) {
+                return "Không thể khóa tài khoản quản trị viên duy nhất đang hoạt động của hệ thống.";
+            }
+        }
+        boolean success = userDao.updateUserStatus(targetUserId, isActive);
+        if (success) {
+            return "SUCCESS";
+        } else {
+            return "Cập nhật trạng thái thất bại. Vui lòng thử lại sau.";
+        }
     }
 }

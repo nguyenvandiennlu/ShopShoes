@@ -108,7 +108,7 @@
                 </a>
             </li>
             <li class="nav-item">
-                <a class="admin-nav-link <%= "customers".equals(adminActive) ? "active" : "" %>" href="${pageContext.request.contextPath}/admin/quanlykhachhang.jsp">
+                <a class="admin-nav-link <%= "customers".equals(adminActive) ? "active" : "" %>" href="${pageContext.request.contextPath}/admin/users">
                     <span class="material-symbols-outlined">group</span>
                     Khách hàng
                 </a>

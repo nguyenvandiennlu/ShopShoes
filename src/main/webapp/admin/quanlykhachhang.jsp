@@ -1,4 +1,6 @@
 <%@ page contentType="text/html;charset=UTF-8" pageEncoding="UTF-8" language="java" %>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %>
 <%
     request.setAttribute("adminActive", "customers");
 %>
@@ -408,15 +410,21 @@
             text-transform: uppercase;
             background-color: #f8fafb;
             border-bottom: 1px solid var(--gainsboro);
-            padding: 1rem 1.5rem;
+            padding: 0.75rem 1rem;
             border-top: none;
+            white-space: nowrap;
         }
 
         .table-custom td {
             vertical-align: middle;
-            padding: 1rem 1.5rem;
+            padding: 0.75rem 1rem;
             color: #191c1d;
             border-bottom: 1px solid rgba(220, 220, 220, 0.5);
+        }
+
+        .table-custom td.email-cell {
+            font-size: 13px;
+            word-break: break-all;
         }
 
         .table-custom tbody tr {
@@ -451,10 +459,11 @@
             display: inline-flex;
             align-items: center;
             gap: 0.25rem;
-            padding: 0.25em 0.6em;
+            padding: 0.25em 0.8em;
             font-size: 12px;
             font-weight: 700;
             border-radius: 50rem;
+            white-space: nowrap;
         }
 
         .badge-active {
@@ -478,11 +487,12 @@
         .badge-role {
             background-color: var(--surface-variant);
             color: var(--on-surface-variant);
-            padding: 0.25em 0.6em;
+            padding: 0.25em 0.8em;
             font-size: 12px;
             font-weight: 700;
             border-radius: 50rem;
             display: inline-block;
+            white-space: nowrap;
         }
 
         .badge-role-admin {
@@ -732,37 +742,39 @@
     </div>
     <!-- Filter Bar -->
     <div class="card-custom">
-        <div class="row g-3 align-items-end">
-            <div class="col-12 col-lg-5">
-                <label class="form-label-custom">Tìm kiếm</label>
-                <div class="search-input-wrapper">
-                    <span class="material-symbols-outlined">search</span>
-                    <input class="form-control-custom" placeholder="Tên hoặc email..." type="text"/>
+        <form method="GET" action="${pageContext.request.contextPath}/admin/users">
+            <div class="row g-3 align-items-end">
+                <div class="col-12 col-lg-5">
+                    <label class="form-label-custom">Tìm kiếm</label>
+                    <div class="search-input-wrapper">
+                        <span class="material-symbols-outlined">search</span>
+                        <input class="form-control-custom" name="search" placeholder="Tên hoặc email..." type="text" value="<c:out value='${search}'/>"/>
+                    </div>
+                </div>
+                <div class="col-12 col-md-4 col-lg-3">
+                    <label class="form-label-custom">Vai trò</label>
+                    <select class="form-select-custom" name="role">
+                        <option value="all" ${role == 'all' ? 'selected' : ''}>Tất cả</option>
+                        <option value="USER" ${role == 'USER' ? 'selected' : ''}>USER</option>
+                        <option value="ADMIN" ${role == 'ADMIN' ? 'selected' : ''}>ADMIN</option>
+                    </select>
+                </div>
+                <div class="col-12 col-md-4 col-lg-2">
+                    <label class="form-label-custom">Trạng thái</label>
+                    <select class="form-select-custom" name="status">
+                        <option value="all" ${status == 'all' ? 'selected' : ''}>Tất cả</option>
+                        <option value="active" ${status == 'active' ? 'selected' : ''}>Đang hoạt động</option>
+                        <option value="locked" ${status == 'locked' ? 'selected' : ''}>Bị khóa</option>
+                    </select>
+                </div>
+                <div class="col-12 col-md-4 col-lg-2">
+                    <button type="submit" class="btn-filter">
+                        <span class="material-symbols-outlined fs-6">filter_list</span>
+                        Lọc
+                    </button>
                 </div>
             </div>
-            <div class="col-12 col-md-4 col-lg-3">
-                <label class="form-label-custom">Vai trò</label>
-                <select class="form-select-custom">
-                    <option value="all">Tất cả</option>
-                    <option value="customer">Khách hàng</option>
-                    <option value="admin">Quản trị viên</option>
-                </select>
-            </div>
-            <div class="col-12 col-md-4 col-lg-2">
-                <label class="form-label-custom">Trạng thái</label>
-                <select class="form-select-custom">
-                    <option value="all">Tất cả</option>
-                    <option value="active">Đang hoạt động</option>
-                    <option value="locked">Bị khóa</option>
-                </select>
-            </div>
-            <div class="col-12 col-md-4 col-lg-2">
-                <button class="btn-filter">
-                    <span class="material-symbols-outlined fs-6">filter_list</span>
-                    Lọc
-                </button>
-            </div>
-        </div>
+        </form>
     </div>
     <!-- Data Table -->
     <div class="card-table-container">
@@ -770,125 +782,96 @@
             <table class="table table-custom table-hover">
                 <thead>
                 <tr>
-                    <th width="5%">#</th>
-                    <th width="20%">Họ tên</th>
-                    <th width="20%">Email</th>
-                    <th width="15%">Số điện thoại</th>
+                    <th width="4%">#</th>
+                    <th>Họ tên</th>
+                    <th>Email</th>
+                    <th width="12%">Số điện thoại</th>
                     <th width="10%">Vai trò</th>
                     <th width="12%">Trạng thái</th>
-                    <th width="10%">Ngày tạo</th>
-                    <th class="text-end" width="8%">Thao tác</th>
+                    <th width="12%">Ngày tạo</th>
+                    <th class="text-end" width="10%">Thao tác</th>
                 </tr>
                 </thead>
                 <tbody>
-                <tr>
-                    <td class="text-secondary">01</td>
-                    <td>
-                        <div class="user-cell">
-                            <img alt="Avatar" class="avatar-sm" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBA85hc8RBayn1BAQHyJok-sWuowvV_TsZzPUZ3zauihiKjKcXVYTUoxn_q4jLkYnh9zL8PqMUjcomzMBZVe86rLhsTht8iWV77P7o2oPZtp6p10oZuNtNpjgWyG7ejrlAhtZBedpomB6ckGdvasvgMebpHJit0Lm4wSVbRyYOHHmw47fkuLlAShdFIKV9kvhgbHQDhKfWTAEBl8dRR9MpfAy9H8lvgQleI_8HZSZrGInbIFs0nsDJnBV4826X_tj5DEND7n2ConlDT"/>
-                            <span class="user-name">Nguyễn Văn An</span>
-                        </div>
-                    </td>
-                    <td class="text-secondary">an.nguyen@email.com</td>
-                    <td>0901 234 567</td>
-                    <td>
-                        <span class="badge-role">Khách hàng</span>
-                    </td>
-                    <td>
-<span class="badge-status badge-active">
-<span class="dot"></span>
-                                    Đang hoạt động
-                                </span>
-                    </td>
-                    <td class="text-secondary">12/10/2023</td>
-                    <td>
-                        <div class="action-btns">
-                            <button class="action-btn" title="Xem chi tiết">
-                                <span class="material-symbols-outlined">visibility</span>
-                            </button>
-                            <button class="action-btn delete" title="Khóa tài khoản">
-                                <span class="material-symbols-outlined">lock_open</span>
-                            </button>
-                        </div>
-                    </td>
-                </tr>
-                <tr>
-                    <td class="text-secondary">02</td>
-                    <td>
-                        <div class="user-cell">
-                            <img alt="Avatar" class="avatar-sm" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCptsu14Ia4SrGc7gfKnXdukrrUwmIb63dcALgjHN5z3bEi0BVlg2d8RIIzCz-t4OfLxg9MTv-oWmeNG-wvJet1K7c7RFPKg0kidgbZw8ZFFBNCsap6K3ZW5knXb4WCJjXd4jU1BT3GJdWdeZnD0AUB9LwDTcpP_mCLdRwHKOT7G-gTUB4-4JOa_NwOBdG9jnGNtgNL1h_y-2rUlmAs-WWdcK7f00-iSwcr_BJ_ExsLj23i3pzUnYuCcLqMIuTg9TebMYXnkeVhpNHq"/>
-                            <span class="user-name">Trần Bình</span>
-                        </div>
-                    </td>
-                    <td class="text-secondary">binh.tran@email.com</td>
-                    <td>0912 345 678</td>
-                    <td>
-                        <span class="badge-role badge-role-admin">Quản trị viên</span>
-                    </td>
-                    <td>
-<span class="badge-status badge-active">
-<span class="dot"></span>
-                                    Đang hoạt động
-                                </span>
-                    </td>
-                    <td class="text-secondary">15/10/2023</td>
-                    <td>
-                        <div class="action-btns">
-                            <button class="action-btn" title="Xem chi tiết">
-                                <span class="material-symbols-outlined">visibility</span>
-                            </button>
-                            <button class="action-btn delete" title="Khóa tài khoản">
-                                <span class="material-symbols-outlined">lock_open</span>
-                            </button>
-                        </div>
-                    </td>
-                </tr>
-                <tr class="locked">
-                    <td class="text-secondary">03</td>
-                    <td>
-                        <div class="user-cell">
-                            <div class="avatar-placeholder">L</div>
-                            <span class="user-name text-secondary text-decoration-line-through">Lê Văn Cường</span>
-                        </div>
-                    </td>
-                    <td class="text-secondary">cuong.le@email.com</td>
-                    <td class="text-secondary">0923 456 789</td>
-                    <td>
-                        <span class="badge-role">Khách hàng</span>
-                    </td>
-                    <td>
-<span class="badge-status badge-locked">
-<span class="dot"></span>
-                                    Bị khóa
-                                </span>
-                    </td>
-                    <td class="text-secondary">20/10/2023</td>
-                    <td>
-                        <div class="action-btns">
-                            <button class="action-btn" title="Xem chi tiết">
-                                <span class="material-symbols-outlined">visibility</span>
-                            </button>
-                            <button class="action-btn delete" title="Mở khóa tài khoản">
-                                <span class="material-symbols-outlined">lock</span>
-                            </button>
-                        </div>
-                    </td>
-                </tr>
+                <c:choose>
+                    <c:when test="${empty usersList}">
+                        <tr>
+                            <td colspan="8" class="text-center text-secondary py-4">Không tìm thấy người dùng nào phù hợp.</td>
+                        </tr>
+                    </c:when>
+                    <c:otherwise>
+                        <c:forEach var="u" items="${usersList}" varStatus="loop">
+                            <tr class="${!u.active ? 'locked' : ''}">
+                                <td class="text-secondary">${(currentPage - 1) * 10 + loop.index + 1}</td>
+                                <td>
+                                    <div class="user-cell">
+                                        <img alt="Avatar" class="avatar-sm" src="<c:choose><c:when test='${not empty u.avatarUrl}'>${u.avatarUrl}</c:when><c:otherwise>data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='32' height='32' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='50' fill='%23e8e8e8'/%3E%3Ccircle cx='50' cy='38' r='18' fill='%23bbb'/%3E%3Cellipse cx='50' cy='85' rx='28' ry='20' fill='%23bbb'/%3E%3C/svg%3E</c:otherwise></c:choose>" onerror="this.onerror=null;this.src='data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'32\' height=\'32\' viewBox=\'0 0 100 100\'%3E%3Ccircle cx=\'50\' cy=\'50\' r=\'50\' fill=\'%23e8e8e8\'/%3E%3Ccircle cx=\'50\' cy=\'38\' r=\'18\' fill=\'%23bbb\'/%3E%3Cellipse cx=\'50\' cy=\'85\' rx=\'28\' ry=\'20\' fill=\'%23bbb\'/%3E%3C/svg%3E'"/>
+                                        <span class="user-name <c:if test='${!u.active}'>text-secondary text-decoration-line-through</c:if>"><c:out value="${u.fullName}"/></span>
+                                    </div>
+                                </td>
+                                <td class="text-secondary email-cell"><c:out value="${u.email}"/></td>
+                                <td><c:out value="${u.phoneNumber}" default="Chưa cập nhật"/></td>
+                                <td>
+                                    <span class="badge-role ${u.role == 'ADMIN' ? 'badge-role-admin' : ''}">
+                                        <c:out value="${u.role}"/>
+                                    </span>
+                                </td>
+                                <td>
+                                    <c:choose>
+                                        <c:when test="${u.active}">
+                                            <span class="badge-status badge-active" id="status-badge-${u.id}">
+                                                <span class="dot"></span> Đang hoạt động
+                                            </span>
+                                        </c:when>
+                                        <c:otherwise>
+                                            <span class="badge-status badge-locked" id="status-badge-${u.id}">
+                                                <span class="dot"></span> Bị khóa
+                                            </span>
+                                        </c:otherwise>
+                                    </c:choose>
+                                </td>
+                                <td class="text-secondary">
+                                    <c:choose>
+                                        <c:when test="${not empty u.createdAt}">
+                                            <c:set var="d" value="${u.createdAt.dayOfMonth}"/>
+                                            <c:set var="m" value="${u.createdAt.monthValue}"/>
+                                            <c:set var="y" value="${u.createdAt.year}"/>
+                                            ${d < 10 ? '0' : ''}${d}/${m < 10 ? '0' : ''}${m}/${y}
+                                        </c:when>
+                                        <c:otherwise>Chưa rõ</c:otherwise>
+                                    </c:choose>
+                                </td>
+                                <td>
+                                    <div class="action-btns">
+                                        <button class="action-btn" title="Xem chi tiết" onclick="viewDetails(${u.id})">
+                                            <span class="material-symbols-outlined">visibility</span>
+                                        </button>
+                                        <button class="action-btn btn-toggle-status ${!u.active ? 'locked' : ''}" 
+                                                title="${u.active ? 'Khóa tài khoản' : 'Mở khóa tài khoản'}" 
+                                                data-id="${u.id}" 
+                                                data-name="<c:out value='${u.fullName}'/>" 
+                                                data-active="${u.active}">
+                                            <span class="material-symbols-outlined icon-lock">${u.active ? 'lock_open' : 'lock'}</span>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                        </c:forEach>
+                    </c:otherwise>
+                </c:choose>
                 </tbody>
             </table>
         </div>
         <div class="pagination-container">
-            <span class="pagination-info">Hiển thị 1 - 3 của 124 khách hàng</span>
+            <span class="pagination-info">Hiển thị ${(currentPage - 1) * 10 + 1} - ${(currentPage * 10) > totalCount ? totalCount : (currentPage * 10)} của ${totalCount} khách hàng</span>
             <div class="pagination-custom">
-                <button class="page-btn" disabled="">
+                <button class="page-btn" ${currentPage == 1 ? 'disabled' : ''} onclick="changePage(${currentPage - 1})">
                     <span class="material-symbols-outlined fs-6">chevron_left</span>
                 </button>
-                <button class="page-btn active">1</button>
-                <button class="page-btn">2</button>
-                <button class="page-btn">3</button>
-                <span class="px-2 text-secondary">...</span>
-                <button class="page-btn">13</button>
-                <button class="page-btn">
+                <c:forEach begin="1" end="${totalPages}" var="i">
+                    <button class="page-btn ${currentPage == i ? 'active' : ''}" onclick="changePage(${i})">${i}</button>
+                </c:forEach>
+                <button class="page-btn" ${currentPage == totalPages ? 'disabled' : ''} onclick="changePage(${currentPage + 1})">
                     <span class="material-symbols-outlined fs-6">chevron_right</span>
                 </button>
             </div>
@@ -896,4 +879,121 @@
     </div>
 </main>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+    function changePage(page) {
+        const urlParams = new URLSearchParams(window.location.search);
+        urlParams.set('page', page);
+        window.location.search = urlParams.toString();
+    }
+
+    function viewDetails(userId) {
+        Swal.fire({
+            title: 'Xem chi tiết',
+            text: 'Tính năng xem chi tiết thông tin đầy đủ của người dùng ID ' + userId + ' đang được phát triển.',
+            icon: 'info',
+            confirmButtonText: 'Đóng'
+        });
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        const toggleButtons = document.querySelectorAll('.btn-toggle-status');
+        
+        toggleButtons.forEach(btn => {
+            btn.addEventListener('click', function(e) {
+                e.preventDefault();
+                
+                const userId = this.getAttribute('data-id');
+                const userName = this.getAttribute('data-name');
+                const isCurrentlyActive = this.getAttribute('data-active') === 'true';
+                const nextActiveState = !isCurrentlyActive;
+                
+                const actionText = nextActiveState ? 'mở khóa' : 'khóa';
+                const confirmBtnColor = nextActiveState ? '#198754' : '#dc3545';
+                
+                Swal.fire({
+                    title: 'Xác nhận ' + actionText + ' tài khoản?',
+                    text: 'Bạn có chắc chắn muốn ' + actionText + ' tài khoản của "' + userName + '" không?',
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: confirmBtnColor,
+                    cancelButtonColor: '#6c757d',
+                    confirmButtonText: 'Đồng ý',
+                    cancelButtonText: 'Hủy bỏ'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        const formData = new URLSearchParams();
+                        formData.append('action', 'toggle-status');
+                        formData.append('userId', userId);
+                        formData.append('isActive', nextActiveState.toString());
+                        
+                        fetch('${pageContext.request.contextPath}/admin/users', {
+                            method: 'POST',
+                            headers: {
+                                'X-Requested-With': 'XMLHttpRequest',
+                                'Content-Type': 'application/x-www-form-urlencoded'
+                            },
+                            body: formData.toString()
+                        })
+                        .then(response => {
+                            if (!response.ok) {
+                                throw new Error('Không thể kết nối đến server.');
+                            }
+                            return response.json();
+                        })
+                        .then(data => {
+                            if (data.success) {
+                                Swal.fire(
+                                    'Thành công!',
+                                    data.message,
+                                    'success'
+                                );
+                                btn.setAttribute('data-active', nextActiveState.toString());
+                                const iconLock = btn.querySelector('.icon-lock');
+                                if (iconLock) {
+                                    iconLock.textContent = nextActiveState ? 'lock_open' : 'lock';
+                                }
+                                btn.setAttribute('title', nextActiveState ? 'Khóa tài khoản' : 'Mở khóa tài khoản');
+                                
+                                const row = btn.closest('tr');
+                                const nameSpan = row.querySelector('.user-name');
+                                if (nextActiveState) {
+                                    row.classList.remove('locked');
+                                    if (nameSpan) nameSpan.classList.remove('text-secondary', 'text-decoration-line-through');
+                                } else {
+                                    row.classList.add('locked');
+                                    if (nameSpan) nameSpan.classList.add('text-secondary', 'text-decoration-line-through');
+                                }
+                                
+                                const badge = document.getElementById('status-badge-' + userId);
+                                if (badge) {
+                                    if (nextActiveState) {
+                                        badge.className = 'badge-status badge-active';
+                                        badge.innerHTML = '<span class="dot"></span> Đang hoạt động';
+                                    } else {
+                                        badge.className = 'badge-status badge-locked';
+                                        badge.innerHTML = '<span class="dot"></span> Bị khóa';
+                                    }
+                                }
+                            } else {
+                                Swal.fire(
+                                    'Thất bại!',
+                                    data.message,
+                                    'error'
+                                );
+                            }
+                        })
+                        .catch(error => {
+                            Swal.fire(
+                                'Lỗi hệ thống!',
+                                error.message,
+                                'error'
+                            );
+                        });
+                    }
+                });
+            });
+        });
+    });
+</script>
 </body></html>
