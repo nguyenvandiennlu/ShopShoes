@@ -91,7 +91,9 @@ public class OrderDao {
                     o.orders_id,
                     o.created_at,
                     o.shipping_address,
-                    o.phone_number
+                    o.phone_number,
+                    o.payment_method,
+                    o.cancel_reason
                 FROM orders o
                 WHERE 1 = 1
                 """);
@@ -193,6 +195,72 @@ public class OrderDao {
         return jdbi.withHandle(handle -> handle.createQuery(sql)
                 .mapTo(BigDecimal.class)
                 .one());
+    }
+
+    public void cancelOrder(Handle handle, int orderId, String cancelReason) {
+        handle.createUpdate("""
+                    UPDATE orders
+                    SET order_status = :order_status,
+                        cancel_reason = :cancel_reason
+                    WHERE id = :order_id
+                """)
+                .bind("order_status", OrderStatus.CANCELLED.name())
+                .bind("cancel_reason", cancelReason)
+                .bind("order_id", orderId)
+                .execute();
+    }
+
+    public String getOrderStatusById(int orderId) {
+        String sql = """
+                SELECT order_status
+                FROM orders
+                WHERE id = :order_id
+                """;
+        return jdbi.withHandle(handle -> handle.createQuery(sql)
+                .bind("order_id", orderId)
+                .mapTo(String.class)
+                .findOne()
+                .orElse(null));
+    }
+
+    public String getShippingStatusById(int orderId) {
+        String sql = """
+                SELECT shipping_status
+                FROM orders
+                WHERE id = :order_id
+                """;
+        return jdbi.withHandle(handle -> handle.createQuery(sql)
+                .bind("order_id", orderId)
+                .mapTo(String.class)
+                .findOne()
+                .orElse(null));
+    }
+
+    public Order findById(int orderId) {
+        String sql = """
+                SELECT
+                    o.id,
+                    o.user_id,
+                    o.sub_total,
+                    o.shipping_fee,
+                    o.grand_total,
+                    o.order_status,
+                    o.payment_status,
+                    o.shipping_status,
+                    o.orders_id,
+                    o.created_at,
+                    o.shipping_address,
+                    o.phone_number,
+                    o.payment_method,
+                    o.cancel_reason
+                FROM orders o
+                WHERE o.id = :order_id
+                """;
+        return jdbi.withHandle(handle -> handle.createQuery(sql)
+                .bind("order_id", orderId)
+                .mapToBean(Order.class)
+                .findOne()
+                .orElse(null));
     }
 
     public boolean checkUserPurchasedProduct(int userId, int productId) {
