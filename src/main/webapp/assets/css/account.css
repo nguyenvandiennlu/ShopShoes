@@ -255,6 +255,49 @@
     padding: 12px 20px;
     background: #f9fafb;
     border-top: 1px solid #e5e7eb;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.order-footer-left {
+    display: flex;
+    align-items: center;
+}
+
+.order-footer-right {
+    display: flex;
+    align-items: center;
+}
+
+.btn-reorder {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 18px;
+    background: #ff6f61;
+    color: #fff;
+    border: none;
+    border-radius: 6px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s ease, transform 0.2s ease;
+}
+
+.btn-reorder:hover {
+    background: #e85d2c;
+    transform: translateY(-1px);
+}
+
+.btn-reorder:active {
+    transform: translateY(0);
+}
+
+.btn-reorder ion-icon {
+    font-size: 16px;
 }
 
 .payment-status {
