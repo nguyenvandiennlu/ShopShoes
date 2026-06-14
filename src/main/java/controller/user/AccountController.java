@@ -35,6 +35,8 @@ public class AccountController extends HttpServlet {
         accountServices = new AccountServices();
     }
 
+    private static final int PAGE_SIZE = 5;
+
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         User currentUser = requireLogin(req, resp);
@@ -52,8 +54,31 @@ public class AccountController extends HttpServlet {
             session.removeAttribute("flashType");
         }
 
-        java.util.List<model.Order.Order> orderHistory = accountServices.getOrderHistory(currentUser.getId());
+        // Pagination
+        int page = 1;
+        String pageParam = req.getParameter("page");
+        if (pageParam != null && !pageParam.isBlank()) {
+            try {
+                page = Integer.parseInt(pageParam);
+                if (page < 1) page = 1;
+            } catch (NumberFormatException e) {
+                page = 1;
+            }
+        }
+
+        int totalOrders = accountServices.getOrderCount(currentUser.getId());
+        int totalPages = (int) Math.ceil((double) totalOrders / PAGE_SIZE);
+        if (totalPages < 1) totalPages = 1;
+        if (page > totalPages) page = totalPages;
+
+        java.util.List<model.Order.Order> orderHistory = accountServices.getOrderHistoryPaginated(currentUser.getId(), page, PAGE_SIZE);
         req.setAttribute("orderHistory", orderHistory);
+        req.setAttribute("currentPage", page);
+        req.setAttribute("totalPages", totalPages);
+
+        // Determine active tab: only switch to orders tab when paginating
+        String activeTab = (pageParam != null && !pageParam.isBlank()) ? "orders" : "info";
+        req.setAttribute("activeTab", activeTab);
 
         req.getRequestDispatcher("/Account.jsp").forward(req, resp);
     }

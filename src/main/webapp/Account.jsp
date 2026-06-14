@@ -59,13 +59,13 @@
                                             </p>
                                         </div>
                                         <ul class="account-nav-list">
-                                            <li class="active"><a href="#personal-info" data-tab="info"><ion-icon
+                                            <li class="${activeTab == 'info' ? 'active' : ''}"><a href="#personal-info" data-tab="info"><ion-icon
                                                         name="person-circle-outline"></ion-icon> Thông tin cá nhân</a>
                                             </li>
-                                            <li><a href="#change-password" data-tab="password"><ion-icon
+                                            <li class="${activeTab == 'password' ? 'active' : ''}"><a href="#change-password" data-tab="password"><ion-icon
                                                         name="lock-closed-outline"></ion-icon> Đổi mật khẩu</a></li>
 
-                                            <li><a href="#order-history" data-tab="orders"><ion-icon
+                                            <li class="${activeTab == 'orders' ? 'active' : ''}"><a href="#order-history" data-tab="orders"><ion-icon
                                                         name="time-outline"></ion-icon>
                                                     Lịch sử đơn hàng</a></li>
 
@@ -88,7 +88,7 @@
                                             </div>
                                             <% } %>
 
-                                                <section id="personal-info" class="tab-content active"
+                                                <section id="personal-info" class="tab-content ${activeTab == 'info' ? 'active' : ''}"
                                                     data-content="info">
                                                     <h3 class="h3 content-title">Thông Tin Cá Nhân</h3>
                                                     <p>Quản lý tên, email và số điện thoại của bạn.</p>
@@ -123,7 +123,7 @@
                                                     </form>
                                                 </section>
 
-                                                <section id="change-password" class="tab-content"
+                                                <section id="change-password" class="tab-content ${activeTab == 'password' ? 'active' : ''}"
                                                     data-content="password">
                                                     <h3 class="h3 content-title">Đổi Mật Khẩu</h3>
                                                     <p>Đặt mật khẩu mới để tăng cường bảo mật tài khoản.</p>
@@ -159,7 +159,7 @@
                                                             Khẩu</button>
                                                     </form>
                                                 </section>
-                                                <section id="order-history" class="tab-content" data-content="orders">
+                                                <section id="order-history" class="tab-content ${activeTab == 'orders' ? 'active' : ''}" data-content="orders">
                                                     <h3 class="h3 content-title">Lịch Sử Đơn Hàng</h3>
                                                     <p>Theo dõi trạng thái và lịch sử các đơn hàng của bạn.</p>
 
@@ -338,6 +338,27 @@
                                                                     </div>
                                                                 </c:forEach>
                                                             </div>
+                                                            <!-- Pagination -->
+                                                            <c:if test="${totalPages > 1}">
+                                                                <div class="pagination">
+                                                                    <c:if test="${currentPage > 1}">
+                                                                        <a href="${pageContext.request.contextPath}/account?page=${currentPage - 1}" class="page-link">&laquo; Trang trước</a>
+                                                                    </c:if>
+                                                                    <c:forEach var="i" begin="1" end="${totalPages}">
+                                                                        <c:choose>
+                                                                            <c:when test="${i == currentPage}">
+                                                                                <span class="page-link active">${i}</span>
+                                                                            </c:when>
+                                                                            <c:otherwise>
+                                                                                <a href="${pageContext.request.contextPath}/account?page=${i}" class="page-link">${i}</a>
+                                                                            </c:otherwise>
+                                                                        </c:choose>
+                                                                    </c:forEach>
+                                                                    <c:if test="${currentPage < totalPages}">
+                                                                        <a href="${pageContext.request.contextPath}/account?page=${currentPage + 1}" class="page-link">Trang sau &raquo;</a>
+                                                                    </c:if>
+                                                                </div>
+                                                            </c:if>
                                                         </c:otherwise>
                                                     </c:choose>
                                                 </section>

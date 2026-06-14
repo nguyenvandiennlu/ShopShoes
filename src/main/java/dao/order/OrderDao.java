@@ -133,6 +133,48 @@ public class OrderDao {
         });
     }
 
+    public int countByUserId(int userId) {
+        String sql = """
+                SELECT COUNT(*)
+                FROM orders o
+                WHERE o.user_id = :userId
+                """;
+        return jdbi.withHandle(handle -> handle.createQuery(sql)
+                .bind("userId", userId)
+                .mapTo(Integer.class)
+                .one());
+    }
+
+    public List<Order> findByUserIdWithPagination(int userId, int limit, int offset) {
+        String sql = """
+                SELECT
+                    o.id,
+                    o.user_id,
+                    o.sub_total,
+                    o.shipping_fee,
+                    o.grand_total,
+                    o.order_status,
+                    o.payment_status,
+                    o.shipping_status,
+                    o.orders_id,
+                    o.created_at,
+                    o.shipping_address,
+                    o.phone_number,
+                    o.payment_method,
+                    o.cancel_reason
+                FROM orders o
+                WHERE o.user_id = :userId
+                ORDER BY o.created_at DESC
+                LIMIT :limit OFFSET :offset
+                """;
+        return jdbi.withHandle(handle -> handle.createQuery(sql)
+                .bind("userId", userId)
+                .bind("limit", limit)
+                .bind("offset", offset)
+                .mapToBean(Order.class)
+                .list());
+    }
+
     public List<Order> findAll() {
         String sql = """
                 SELECT *
