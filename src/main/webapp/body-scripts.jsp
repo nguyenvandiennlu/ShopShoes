@@ -6,3 +6,12 @@
 
 <!-- Core Scripts -->
 <script src="${pageContext.request.contextPath}/assets/script/reponsive.js"></script>
+
+<!-- Enhanced Lazy Loading -->
+<script src="${pageContext.request.contextPath}/assets/script/lazy-loading.js"></script>
+
+<!-- Image Zoom & Lightbox -->
+<script src="${pageContext.request.contextPath}/assets/script/image-zoom.js"></script>
+
+<!-- Quick View -->
+<script src="${pageContext.request.contextPath}/assets/script/quick-view.js"></script>
