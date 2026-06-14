@@ -369,6 +369,10 @@
 
       <script src="${pageContext.request.contextPath}/assets/script/reponsive.js"></script>
       <script src="${pageContext.request.contextPath}/assets/script/chitietsanpham.js"></script>
+      <!-- Enhanced Lazy Loading -->
+      <script src="${pageContext.request.contextPath}/assets/script/lazy-loading.js"></script>
+      <!-- Image Zoom & Lightbox -->
+      <script src="${pageContext.request.contextPath}/assets/script/image-zoom.js"></script>
       <script>
         window.CONTEXT_PATH = window.CONTEXT_PATH || "${pageContext.request.contextPath}";
       </script>
