@@ -176,4 +176,48 @@ public class UserServices {
             return "Cập nhật thông tin thất bại.";
         }
     }
+
+    public String createUserAdmin(String fullName, String email, String phone, String password, String address, String roleStr) {
+        if (fullName == null || fullName.isBlank() ||
+            email == null || email.isBlank() ||
+            phone == null || phone.isBlank() ||
+            password == null || password.isBlank() ||
+            roleStr == null || roleStr.isBlank()) {
+            return "Vui lòng nhập đầy đủ các trường bắt buộc.";
+        }
+
+        if (userDao.findByEmail(email) != null) {
+            return "Email này đã được đăng ký sử dụng.";
+        }
+
+        if (userDao.findByPhone(phone) != null) {
+            return "Số điện thoại này đã được đăng ký sử dụng.";
+        }
+
+        Role role;
+        try {
+            role = Role.valueOf(roleStr.toUpperCase().trim());
+        } catch (IllegalArgumentException e) {
+            return "Vai trò không hợp lệ.";
+        }
+
+        User user = new User();
+        user.setFullName(fullName.trim());
+        user.setEmail(email.trim());
+        user.setPhoneNumber(phone.trim());
+        user.setPasswordHash(BCrypt.hashpw(password, BCrypt.gensalt(12)));
+        user.setAddress(address != null ? address.trim() : "");
+        user.setRole(role);
+        user.setIsActive(true);
+        user.setCreatedAt(LocalDateTime.now());
+        user.setFirebaseUID("");
+        user.setEmailVerified(false);
+
+        int rows = userDao.insertUser(user);
+        if (rows > 0) {
+            return "SUCCESS";
+        } else {
+            return "Thêm tài khoản khách hàng thất bại.";
+        }
+    }
 }

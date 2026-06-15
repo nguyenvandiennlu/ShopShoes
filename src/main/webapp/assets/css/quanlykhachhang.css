@@ -861,3 +861,8 @@ h1, h2, h3, h4, h5, h6, .heading-font {
     font-weight: 700;
     font-family: var(--heading-font);
 }
+
+/* Đảm bảo SweetAlert2 hiển thị đè lên các modal overlay */
+.swal2-container {
+    z-index: 3000 !important;
+}

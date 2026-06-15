@@ -114,7 +114,7 @@
                 <h2 class="page-title">Quản lý Khách hàng</h2>
                 <p class="page-subtitle">Theo dõi và quản lý danh sách người dùng hệ thống.</p>
             </div>
-            <button class="btn btn-bittersweet">
+            <button class="btn btn-bittersweet" id="btnAddUser">
                 <span class="material-symbols-outlined fs-6">person_add</span>
                 Thêm Khách Hàng
             </button>
@@ -356,6 +356,57 @@
     </div>
 </div>
 
+<!-- ===================== ADD USER MODAL ===================== -->
+<div class="modal-overlay" id="addUserOverlay">
+    <div class="modal-box" role="dialog" aria-modal="true" aria-labelledby="addModalTitle">
+        <!-- Header -->
+        <div class="modal-header-custom" style="padding: 1.5rem 1.5rem 1rem; align-items: flex-start; gap: 0.25rem;">
+            <button class="modal-close-btn" id="addModalCloseTop" title="Đóng">
+                <span class="material-symbols-outlined" style="font-size:18px;">close</span>
+            </button>
+            <h3 class="modal-user-name" id="addModalTitle" style="font-size: 20px; font-weight: 600; margin: 0; color: #fff;">Thêm khách hàng mới</h3>
+            <p class="modal-user-email" style="margin: 0; font-size: 13px; color: #aaa;">Nhập thông tin cho tài khoản mới</p>
+        </div>
+        <!-- Body -->
+        <div class="modal-body-custom" style="padding: 1.5rem;">
+            <form id="addUserForm">
+                <div class="mb-3">
+                    <label for="addFullName" class="form-label-custom" style="display:block; margin-bottom: 6px; font-weight:500;">Họ và tên</label>
+                    <input type="text" id="addFullName" name="fullName" class="form-control-custom" style="width:100%;" placeholder="Nhập họ và tên..." required />
+                </div>
+                <div class="mb-3">
+                    <label for="addEmail" class="form-label-custom" style="display:block; margin-bottom: 6px; font-weight:500;">Email</label>
+                    <input type="email" id="addEmail" name="email" class="form-control-custom" style="width:100%;" placeholder="example@gmail.com" required />
+                </div>
+                <div class="mb-3">
+                    <label for="addPhone" class="form-label-custom" style="display:block; margin-bottom: 6px; font-weight:500;">Số điện thoại</label>
+                    <input type="text" id="addPhone" name="phone" class="form-control-custom" style="width:100%;" placeholder="Nhập số điện thoại..." required />
+                </div>
+                <div class="mb-3">
+                    <label for="addPassword" class="form-label-custom" style="display:block; margin-bottom: 6px; font-weight:500;">Mật khẩu</label>
+                    <input type="password" id="addPassword" name="password" class="form-control-custom" style="width:100%;" placeholder="Tối thiểu 6 ký tự..." required />
+                </div>
+                <div class="mb-3">
+                    <label for="addAddress" class="form-label-custom" style="display:block; margin-bottom: 6px; font-weight:500;">Địa chỉ</label>
+                    <input type="text" id="addAddress" name="address" class="form-control-custom" style="width:100%;" placeholder="Nhập địa chỉ..." />
+                </div>
+                <div class="mb-3">
+                    <label for="addRole" class="form-label-custom" style="display:block; margin-bottom: 6px; font-weight:500;">Vai trò</label>
+                    <select id="addRole" name="role" class="form-select-custom" style="width:100%;">
+                        <option value="USER" selected>USER</option>
+                        <option value="ADMIN">ADMIN</option>
+                    </select>
+                </div>
+            </form>
+        </div>
+        <!-- Footer -->
+        <div class="modal-footer-custom" style="display: flex; gap: 10px; justify-content: flex-end; padding: 1rem 1.5rem;">
+            <button class="btn-modal-close" id="addModalCloseBottom" style="background:#6c757d; border-color:#6c757d; margin:0;">Hủy</button>
+            <button class="btn btn-bittersweet" id="addModalSaveBtn" style="padding: 8px 18px; border-radius: 6px; font-weight: 500; font-size: 14px; margin: 0; background: var(--bittersweet); border-color: var(--bittersweet);">Thêm mới</button>
+        </div>
+    </div>
+</div>
+
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" defer></script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
@@ -544,7 +595,15 @@
     document.getElementById('modalCloseTop').addEventListener('click', closeModal);
     document.getElementById('modalCloseBottom').addEventListener('click', closeModal);
     overlay.addEventListener('click', function(e) { if (!modalBox.contains(e.target)) closeModal(); });
-    document.addEventListener('keydown', function(e) { if (e.key === 'Escape') closeModal(); });
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+            closeModal();
+            closeEditModal();
+            if (typeof closeAddModal === 'function') {
+                closeAddModal();
+            }
+        }
+    });
 
 
     function handleToggleStatus(btn) {
@@ -667,6 +726,103 @@
                     showConfirmButton: false 
                 });
                 fetchUsers(currentPage);
+            } else {
+                Swal.fire({ icon: 'error', title: 'Thất bại!', text: data.message });
+            }
+        })
+        .catch(function(err) {
+            Swal.fire({ icon: 'error', title: 'Lỗi!', text: err.message });
+        });
+    });
+
+    // ============================================================
+    // MODAL THEM KHACH HANG MOI
+    // ============================================================
+    var addOverlay = document.getElementById('addUserOverlay');
+
+    function openAddModal() {
+        document.getElementById('addUserForm').reset();
+        addOverlay.classList.add('show');
+        document.body.style.overflow = 'hidden';
+    }
+
+    function closeAddModal() {
+        addOverlay.classList.remove('show');
+        document.body.style.overflow = '';
+    }
+
+    document.getElementById('btnAddUser').addEventListener('click', function(e) {
+        e.preventDefault();
+        openAddModal();
+    });
+
+    document.getElementById('addModalCloseTop').addEventListener('click', closeAddModal);
+    document.getElementById('addModalCloseBottom').addEventListener('click', closeAddModal);
+    addOverlay.addEventListener('click', function(e) {
+        var addModalBox = addOverlay.querySelector('.modal-box');
+        if (!addModalBox.contains(e.target)) closeAddModal();
+    });
+
+    document.getElementById('addModalSaveBtn').addEventListener('click', function(e) {
+        e.preventDefault();
+        var fullName = document.getElementById('addFullName').value;
+        var email = document.getElementById('addEmail').value;
+        var phone = document.getElementById('addPhone').value;
+        var password = document.getElementById('addPassword').value;
+        var address = document.getElementById('addAddress').value;
+        var role = document.getElementById('addRole').value;
+
+        if (!fullName || fullName.trim() === '') {
+            Swal.fire({ icon: 'error', title: 'Lỗi!', text: 'Vui lòng nhập họ và tên.' });
+            return;
+        }
+        if (!email || email.trim() === '') {
+            Swal.fire({ icon: 'error', title: 'Lỗi!', text: 'Vui lòng nhập email.' });
+            return;
+        }
+        var emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(email.trim())) {
+            Swal.fire({ icon: 'error', title: 'Lỗi!', text: 'Email không đúng định dạng.' });
+            return;
+        }
+        if (!phone || phone.trim() === '') {
+            Swal.fire({ icon: 'error', title: 'Lỗi!', text: 'Vui lòng nhập số điện thoại.' });
+            return;
+        }
+        if (!password || password.length < 6) {
+            Swal.fire({ icon: 'error', title: 'Lỗi!', text: 'Mật khẩu phải tối thiểu 6 ký tự.' });
+            return;
+        }
+
+        var formData = new URLSearchParams();
+        formData.append('action', 'add');
+        formData.append('fullName', fullName);
+        formData.append('email', email);
+        formData.append('phone', phone);
+        formData.append('password', password);
+        formData.append('address', address);
+        formData.append('role', role);
+
+        fetch('${pageContext.request.contextPath}/admin/users', {
+            method: 'POST',
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest',
+                'Content-Type': 'application/x-www-form-urlencoded'
+            },
+            body: formData.toString()
+        })
+        .then(function(r) { return r.json(); })
+        .then(function(data) {
+            if (data.success) {
+                closeAddModal();
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Thành công!',
+                    text: data.message,
+                    timer: 1500,
+                    showConfirmButton: false
+                });
+                fetchUsers(1);
             } else {
                 Swal.fire({ icon: 'error', title: 'Thất bại!', text: data.message });
             }

@@ -185,6 +185,37 @@ public class ManageUsersController extends HttpServlet {
                 jsonResponse.addProperty("success", false);
                 jsonResponse.addProperty("message", "Định dạng ID người dùng không hợp lệ.");
             }
+        } else if ("add".equals(action)) {
+            String fullName = req.getParameter("fullName");
+            String email = req.getParameter("email");
+            String phone = req.getParameter("phone");
+            String password = req.getParameter("password");
+            String address = req.getParameter("address");
+            String role = req.getParameter("role");
+
+            if (fullName == null || email == null || phone == null || password == null || role == null) {
+                jsonResponse.addProperty("success", false);
+                jsonResponse.addProperty("message", "Thiếu tham số yêu cầu.");
+                out.print(jsonResponse.toString());
+                return;
+            }
+
+            String result = userServices.createUserAdmin(
+                fullName.trim(),
+                email.trim(),
+                phone.trim(),
+                password,
+                address,
+                role.toUpperCase().trim()
+            );
+
+            if ("SUCCESS".equals(result)) {
+                jsonResponse.addProperty("success", true);
+                jsonResponse.addProperty("message", "Thêm khách hàng thành công!");
+            } else {
+                jsonResponse.addProperty("success", false);
+                jsonResponse.addProperty("message", result);
+            }
             out.print(jsonResponse.toString());
         } else {
             resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
