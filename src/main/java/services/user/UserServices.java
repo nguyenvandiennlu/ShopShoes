@@ -133,4 +133,47 @@ public class UserServices {
             return "Cập nhật trạng thái thất bại. Vui lòng thử lại sau.";
         }
     }
+
+    public String updateUserAdmin(int currentAdminId, int userId, String fullName, String phone, String address, String roleStr, boolean isActive) {
+        User targetUser = userDao.findById(userId);
+        if (targetUser == null) {
+            return "Tài khoản người dùng không tồn tại.";
+        }
+
+        Role newRole;
+        try {
+            newRole = Role.valueOf(roleStr);
+        } catch (IllegalArgumentException e) {
+            return "Vai trò không hợp lệ.";
+        }
+
+        if (currentAdminId == userId) {
+            if (!isActive) {
+                return "Không thể tự khóa tài khoản của chính mình.";
+            }
+            if (newRole != Role.ADMIN) {
+                return "Không thể tự hạ vai trò của chính mình.";
+            }
+        }
+
+        if (Role.ADMIN.equals(targetUser.getRole()) && (newRole != Role.ADMIN || !isActive)) {
+            int activeAdminsCount = userDao.countUsersWithFilters(null, "ADMIN", "active");
+            if (activeAdminsCount <= 1) {
+                return "Không thể khóa hoặc đổi vai trò của quản trị viên hoạt động duy nhất.";
+            }
+        }
+
+        targetUser.setFullName(fullName);
+        targetUser.setPhoneNumber(phone);
+        targetUser.setAddress(address);
+        targetUser.setRole(newRole);
+        targetUser.setIsActive(isActive);
+
+        int rows = userDao.update(targetUser);
+        if (rows > 0) {
+            return "SUCCESS";
+        } else {
+            return "Cập nhật thông tin thất bại.";
+        }
+    }
 }
