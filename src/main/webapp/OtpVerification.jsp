@@ -134,21 +134,64 @@
             e.target.value = e.target.value.replace(/[^0-9]/g, '');
         });
 
-        // Show loading popup when form is submitted (verify action)
+        // Handle OTP verify via AJAX
         document.getElementById('otpForm').addEventListener('submit', function(e) {
-            var action = e.submitter.value;
+            var submitter = e.submitter || document.activeElement;
+            var action = submitter ? submitter.value : '';
+            
             if (action === 'verify') {
+                e.preventDefault();
+                
                 var otpValue = document.getElementById('otp').value;
+                var otpFeedback = document.getElementById('otpFeedback');
+                var otpInput = document.getElementById('otp');
                  
                 if (!otpValue || otpValue.length !== 6) {
-                    e.preventDefault();
-                    document.getElementById('otpFeedback').textContent = 'Vui lòng nhập 6 chữ số OTP';
-                    document.getElementById('otpFeedback').className = 'field-feedback is-invalid';
-                    document.getElementById('otp').classList.add('input-invalid');
+                    otpFeedback.textContent = 'Vui lòng nhập 6 chữ số OTP';
+                    otpFeedback.className = 'field-feedback is-invalid';
+                    otpInput.classList.add('input-invalid');
                     return;
                 }
                 
+                // Show loading overlay
                 showLoadingOverlay('loadingOverlay', 'Đang xác thực OTP...');
+                
+                var email = document.getElementById('otpEmail').value;
+                var token = document.getElementById('otpToken').value;
+                
+                var xhr = new XMLHttpRequest();
+                xhr.open('POST', CONTEXT_PATH + '/verify-otp', true);
+                xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+                xhr.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
+                
+                xhr.onload = function() {
+                    hideLoadingOverlay('loadingOverlay');
+                    try {
+                        // Try to parse JSON response (AJAX verify action sends JSON)
+                        var data = JSON.parse(xhr.responseText);
+                        if (data.success) {
+                            window.location.href = data.redirect || (CONTEXT_PATH + '/menufilter?brandId=all');
+                        } else {
+                            otpFeedback.textContent = data.message || 'OTP không hợp lệ. Vui lòng thử lại.';
+                            otpFeedback.className = 'field-feedback is-invalid';
+                            otpInput.classList.add('input-invalid');
+                        }
+                    } catch (ex) {
+                        // If not JSON, it's a full HTML response (page forward) - reload the page to show error
+                        document.open();
+                        document.write(xhr.responseText);
+                        document.close();
+                    }
+                };
+                
+                xhr.onerror = function() {
+                    hideLoadingOverlay('loadingOverlay');
+                    otpFeedback.textContent = 'Không thể kết nối server. Vui lòng thử lại.';
+                    otpFeedback.className = 'field-feedback is-invalid';
+                    otpInput.classList.add('input-invalid');
+                };
+                
+                xhr.send('action=verify&email=' + encodeURIComponent(email) + '&token=' + encodeURIComponent(token) + '&otp=' + encodeURIComponent(otpValue));
             }
         });
 

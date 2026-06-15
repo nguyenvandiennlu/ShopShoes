@@ -11,14 +11,22 @@ import services.auth.RegisterService;
 import services.common.EmailServices;
 import services.user.UserServices;
 import utils.EmailTemplateBuilder;
+import utils.RecaptchaVerifier;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.TimeUnit;
 
 @WebServlet("/register")
 public class RegisterController extends HttpServlet {
     private RegisterService registerService;
     private UserServices userServices;
+
+    // Rate limiting: track registration attempts per IP
+    private static final ConcurrentHashMap<String, long[]> registerAttempts = new ConcurrentHashMap<>();
+    private static final int MAX_REGISTER_ATTEMPTS = 3;
+    private static final long REGISTER_WINDOW_MS = TimeUnit.MINUTES.toMillis(10);
 
     @Override
     public void init() {
@@ -44,6 +52,22 @@ public class RegisterController extends HttpServlet {
 
         req.setCharacterEncoding(StandardCharsets.UTF_8.name());
         resp.setContentType("text/html;charset=UTF-8");
+
+        // --- Rate limiting check ---
+        String clientIp = getClientIp(req);
+        if (isRateLimited(clientIp)) {
+            req.setAttribute("error", "Bạn đã gửi quá nhiều yêu cầu đăng ký. Vui lòng thử lại sau 10 phút.");
+            req.getRequestDispatcher("/Register.jsp").forward(req, resp);
+            return;
+        }
+
+        // --- reCAPTCHA verification ---
+        String recaptchaResponse = req.getParameter("g-recaptcha-response");
+        if (!RecaptchaVerifier.verify(recaptchaResponse)) {
+            req.setAttribute("error", "Xác thực reCAPTCHA thất bại. Vui lòng xác nhận bạn không phải robot.");
+            req.getRequestDispatcher("/Register.jsp").forward(req, resp);
+            return;
+        }
 
         String fullName = req.getParameter("fullName");
         String email = req.getParameter("email");
@@ -97,6 +121,54 @@ public class RegisterController extends HttpServlet {
             req.setAttribute("error", "Đăng ký thành công nhưng gửi email kích hoạt thất bại: " + e.getMessage());
             req.getRequestDispatcher("/Register.jsp").forward(req, resp);
         }
+    }
+
+    /**
+     * Get client IP address from request, respecting proxy headers.
+     */
+    private String getClientIp(HttpServletRequest req) {
+        String ip = req.getHeader("X-Forwarded-For");
+        if (ip == null || ip.isEmpty() || "unknown".equalsIgnoreCase(ip)) {
+            ip = req.getHeader("Proxy-Client-IP");
+        }
+        if (ip == null || ip.isEmpty() || "unknown".equalsIgnoreCase(ip)) {
+            ip = req.getHeader("WL-Proxy-Client-IP");
+        }
+        if (ip == null || ip.isEmpty() || "unknown".equalsIgnoreCase(ip)) {
+            ip = req.getRemoteAddr();
+        }
+        // X-Forwarded-For may contain comma-separated list; take first IP
+        if (ip != null && ip.contains(",")) {
+            ip = ip.split(",")[0].trim();
+        }
+        return ip;
+    }
+
+    /**
+     * Check if the given IP has exceeded the rate limit for registration attempts.
+     */
+    private boolean isRateLimited(String ip) {
+        long now = System.currentTimeMillis();
+        long[] record = registerAttempts.get(ip);
+        if (record == null) {
+            // First attempt: [count, windowStart]
+            registerAttempts.put(ip, new long[]{1, now});
+            return false;
+        }
+        long count = record[0];
+        long windowStart = record[1];
+        if (now - windowStart > REGISTER_WINDOW_MS) {
+            // Window expired, reset
+            registerAttempts.put(ip, new long[]{1, now});
+            return false;
+        }
+        if (count >= MAX_REGISTER_ATTEMPTS) {
+            return true; // rate limited
+        }
+        // Increment count
+        record[0] = count + 1;
+        registerAttempts.put(ip, record);
+        return false;
     }
 
     private void handleAjaxValidation(HttpServletRequest req, HttpServletResponse resp) throws IOException {

@@ -30,6 +30,8 @@ public class Order implements Serializable {
 
     private String order_note;
 
+    private String cancel_reason;
+
     public int getId() {
         return id;
     }
@@ -145,6 +147,14 @@ public class Order implements Serializable {
 
     public void setOrderNote(String order_note) {
         this.order_note = order_note;
+    }
+
+    public String getCancelReason() {
+        return cancel_reason;
+    }
+
+    public void setCancelReason(String cancel_reason) {
+        this.cancel_reason = cancel_reason;
     }
 
     // List items for display

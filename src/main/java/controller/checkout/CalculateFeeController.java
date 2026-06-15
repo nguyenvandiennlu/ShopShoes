@@ -39,9 +39,12 @@ public class CalculateFeeController extends HttpServlet {
         }
 
         String mode = (String) session.getAttribute("checkoutMode");
-        Map<String, CartItem> cart = "BUY_NOW".equals(mode)
-                ? (Map<String, CartItem>) session.getAttribute("checkoutCart")
-                : (Map<String, CartItem>) session.getAttribute("cart");
+        Map<String, CartItem> cart;
+        if ("BUY_NOW".equals(mode) || "REORDER".equals(mode)) {
+            cart = (Map<String, CartItem>) session.getAttribute("checkoutCart");
+        } else {
+            cart = (Map<String, CartItem>) session.getAttribute("cart");
+        }
 
         if (cart == null || cart.isEmpty()) {
             session.removeAttribute("shippingFeeRaw");

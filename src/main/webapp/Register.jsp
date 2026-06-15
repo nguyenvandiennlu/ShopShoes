@@ -11,6 +11,8 @@
     <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/loading-overlay.css"/>
     <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/dangnhapvadangki.css" />
     <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/otp-verification.css" />
+    <!-- Google reCAPTCHA v2 -->
+    <script src="https://www.google.com/recaptcha/api.js" async defer></script>
   </head>
   <body>
   <jsp:include page="Header.jsp" />
@@ -181,6 +183,14 @@
                     <small id="confirmPasswordFeedback" class="field-feedback" aria-live="polite"></small>
                   </fieldset>
 
+                  <!-- Google reCAPTCHA -->
+                  <fieldset class="form-auth">
+                    <div class="g-recaptcha"
+                         data-sitekey="<%= utils.RecaptchaVerifier.getSiteKey() %>">
+                    </div>
+                    <small id="recaptchaFeedback" class="field-feedback" aria-live="polite"></small>
+                  </fieldset>
+
                   <div>
                     <button type="submit" class="btn-primary">Đăng ký</button>
                   </div>
@@ -205,13 +215,8 @@
   <script src="${pageContext.request.contextPath}/assets/script/register.js?v=20260406-4"></script>
 
   <script>
-    // Show loading popup when register form is submitted
-    const registerForm = document.getElementById('register');
-    if (registerForm) {
-      registerForm.addEventListener('submit', function(e) {
-        document.getElementById('registerLoadingOverlay').classList.add('active');
-      });
-    }
+    // Loading overlay is now managed in register.js
+    // (shown on submit, hidden on validation failure/error)
   </script>
 
   </body>

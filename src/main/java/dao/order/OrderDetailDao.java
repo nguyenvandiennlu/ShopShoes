@@ -63,4 +63,25 @@ public class OrderDetailDao {
                 .mapToBean(OrderDetailDTO.class)
                 .list());
     }
+
+    public List<model.Order.OrderDetail> findDetailByOrderId(int orderId) {
+        String sql = """
+                    SELECT
+                        od.id,
+                        od.order_id,
+                        od.product_id,
+                        od.color_id,
+                        od.size_id,
+                        od.quantity,
+                        od.unit_price,
+                        od.subtotal
+                    FROM order_detail od
+                    WHERE od.order_id = :orderId
+                """;
+
+        return JDBIConnector.getJdbi().withHandle(handle -> handle.createQuery(sql)
+                .bind("orderId", orderId)
+                .mapToBean(model.Order.OrderDetail.class)
+                .list());
+    }
 }
