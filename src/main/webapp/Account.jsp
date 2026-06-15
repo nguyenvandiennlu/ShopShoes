@@ -59,13 +59,13 @@
                                             </p>
                                         </div>
                                         <ul class="account-nav-list">
-                                            <li class="active"><a href="#personal-info" data-tab="info"><ion-icon
+                                            <li class="${activeTab == 'info' ? 'active' : ''}"><a href="#personal-info" data-tab="info"><ion-icon
                                                         name="person-circle-outline"></ion-icon> Thông tin cá nhân</a>
                                             </li>
-                                            <li><a href="#change-password" data-tab="password"><ion-icon
+                                            <li class="${activeTab == 'password' ? 'active' : ''}"><a href="#change-password" data-tab="password"><ion-icon
                                                         name="lock-closed-outline"></ion-icon> Đổi mật khẩu</a></li>
 
-                                            <li><a href="#order-history" data-tab="orders"><ion-icon
+                                            <li class="${activeTab == 'orders' ? 'active' : ''}"><a href="#order-history" data-tab="orders"><ion-icon
                                                         name="time-outline"></ion-icon>
                                                     Lịch sử đơn hàng</a></li>
 
@@ -88,7 +88,7 @@
                                             </div>
                                             <% } %>
 
-                                                <section id="personal-info" class="tab-content active"
+                                                <section id="personal-info" class="tab-content ${activeTab == 'info' ? 'active' : ''}"
                                                     data-content="info">
                                                     <h3 class="h3 content-title">Thông Tin Cá Nhân</h3>
                                                     <p>Quản lý tên, email và số điện thoại của bạn.</p>
@@ -123,7 +123,7 @@
                                                     </form>
                                                 </section>
 
-                                                <section id="change-password" class="tab-content"
+                                                <section id="change-password" class="tab-content ${activeTab == 'password' ? 'active' : ''}"
                                                     data-content="password">
                                                     <h3 class="h3 content-title">Đổi Mật Khẩu</h3>
                                                     <p>Đặt mật khẩu mới để tăng cường bảo mật tài khoản.</p>
@@ -159,7 +159,7 @@
                                                             Khẩu</button>
                                                     </form>
                                                 </section>
-                                                <section id="order-history" class="tab-content" data-content="orders">
+                                                <section id="order-history" class="tab-content ${activeTab == 'orders' ? 'active' : ''}" data-content="orders">
                                                     <h3 class="h3 content-title">Lịch Sử Đơn Hàng</h3>
                                                     <p>Theo dõi trạng thái và lịch sử các đơn hàng của bạn.</p>
 
@@ -210,6 +210,18 @@
                                                                                         test="${order.orderStatus == 'DELIVERED'}">
                                                                                         <span
                                                                                             class="order-status status-delivered">Đã
+                                                                                            giao</span>
+                                                                                    </c:when>
+                                                                                    <c:when
+                                                                                        test="${order.orderStatus == 'CANCELLED'}">
+                                                                                        <span
+                                                                                            class="order-status status-cancelled">Đã
+                                                                                            hủy</span>
+                                                                                    </c:when>
+                                                                                    <c:when
+                                                                                        test="${order.orderStatus == 'SHIPPED'}">
+                                                                                        <span
+                                                                                            class="order-status status-shipped">Đang
                                                                                             giao</span>
                                                                                     </c:when>
                                                                                     <c:otherwise>
@@ -290,25 +302,63 @@
                                                                             </div>
                                                                         </div>
                                                                         <div class="order-footer">
-                                                                            <c:choose>
-                                                                                <c:when
-                                                                                    test="${order.paymentStatus == 'PAID'}">
-                                                                                    <span
-                                                                                        class="payment-status paid"><ion-icon
-                                                                                            name="checkmark-circle"></ion-icon>
-                                                                                        Đã thanh toán</span>
-                                                                                </c:when>
-                                                                                <c:otherwise>
-                                                                                    <span
-                                                                                        class="payment-status unpaid"><ion-icon
-                                                                                            name="time-outline"></ion-icon>
-                                                                                        Chưa thanh toán</span>
-                                                                                </c:otherwise>
-                                                                            </c:choose>
+                                                                            <div class="order-footer-left">
+                                                                                <c:choose>
+                                                                                    <c:when
+                                                                                        test="${order.paymentStatus == 'PAID'}">
+                                                                                        <span
+                                                                                            class="payment-status paid"><ion-icon
+                                                                                                name="checkmark-circle"></ion-icon>
+                                                                                            Đã thanh toán</span>
+                                                                                    </c:when>
+                                                                                    <c:otherwise>
+                                                                                        <span
+                                                                                            class="payment-status unpaid"><ion-icon
+                                                                                                name="time-outline"></ion-icon>
+                                                                                            Chưa thanh toán</span>
+                                                                                    </c:otherwise>
+                                                                                </c:choose>
+                                                                            </div>
+                                                                            <div class="order-footer-right">
+                                                                                <c:if test="${order.orderStatus == 'NEW' || order.orderStatus == 'PROCESSING'}">
+                                                                                    <button type="button" class="btn-cancel-order" data-order-id="${order.id}">
+                                                                                        <ion-icon name="close-circle-outline"></ion-icon>
+                                                                                        Hủy đơn
+                                                                                    </button>
+                                                                                </c:if>
+                                                                                <form action="${pageContext.request.contextPath}/reorder" method="post" style="margin-left: 8px;">
+                                                                                    <input type="hidden" name="orderId" value="${order.id}" />
+                                                                                    <button type="submit" class="btn-reorder">
+                                                                                        <ion-icon name="refresh-outline"></ion-icon>
+                                                                                        Mua lại
+                                                                                    </button>
+                                                                                </form>
+                                                                            </div>
                                                                         </div>
                                                                     </div>
                                                                 </c:forEach>
                                                             </div>
+                                                            <!-- Pagination -->
+                                                            <c:if test="${totalPages > 1}">
+                                                                <div class="pagination">
+                                                                    <c:if test="${currentPage > 1}">
+                                                                        <a href="${pageContext.request.contextPath}/account?page=${currentPage - 1}" class="page-link">&laquo; Trang trước</a>
+                                                                    </c:if>
+                                                                    <c:forEach var="i" begin="1" end="${totalPages}">
+                                                                        <c:choose>
+                                                                            <c:when test="${i == currentPage}">
+                                                                                <span class="page-link active">${i}</span>
+                                                                            </c:when>
+                                                                            <c:otherwise>
+                                                                                <a href="${pageContext.request.contextPath}/account?page=${i}" class="page-link">${i}</a>
+                                                                            </c:otherwise>
+                                                                        </c:choose>
+                                                                    </c:forEach>
+                                                                    <c:if test="${currentPage < totalPages}">
+                                                                        <a href="${pageContext.request.contextPath}/account?page=${currentPage + 1}" class="page-link">Trang sau &raquo;</a>
+                                                                    </c:if>
+                                                                </div>
+                                                            </c:if>
                                                         </c:otherwise>
                                                     </c:choose>
                                                 </section>
@@ -317,6 +367,29 @@
                             </div>
 
                             <div class="modal" id="addressModal"></div>
+
+                            <!-- Cancel Order Modal -->
+                            <div class="modal-overlay" id="cancelModalOverlay">
+                                <div class="cancel-modal" id="cancelModal">
+                                    <button type="button" class="cancel-modal-close" id="cancelModalClose">&times;</button>
+                                    <h3>
+                                        <ion-icon name="alert-circle-outline"></ion-icon>
+                                        Xác nhận hủy đơn hàng
+                                    </h3>
+                                    <p>Vui lòng nhập lý do bạn muốn hủy đơn hàng này. Đơn hàng chỉ có thể hủy trong vòng 24 giờ kể từ khi đặt hàng và chưa được giao đi.</p>
+                                    <form id="cancelOrderForm">
+                                        <input type="hidden" name="orderId" id="cancelOrderId" value="" />
+                                        <textarea name="cancelReason" id="cancelReason" placeholder="Nhập lý do hủy đơn hàng (bắt buộc)..." required></textarea>
+                                        <div class="cancel-modal-actions">
+                                            <button type="button" class="btn btn-secondary" id="cancelModalNo">Không hủy</button>
+                                            <button type="submit" class="btn btn-danger" id="confirmCancelBtn">
+                                                <span id="cancelBtnText">Xác nhận hủy</span>
+                                                <span id="cancelBtnSpinner" style="display:none;"><ion-icon name="sync-outline" class="spin-icon"></ion-icon> Đang xử lý...</span>
+                                            </button>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
 
                             <div class="modal" id="logoutModal" style="display: none;">
                                 <div class="modal-content">
@@ -347,6 +420,114 @@
                         </script>
                         <script src="${pageContext.request.contextPath}/assets/script/pageaccount.js"></script>
                         <script src="${pageContext.request.contextPath}/assets/script/account.js"></script>
+                        <script>
+                        document.addEventListener('DOMContentLoaded', function() {
+                            var overlay = document.getElementById('cancelModalOverlay');
+                            var closeBtn = document.getElementById('cancelModalClose');
+                            var cancelNoBtn = document.getElementById('cancelModalNo');
+                            var cancelOrderId = document.getElementById('cancelOrderId');
+                            var cancelReason = document.getElementById('cancelReason');
+                            var cancelForm = document.getElementById('cancelOrderForm');
+                            var confirmBtn = document.getElementById('confirmCancelBtn');
+                            var btnText = document.getElementById('cancelBtnText');
+                            var btnSpinner = document.getElementById('cancelBtnSpinner');
+
+                            var cancelButtons = document.querySelectorAll('.btn-cancel-order');
+                            for (var i = 0; i < cancelButtons.length; i++) {
+                                cancelButtons[i].addEventListener('click', function() {
+                                    var orderId = this.getAttribute('data-order-id');
+                                    cancelOrderId.value = orderId;
+                                    cancelReason.value = '';
+                                    overlay.classList.add('active');
+                                });
+                            }
+
+                            function closeCancelModal() {
+                                overlay.classList.remove('active');
+                                cancelReason.value = '';
+                                confirmBtn.disabled = false;
+                                btnText.style.display = 'inline';
+                                btnSpinner.style.display = 'none';
+                            }
+
+                            if (closeBtn) closeBtn.addEventListener('click', closeCancelModal);
+                            if (cancelNoBtn) cancelNoBtn.addEventListener('click', closeCancelModal);
+                            if (overlay) overlay.addEventListener('click', function(e) {
+                                if (e.target === overlay) closeCancelModal();
+                            });
+
+                            if (cancelForm) {
+                                cancelForm.addEventListener('submit', function(e) {
+                                    e.preventDefault();
+                                    var reason = cancelReason.value.trim();
+                                    if (!reason) {
+                                        Swal.fire({
+                                            icon: 'warning',
+                                            title: 'Chưa nhập lý do',
+                                            text: 'Vui lòng nhập lý do hủy đơn hàng.',
+                                            confirmButtonColor: '#3085d6'
+                                        });
+                                        return;
+                                    }
+                                    var orderId = cancelOrderId.value;
+                                    confirmBtn.disabled = true;
+                                    btnText.style.display = 'none';
+                                    btnSpinner.style.display = 'inline';
+
+                                    var xhr = new XMLHttpRequest();
+                                    xhr.open('POST', CONTEXT_PATH + '/cancel-order', true);
+                                    xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded; charset=UTF-8');
+                                    xhr.onload = function() {
+                                        confirmBtn.disabled = false;
+                                        btnText.style.display = 'inline';
+                                        btnSpinner.style.display = 'none';
+                                        if (xhr.status === 200) {
+                                            try {
+                                                var resp = JSON.parse(xhr.responseText);
+                                                if (resp.success) {
+                                                    closeCancelModal();
+                                                    var html = '<p>' + resp.message + '</p>';
+                                                    if (resp.refundNotification) {
+                                                        html += '<p style="color:#d97706;margin-top:12px;font-weight:600;">' + resp.refundNotification + '</p>';
+                                                    }
+                                                    Swal.fire({
+                                                        icon: 'success',
+                                                        title: 'Hủy đơn thành công!',
+                                                        html: html,
+                                                        confirmButtonColor: '#3085d6'
+                                                    }).then(function() {
+                                                        location.reload();
+                                                    });
+                                                } else {
+                                                    closeCancelModal();
+                                                    Swal.fire({
+                                                        icon: 'error',
+                                                        title: 'Hủy đơn thất bại',
+                                                        text: resp.message,
+                                                        confirmButtonColor: '#d33'
+                                                    });
+                                                }
+                                            } catch(e) {
+                                                closeCancelModal();
+                                                Swal.fire({ icon: 'error', title: 'Lỗi hệ thống', text: 'Đã có lỗi xảy ra, vui lòng thử lại sau.', confirmButtonColor: '#d33' });
+                                            }
+                                        } else {
+                                            closeCancelModal();
+                                            Swal.fire({ icon: 'error', title: 'Lỗi kết nối', text: 'Không thể kết nối đến máy chủ.', confirmButtonColor: '#d33' });
+                                        }
+                                    };
+                                    xhr.onerror = function() {
+                                        confirmBtn.disabled = false;
+                                        btnText.style.display = 'inline';
+                                        btnSpinner.style.display = 'none';
+                                        closeCancelModal();
+                                        Swal.fire({ icon: 'error', title: 'Lỗi kết nối', text: 'Không thể kết nối đến máy chủ.', confirmButtonColor: '#d33' });
+                                    };
+                                    xhr.send('orderId=' + encodeURIComponent(orderId) + '&cancelReason=' + encodeURIComponent(reason));
+                                });
+                            }
+                        });
+                        </script>
 
                     </body>
 

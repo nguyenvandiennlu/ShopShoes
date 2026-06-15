@@ -32,6 +32,23 @@ public class AccountServices {
         return orders;
     }
 
+    public java.util.List<model.Order.Order> getOrderHistoryPaginated(int userId, int page, int pageSize) {
+        int offset = (page - 1) * pageSize;
+        java.util.List<model.Order.Order> orders = orderDao.findByUserIdWithPagination(userId, pageSize, offset);
+
+        // Lấy chi tiết cho từng đơn hàng
+        for (model.Order.Order order : orders) {
+            java.util.List<model.Order.OrderDetailDTO> items = orderDetailDao.findByOrderId(order.getId());
+            order.setItems(items);
+        }
+
+        return orders;
+    }
+
+    public int getOrderCount(int userId) {
+        return orderDao.countByUserId(userId);
+    }
+
     public boolean updateUserProfile(int userId, String fullName, String phone, String address) {
         return userDao.updateProfile(userId, fullName, phone, address);
     }

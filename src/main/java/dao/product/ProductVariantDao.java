@@ -213,6 +213,27 @@ public class ProductVariantDao {
     }
 
 
+    public void restoreStock(Handle handle, int productId, int colorId, int sizeId, int quantity) {
+        String sql = """
+        UPDATE product_variant
+        SET stock = stock + :quantity
+        WHERE product_id = :productId
+          AND color_id = :colorId
+          AND size_id = :sizeId
+    """;
+
+        int affected = handle.createUpdate(sql)
+                .bind("quantity", quantity)
+                .bind("productId", productId)
+                .bind("colorId", colorId)
+                .bind("sizeId", sizeId)
+                .execute();
+
+        if (affected == 0) {
+            throw new RuntimeException("Không tìm thấy variant để hoàn tồn kho");
+        }
+    }
+
     public void updateStock(Handle handle, int productId, int colorId, int sizeId, int quantity) {
         String sql = """
         UPDATE product_variant
