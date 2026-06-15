@@ -59,15 +59,30 @@ public class OtpVerificationController extends HttpServlet {
             String token = req.getParameter("token");
             String otp = req.getParameter("otp");
 
-            if (tokenTypeService.verifyEmailByToken(token)) {
-                autoLoginUser(req, email);
-                req.setAttribute("success", "Email đã được xác thực thành công!");
-                resp.sendRedirect(req.getContextPath() + "/menufilter?brandId=all");
+            boolean success = tokenTypeService.verifyEmailByToken(token);
+            
+            // Check if it's an AJAX request
+            boolean isAjax = "XMLHttpRequest".equals(req.getHeader("X-Requested-With"));
+            
+            if (isAjax) {
+                resp.setContentType("application/json;charset=UTF-8");
+                if (success) {
+                    autoLoginUser(req, email);
+                    resp.getWriter().write("{\"success\":true,\"message\":\"Email đã được xác thực thành công!\",\"redirect\":\"" + req.getContextPath() + "/menufilter?brandId=all\"}");
+                } else {
+                    resp.getWriter().write("{\"success\":false,\"message\":\"OTP không hợp lệ hoặc đã hết hạn. Vui lòng thử lại.\"}");
+                }
             } else {
-                req.setAttribute("error", "OTP không hợp lệ hoặc đã hết hạn. Vui lòng thử lại.");
-                req.setAttribute("email", email);
-                req.setAttribute("token", token);
-                req.getRequestDispatcher("/OtpVerification.jsp").forward(req, resp);
+                if (success) {
+                    autoLoginUser(req, email);
+                    req.setAttribute("success", "Email đã được xác thực thành công!");
+                    resp.sendRedirect(req.getContextPath() + "/menufilter?brandId=all");
+                } else {
+                    req.setAttribute("error", "OTP không hợp lệ hoặc đã hết hạn. Vui lòng thử lại.");
+                    req.setAttribute("email", email);
+                    req.setAttribute("token", token);
+                    req.getRequestDispatcher("/OtpVerification.jsp").forward(req, resp);
+                }
             }
             return;
         }

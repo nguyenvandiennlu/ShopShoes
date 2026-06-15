@@ -209,10 +209,56 @@ document.addEventListener("DOMContentLoaded", function () {
       touched[key] = true;
     });
 
+    // Show loading overlay IMMEDIATELY (before any validation)
+    var loadingOverlay = document.getElementById('registerLoadingOverlay');
+    if (loadingOverlay) {
+      loadingOverlay.classList.add('active');
+      document.body.style.overflow = 'hidden';
+    }
+
+    // Validate reCAPTCHA
+    var recaptchaResponse = '';
+    if (typeof grecaptcha !== 'undefined') {
+      recaptchaResponse = grecaptcha.getResponse();
+    }
+    var recaptchaFeedback = document.getElementById('recaptchaFeedback');
+    if (!recaptchaResponse) {
+      if (recaptchaFeedback) {
+        recaptchaFeedback.textContent = 'Vui lòng xác nhận bạn không phải robot';
+        recaptchaFeedback.classList.add('is-invalid');
+      }
+      // Hide loading overlay since we can't proceed
+      if (loadingOverlay) {
+        loadingOverlay.classList.remove('active');
+        document.body.style.overflow = '';
+      }
+      return;
+    } else {
+      if (recaptchaFeedback) {
+        recaptchaFeedback.textContent = '';
+        recaptchaFeedback.classList.remove('is-invalid');
+      }
+    }
+
     postValidation(true).then(function (data) {
       if (data && data.valid) {
-        form.submit();
+        // Append reCAPTCHA response to form before submitting
+        var recaptchaInput = document.createElement('input');
+        recaptchaInput.type = 'hidden';
+        recaptchaInput.name = 'g-recaptcha-response';
+        recaptchaInput.value = recaptchaResponse;
+        form.appendChild(recaptchaInput);
+        // Use setTimeout to allow the loading overlay to render before form submit
+        setTimeout(function () {
+          form.submit();
+        }, 100);
         return;
+      }
+
+      // Hide loading overlay when validation fails or errors occur
+      if (loadingOverlay) {
+        loadingOverlay.classList.remove('active');
+        document.body.style.overflow = '';
       }
 
       if (!data || !data.fields) {
