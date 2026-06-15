@@ -31,13 +31,13 @@ public class InventoryService {
             Integer colorId,
             Integer sizeId,
             String stockStatus,
-            int page
+            String visible, int page
     ) {
         int offset = (page - 1) * PAGE_SIZE;
         List<InventoryProductRow> rows = inventoryDao.findWithFilter(
-                keyword, brandId, colorId, sizeId, stockStatus, PAGE_SIZE, offset);
+                keyword, brandId, colorId, sizeId, stockStatus, visible, PAGE_SIZE, offset);
         int total = inventoryDao.countWithFilter(
-                keyword, brandId, colorId, sizeId, stockStatus);
+                keyword, brandId, colorId, sizeId, stockStatus, visible);
         return new InventoryPageResult(rows, total, page);
     }
 }

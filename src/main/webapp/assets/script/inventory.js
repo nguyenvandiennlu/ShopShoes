@@ -1,31 +1,25 @@
-/**
- * inventory.js
- * Quản lý kho hàng — filter, search, accordion, pagination
- */
-
 const API = window.contextPath + '/admin/api/inventory';
 
-// ── State ────────────────────────────────────────────────────────────────────
 const state = {
     keyword:     '',
     brandId:     '',
     colorId:     '',
     sizeId:      '',
     stockStatus: '',
+    visible:     '',
     page:        1,
     totalPages:  1,
     totalCount:  0,
 };
 
-// Tracks which productId rows are expanded
 const expandedRows = new Set();
 
-// ── DOM refs ─────────────────────────────────────────────────────────────────
 const elKeyword    = document.getElementById('filter-keyword');
 const elBrand      = document.getElementById('filter-brand');
 const elColor      = document.getElementById('filter-color');
 const elSize       = document.getElementById('filter-size');
 const elStatus     = document.getElementById('filter-status');
+const elVisible    = document.getElementById('filter-visible');
 const elApply      = document.getElementById('btn-apply-filter');
 const elReset      = document.getElementById('btn-reset-filter');
 const elTbody      = document.getElementById('inventory-tbody');
@@ -47,6 +41,7 @@ function applyFilters() {
     state.colorId     = elColor.value;
     state.sizeId      = elSize.value;
     state.stockStatus = elStatus.value;
+    state.visible     = elVisible.value;
     state.page        = 1;
     expandedRows.clear();
     fetchList();
@@ -54,17 +49,17 @@ function applyFilters() {
 
 const debouncedApply = debounce(applyFilters, 400);
 
-// ── Init ─────────────────────────────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', () => {
     loadFilterOptions();
     fetchList();
 
     elKeyword.addEventListener('input', debouncedApply);
 
-    elBrand.addEventListener('change',  applyFilters);
-    elColor.addEventListener('change',  applyFilters);
-    elSize.addEventListener('change',   applyFilters);
-    elStatus.addEventListener('change', applyFilters);
+    elBrand.addEventListener('change',   applyFilters);
+    elColor.addEventListener('change',   applyFilters);
+    elSize.addEventListener('change',    applyFilters);
+    elStatus.addEventListener('change',  applyFilters);
+    elVisible.addEventListener('change', applyFilters);
 
     elApply.addEventListener('click', applyFilters);
 
@@ -74,8 +69,11 @@ document.addEventListener('DOMContentLoaded', () => {
         elColor.value   = '';
         elSize.value    = '';
         elStatus.value  = '';
-        Object.assign(state, { keyword:'', brandId:'', colorId:'', sizeId:'',
-            stockStatus:'', page:1 });
+        elVisible.value = '';
+        Object.assign(state, {
+            keyword: '', brandId: '', colorId: '', sizeId: '',
+            stockStatus: '', visible: '', page: 1
+        });
         expandedRows.clear();
         fetchList();
     });
@@ -89,6 +87,10 @@ async function loadFilterOptions() {
         populateSelect(elBrand, data.brands, 'id', 'name');
         populateSelect(elColor, data.colors, 'id', 'name');
         populateSelect(elSize,  data.sizes,  'id', 'name');
+
+        if (typeof populateEditBrandSelect === 'function') {
+            populateEditBrandSelect(data.brands);
+        }
     } catch (err) {
         console.error('Lỗi tải filter options:', err);
     }
@@ -119,6 +121,7 @@ async function fetchList() {
     if (state.colorId)     params.set('colorId',  state.colorId);
     if (state.sizeId)      params.set('sizeId',   state.sizeId);
     if (state.stockStatus) params.set('status',   state.stockStatus);
+    if (state.visible)     params.set('visible',  state.visible);
     params.set('page', state.page);
 
     try {
@@ -163,7 +166,6 @@ function renderTable(rows) {
 
     elTbody.querySelectorAll('.product-row').forEach(tr => {
         tr.addEventListener('click', (e) => {
-            // Không toggle khi click action buttons
             if (e.target.closest('.action-btns')) return;
             const pid = parseInt(tr.dataset.productId);
             toggleAccordion(pid, tr);
@@ -320,8 +322,6 @@ function renderPagination() {
     elPagWrapper.style.display = '';
 
     const p = state.page, tp = state.totalPages;
-    const start = (p - 1) * 10 + 1;
-    const end   = Math.min(p * 10, state.totalCount);
 
     let html = '';
     html += `<li class="page-item ${p === 1 ? 'disabled' : ''}">

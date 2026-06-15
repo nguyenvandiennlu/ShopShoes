@@ -1,5 +1,6 @@
 package dao.admin;
 
+import DTO.ProductEditDTO;
 import dao.JDBIConnector;
 import model.admin.InventoryProductRow;
 import model.admin.InventoryVariantRow;
@@ -21,9 +22,17 @@ public class InventoryDao {
     }
 
     private void appendTokenConditions(StringBuilder sql, List<String> tokens) {
-        for (int i = 0; i < tokens.size(); i++) {
-            sql.append(" AND p.name LIKE :token").append(i).append(" ");
+        if (tokens.isEmpty()) return;
+        if (tokens.size() == 1) {
+            sql.append(" AND p.name LIKE :token0 ");
+            return;
         }
+        sql.append(" AND (");
+        for (int i = 0; i < tokens.size(); i++) {
+            if (i > 0) sql.append(" OR ");
+            sql.append("p.name LIKE :token").append(i);
+        }
+        sql.append(") ");
     }
 
     private void bindTokens(org.jdbi.v3.core.statement.Query query, List<String> tokens) {
@@ -38,6 +47,7 @@ public class InventoryDao {
             Integer colorId,
             Integer sizeId,
             String stockStatus,
+            String visible,
             int limit,
             int offset
     ) {
@@ -79,6 +89,9 @@ public class InventoryDao {
                           AND pv3.is_discontinue_variant = 0)
         """);
 
+        if ("visible".equals(visible))     sql.append(" AND p.is_available = 1 ");
+        else if ("hidden".equals(visible)) sql.append(" AND p.is_available = 0 ");
+
         sql.append(" GROUP BY p.id, p.name, p.price, p.is_available, p.is_discontinue, b.id, b.name, pmi.img_url ");
 
         if ("instock".equals(stockStatus))       sql.append(" HAVING totalStock > 5 ");
@@ -103,7 +116,8 @@ public class InventoryDao {
             Integer brandId,
             Integer colorId,
             Integer sizeId,
-            String stockStatus
+            String stockStatus,
+            String visible
     ) {
         List<String> tokens = tokenize(keyword);
 
@@ -132,6 +146,9 @@ public class InventoryDao {
                           AND pv3.size_id = :sizeId
                           AND pv3.is_discontinue_variant = 0)
         """);
+
+        if ("visible".equals(visible))     inner.append(" AND p.is_available = 1 ");
+        else if ("hidden".equals(visible)) inner.append(" AND p.is_available = 0 ");
 
         inner.append(" GROUP BY p.id ");
 
@@ -173,5 +190,56 @@ public class InventoryDao {
                 .bind("productId", productId)
                 .mapToBean(InventoryVariantRow.class)
                 .list());
+    }
+
+    public ProductEditDTO findProductDetail(int productId) {
+        String sql = """
+            SELECT
+                p.id            AS id,
+                p.name          AS name,
+                p.price         AS price,
+                p.brand_id      AS brandId,
+                b.name          AS brandName,
+                p.is_available  AS available,
+                pmi.img_url     AS mainImgUrl
+            FROM product p
+            JOIN brand b ON b.id = p.brand_id
+            LEFT JOIN product_main_img pmi ON pmi.product_id = p.id
+            WHERE p.id = :productId
+        """;
+        return jdbi.withHandle(h -> h.createQuery(sql)
+                .bind("productId", productId)
+                .mapToBean(ProductEditDTO.class)
+                .findOne()
+                .orElse(null));
+    }
+
+    public void updateProduct(int productId, String name, java.math.BigDecimal price,
+                              int brandId, boolean isAvailable, String mainImgUrl) {
+        jdbi.useHandle(h -> h.createUpdate("""
+                UPDATE product
+                SET name         = :name,
+                    price        = :price,
+                    brand_id     = :brandId,
+                    is_available = :isAvailable
+                WHERE id = :productId
+                """)
+                .bind("name",        name)
+                .bind("price",       price)
+                .bind("brandId",     brandId)
+                .bind("isAvailable", isAvailable ? 1 : 0)
+                .bind("productId",   productId)
+                .execute());
+
+        if (mainImgUrl != null && !mainImgUrl.isBlank()) {
+            jdbi.useHandle(h -> h.createUpdate("""
+                    INSERT INTO product_main_img (product_id, img_url, is_active)
+                    VALUES (:productId, :imgUrl, 1)
+                    ON DUPLICATE KEY UPDATE img_url = :imgUrl, is_active = 1
+                    """)
+                    .bind("productId", productId)
+                    .bind("imgUrl",    mainImgUrl)
+                    .execute());
+        }
     }
 }
