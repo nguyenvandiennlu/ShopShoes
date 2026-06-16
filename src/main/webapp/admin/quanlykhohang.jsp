@@ -62,6 +62,10 @@
             box-shadow: 0 6px 20px rgba(255,103,92,0.5);
         }
 
+        #tab-restock-qty:hover, #tab-new-variant:hover {
+            color: #0d0d0d!important;
+        }
+
         .page-link { color: #ff675c; border-color: #e2e8f0; }
         .page-item.active .page-link {
             background-color: #ff675c; border-color: #ff675c; color: white;
@@ -223,24 +227,46 @@
                 </div>
                 <div id="edit-modal-form" style="display:none;">
                     <input type="hidden" id="edit-product-id"/>
+                    <input type="file" id="edit-img-file"
+                           accept="image/jpeg,image/png,image/webp,image/gif"
+                           style="display:none;"/>
                     <div class="row g-4">
                         <div class="col-12 col-md-4">
                             <label class="form-label fw-semibold small text-muted">Ảnh chính</label>
+
                             <div class="border rounded bg-light d-flex align-items-center
                                         justify-content-center overflow-hidden mb-2"
-                                 style="width:100%;aspect-ratio:1;">
+                                 style="width:100%;aspect-ratio:1;position:relative;">
                                 <img id="edit-img-preview" src="" alt=""
                                      style="width:100%;height:100%;object-fit:cover;display:none;"/>
                                 <span id="edit-img-placeholder"
                                       class="material-symbols-outlined text-muted"
-                                      style="font-size:48px;display:none;">image</span>
+                                      style="font-size:48px;">image</span>
                             </div>
-                            <label for="edit-img-url" class="form-label fw-semibold small text-muted">
-                                URL ảnh
-                            </label>
-                            <input type="url" id="edit-img-url" class="form-control form-control-sm"
-                                   placeholder="https://..."/>
+
+                            <button type="button" id="btn-upload-image"
+                                    class="btn btn-outline-secondary btn-sm w-100 mb-2">
+                                <span class="spinner-border spinner-border-sm me-1"
+                                      id="upload-spinner" style="display:none;"></span>
+                                <span class="material-symbols-outlined me-1 align-middle"
+                                      style="font-size:15px;">upload</span>
+                                <span id="upload-label">Chọn ảnh</span>
+                            </button>
+
+                            <div id="edit-img-url-display"
+                                 class="text-muted text-truncate"
+                                 style="font-size:10px;word-break:break-all;line-height:1.4;"
+                                 title=""></div>
+
+                            <div id="upload-error"
+                                 class="text-danger mt-1 d-none"
+                                 style="font-size:12px;"></div>
+
+                            <p class="text-muted mt-1 mb-0" style="font-size:11px;">
+                                JPEG, PNG, WebP, GIF · Tối đa 5MB
+                            </p>
                         </div>
+
                         <div class="col-12 col-md-8">
                             <div class="mb-3">
                                 <label for="edit-name" class="form-label fw-semibold small text-muted">
@@ -312,8 +338,127 @@
         </div>
     </div>
 </div>
+<div class="modal fade" id="restockModal" tabindex="-1" aria-hidden="true" data-bs-backdrop="static">
+    <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header border-bottom">
+                <h5 class="modal-title fw-bold" style="font-family:var(--heading-font,inherit);">
+                    <span class="material-symbols-outlined me-2 align-middle" style="color:#ff675c;font-size:22px;">inventory</span>
+                    Quản lý Kho & Biến thể: <span id="restock-product-name" class="text-primary"></span>
+                </h5>
+                <button type="button" class="btn-close" id="btn-close-restock-modal"></button>
+            </div>
 
+            <div class="modal-body p-0">
+                <div id="restock-unavailable-warning" class="alert alert-warning m-3 d-none">
+                    <span class="material-symbols-outlined align-middle me-1">warning</span>
+                    Sản phẩm này hiện đang <strong>ẩn khỏi shop</strong>. Vui lòng chuyển trạng thái "Hiển thị" trước khi nhập thêm hàng.
+                </div>
+
+                <div id="restock-modal-loading" class="text-center py-5">
+                    <div class="spinner-border" style="color:#ff675c;"></div>
+                    <p class="text-muted mt-2 mb-0">Đang tải dữ liệu...</p>
+                </div>
+
+                <div id="restock-modal-content" style="display:none;">
+                    <ul class="nav nav-tabs px-3 pt-3 bg-light" id="restockTabs" role="tablist">
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link active fw-semibold" id="tab-restock-qty" data-bs-toggle="tab" data-bs-target="#pane-restock-qty" type="button" role="tab">
+                                Nhập thêm số lượng
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link fw-semibold" id="tab-new-variant" data-bs-toggle="tab" data-bs-target="#pane-new-variant" type="button" role="tab">
+                                Quản lý Biến thể
+                            </button>
+                        </li>
+                    </ul>
+
+                    <div class="tab-content p-4">
+                        <div class="tab-pane fade show active" id="pane-restock-qty" role="tabpanel">
+                            <p class="text-muted small mb-3">Nhập số lượng hàng mới về. Hệ thống sẽ cộng dồn vào tồn kho hiện tại.</p>
+                            <div class="table-responsive">
+                                <table class="table align-middle variant-table border">
+                                    <thead class="table-light">
+                                    <tr>
+                                        <th>Kích cỡ</th>
+                                        <th>Màu sắc</th>
+                                        <th class="text-center">Tồn hiện tại</th>
+                                        <th class="text-center" style="width: 150px;">+ Nhập thêm</th>
+                                        <th class="text-center" style="width: 60px;"></th> </tr>
+                                    </tr>
+                                    </thead>
+                                    <tbody id="restock-qty-tbody">
+                                    </tbody>
+                                </table>
+                            </div>
+                            <div class="text-end mt-3">
+                                <button type="button" id="btn-save-restock" class="btn px-4 fw-semibold" style="background:#ff675c;color:white;">
+                                    <span class="material-symbols-outlined me-1 align-middle" style="font-size:18px;">save</span> Lưu số lượng
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="tab-pane fade" id="pane-new-variant" role="tabpanel">
+                            <div class="card card-body bg-light border-0 mb-4">
+                                <h6 class="fw-bold mb-3">Thêm biến thể mới</h6>
+                                <div class="row g-3 align-items-end">
+                                    <div class="col-md-4">
+                                        <label class="form-label small fw-semibold">Màu sắc</label>
+                                        <select id="new-variant-color" class="form-select"></select>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <label class="form-label small fw-semibold">Kích cỡ</label>
+                                        <select id="new-variant-size" class="form-select"></select>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <label class="form-label small fw-semibold">Tồn kho ban đầu</label>
+                                        <input type="number" id="new-variant-stock" class="form-control" placeholder="0" min="0">
+                                    </div>
+                                    <div class="mt-3">
+                                        <label class="form-label small fw-semibold">Ảnh biến thể (Theo màu sắc)</label>
+                                        <div class="d-flex align-items-center gap-2 mb-2">
+                                            <label for="new-variant-images" class="btn btn-sm btn-outline-secondary d-flex align-items-center">
+                                                <span class="material-symbols-outlined me-1" style="font-size: 18px;">cloud_upload</span>
+                                                Chọn ảnh
+                                            </label>
+                                            <input type="file" id="new-variant-images" class="d-none" accept="image/*" multiple>
+                                            <span class="text-muted small">Có thể chọn nhiều ảnh.</span>
+                                        </div>
+                                        <div id="variant-image-preview-container" class="d-flex flex-wrap gap-2"></div>
+                                    </div>
+                                </div>
+                                <div class="text-end mt-3">
+                                    <button type="button" id="btn-save-new-variant" class="btn btn-dark px-4">
+                                        <span class="material-symbols-outlined me-1 align-middle" style="font-size:18px;">add</span> Thêm biến thể
+                                    </button>
+                                </div>
+                            </div>
+
+                            <h6 class="fw-bold mb-2 text-danger">Biến thể đã ngừng bán</h6>
+                            <p class="small text-muted mb-2">Các biến thể dưới đây đã bị ngừng kinh doanh. Bạn có thể mở lại nếu có hàng.</p>
+                            <div class="table-responsive">
+                                <table class="table align-middle variant-table border text-muted">
+                                    <thead class="table-light">
+                                    <tr>
+                                        <th>Kích cỡ</th>
+                                        <th>Màu sắc</th>
+                                        <th class="text-center">Thao tác</th>
+                                    </tr>
+                                    </thead>
+                                    <tbody id="restock-discontinued-tbody">
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
     window.contextPath = "${pageContext.request.contextPath}";
 </script>
