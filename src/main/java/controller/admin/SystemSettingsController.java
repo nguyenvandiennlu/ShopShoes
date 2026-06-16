@@ -80,7 +80,6 @@ public class SystemSettingsController extends HttpServlet {
                     jsonResponse.addProperty("success", false);
                     jsonResponse.addProperty("message", "Vui lòng nhập đầy đủ các trường bắt buộc.");
                 } else {
-                    // Giữ lại cấu hình SMTP cũ
                     String host = EmailConfigLoader.get("mail.host");
                     String port = EmailConfigLoader.get("mail.port");
                     String username = EmailConfigLoader.get("mail.username");
@@ -116,7 +115,6 @@ public class SystemSettingsController extends HttpServlet {
                     jsonResponse.addProperty("success", false);
                     jsonResponse.addProperty("message", "Vui lòng nhập đầy đủ thông tin cấu hình SMTP.");
                 } else {
-                    // Giữ lại cấu hình shop cũ
                     String shopNameOld = EmailConfigLoader.get("shop.name");
                     String shopHotlineOld = EmailConfigLoader.get("shop.hotline");
                     String shopAddressOld = EmailConfigLoader.get("shop.address");
@@ -139,6 +137,13 @@ public class SystemSettingsController extends HttpServlet {
                 break;
 
             case "change-password":
+                if (currentAdmin != null && currentAdmin.getFirebaseUID() != null && !currentAdmin.getFirebaseUID().isBlank()) {
+                    jsonResponse.addProperty("success", false);
+                    jsonResponse.addProperty("message", "Tài khoản liên kết Google không được phép thực hiện đổi mật khẩu.");
+                    out.print(jsonResponse.toString());
+                    return;
+                }
+
                 String oldPassword = req.getParameter("oldPassword");
                 String newPassword = req.getParameter("newPassword");
                 String confirmPassword = req.getParameter("confirmPassword");
@@ -155,7 +160,6 @@ public class SystemSettingsController extends HttpServlet {
                     jsonResponse.addProperty("success", false);
                     jsonResponse.addProperty("message", "Xác nhận mật khẩu mới không khớp.");
                 } else {
-                    // Load lại user từ DB để lấy mật khẩu băm mới nhất
                     User latestAdmin = userDao.findById(currentAdmin.getId());
                     if (latestAdmin == null) {
                         jsonResponse.addProperty("success", false);
@@ -169,10 +173,8 @@ public class SystemSettingsController extends HttpServlet {
                         boolean updated = userDao.updatePassword(latestAdmin.getId(), newPasswordHash);
 
                         if (updated) {
-                            // Cập nhật lại mật khẩu hash trong Session
                             latestAdmin.setPasswordHash(newPasswordHash);
                             session.setAttribute("currentUser", latestAdmin);
-
                             jsonResponse.addProperty("success", true);
                             jsonResponse.addProperty("message", "Thay đổi mật khẩu thành công!");
                         } else {
@@ -189,7 +191,6 @@ public class SystemSettingsController extends HttpServlet {
                     jsonResponse.addProperty("success", false);
                     jsonResponse.addProperty("message", "Vui lòng nhập địa chỉ email nhận thử nghiệm.");
                 } else {
-                    // Gửi trực tiếp thông qua EmailServices
                     boolean sent = emailServices.send(
                             testEmail.trim(),
                             "Email kiểm tra SMTP - BHD Sport Shoes",

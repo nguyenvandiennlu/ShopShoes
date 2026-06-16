@@ -1,7 +1,9 @@
 <%@ page contentType="text/html;charset=UTF-8" pageEncoding="UTF-8" language="java" %>
 <%@ page import="utils.EmailConfigLoader" %>
+<%@ page import="model.user.User" %>
 <%
     request.setAttribute("adminActive", "settings");
+    User currentUser = (User) session.getAttribute("currentUser");
 %>
 <!DOCTYPE html>
 <html lang="vi">
@@ -621,41 +623,51 @@
                         <span class="material-symbols-outlined text-bittersweet">lock</span>
                         Đổi mật khẩu tài khoản Admin
                     </h3>
-                    <form id="changePasswordForm" class="row g-4">
-                        <div class="col-12">
-                            <label class="form-label">Mật khẩu hiện tại <span class="text-error">*</span></label>
-                            <div class="password-input-group">
-                                <input class="form-control pe-5" name="oldPassword" type="password" placeholder="Nhập mật khẩu hiện tại..." required>
-                                <button class="toggle-password" type="button">
-                                    <span class="material-symbols-outlined" style="font-size: 20px;">visibility_off</span>
-                                </button>
+                    <% if (currentUser != null && currentUser.getFirebaseUID() != null && !currentUser.getFirebaseUID().isBlank()) { %>
+                        <div class="alert alert-info d-flex align-items-center gap-3 mt-4" role="alert" style="background-color: #e8f4fd; border: 1px solid #b3d7f7; color: #1d548f; border-radius: 8px;">
+                            <span class="material-symbols-outlined text-info" style="font-size: 32px; color: #1d548f !important;">info</span>
+                            <div>
+                                <h5 class="alert-heading font-heading mb-1" style="font-weight: 600; color: #1d548f;">Tài khoản đăng nhập bằng Google</h5>
+                                <p class="mb-0" style="font-size: 13px;">Tài khoản quản trị của bạn hiện đang liên kết và đăng nhập thông qua Google OAuth2. Bạn không có mật khẩu cục bộ trên hệ thống này và không thể đổi mật khẩu tại đây.</p>
                             </div>
                         </div>
-                        <div class="col-md-6">
-                            <label class="form-label">Mật khẩu mới <span class="text-error">*</span></label>
-                            <div class="password-input-group">
-                                <input class="form-control pe-5" name="newPassword" id="newPassword" type="password" placeholder="Tối thiểu 6 ký tự..." required>
-                                <button class="toggle-password" type="button">
-                                    <span class="material-symbols-outlined" style="font-size: 20px;">visibility_off</span>
+                    <% } else { %>
+                        <form id="changePasswordForm" class="row g-4">
+                            <div class="col-12">
+                                <label class="form-label">Mật khẩu hiện tại <span class="text-error">*</span></label>
+                                <div class="password-input-group">
+                                    <input class="form-control pe-5" name="oldPassword" type="password" placeholder="Nhập mật khẩu hiện tại..." required>
+                                    <button class="toggle-password" type="button">
+                                        <span class="material-symbols-outlined" style="font-size: 20px;">visibility_off</span>
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Mật khẩu mới <span class="text-error">*</span></label>
+                                <div class="password-input-group">
+                                    <input class="form-control pe-5" name="newPassword" id="newPassword" type="password" placeholder="Tối thiểu 6 ký tự..." required>
+                                    <button class="toggle-password" type="button">
+                                        <span class="material-symbols-outlined" style="font-size: 20px;">visibility_off</span>
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Xác nhận mật khẩu mới <span class="text-error">*</span></label>
+                                <div class="password-input-group">
+                                    <input class="form-control pe-5" name="confirmPassword" id="confirmPassword" type="password" placeholder="Nhập lại mật khẩu mới..." required>
+                                    <button class="toggle-password" type="button">
+                                        <span class="material-symbols-outlined" style="font-size: 20px;">visibility_off</span>
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="col-12 d-flex justify-content-end mt-4">
+                                <button class="btn btn-bittersweet px-4 py-2 d-flex align-items-center gap-2 shadow-sm" type="submit">
+                                    <span class="material-symbols-outlined" style="font-size: 20px;">vpn_key</span>
+                                    Thay đổi mật khẩu
                                 </button>
                             </div>
-                        </div>
-                        <div class="col-md-6">
-                            <label class="form-label">Xác nhận mật khẩu mới <span class="text-error">*</span></label>
-                            <div class="password-input-group">
-                                <input class="form-control pe-5" name="confirmPassword" id="confirmPassword" type="password" placeholder="Nhập lại mật khẩu mới..." required>
-                                <button class="toggle-password" type="button">
-                                    <span class="material-symbols-outlined" style="font-size: 20px;">visibility_off</span>
-                                </button>
-                            </div>
-                        </div>
-                        <div class="col-12 d-flex justify-content-end mt-4">
-                            <button class="btn btn-bittersweet px-4 py-2 d-flex align-items-center gap-2 shadow-sm" type="submit">
-                                <span class="material-symbols-outlined" style="font-size: 20px;">vpn_key</span>
-                                Thay đổi mật khẩu
-                            </button>
-                        </div>
-                    </form>
+                        </form>
+                    <% } %>
                 </div>
 
                 <!-- Permissions Management Card -->
