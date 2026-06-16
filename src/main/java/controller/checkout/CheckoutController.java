@@ -66,12 +66,23 @@ public class CheckoutController extends HttpServlet {
         String phone = safe(req.getParameter("phone"));
         String address = safe(req.getParameter("address"));
         String note = safe(req.getParameter("note"));
+        String fullName = safe(req.getParameter("fullName"));
+
+        // Parse address components from hidden fields
+        String province = safe(req.getParameter("province"));
+        String district = safe(req.getParameter("district"));
+        String ward = safe(req.getParameter("ward"));
+        String street = safe(req.getParameter("street"));
 
         if (phone.isBlank() || address.isBlank()) {
             req.setAttribute("errorMessage", "Vui long nhap day du so dien thoai va dia chi giao hang.");
             req.getRequestDispatcher("/Checkout.jsp").forward(req, resp);
             return;
         }
+
+        // Use fullName from form as recipient name, fallback to user's fullName
+        String recipientName = fullName.isBlank() ? user.getFullName() : fullName;
+        String recipientPhone = phone;
 
         PaymentMethod paymentMethod;
         try {
@@ -92,7 +103,13 @@ public class CheckoutController extends HttpServlet {
                     paymentMethod,
                     address,
                     phone,
-                    note
+                    note,
+                    recipientName,
+                    recipientPhone,
+                    province,
+                    district,
+                    ward,
+                    street
             );
 
             if (!address.equals(user.getAddress()) || !phone.equals(user.getPhoneNumber())) {

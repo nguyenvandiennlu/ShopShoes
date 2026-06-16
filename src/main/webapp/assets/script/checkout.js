@@ -113,9 +113,18 @@ document.addEventListener('DOMContentLoaded', function() {
 
     streetInput.addEventListener('input', updateFullAddress);
 
+    // Populate hidden address component fields before form submit
+    function populateHiddenAddressFields() {
+        document.getElementById('hiddenProvince').value = provinceSelect.options[provinceSelect.selectedIndex]?.text || '';
+        document.getElementById('hiddenDistrict').value = districtSelect.options[districtSelect.selectedIndex]?.text || '';
+        document.getElementById('hiddenWard').value = wardSelect.options[wardSelect.selectedIndex]?.text || '';
+        document.getElementById('hiddenStreet').value = streetInput.value.trim();
+    }
+
     if (checkoutForm) {
         checkoutForm.addEventListener('submit', function (event) {
             updateFullAddress();
+            populateHiddenAddressFields();
 
             const isAddressIncomplete =
                 !provinceSelect.value ||

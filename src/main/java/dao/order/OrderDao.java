@@ -23,14 +23,22 @@ public class OrderDao {
 
     public int insertOrder(Handle handle, int userId, BigDecimal subTotal, BigDecimal shippingFee,
             BigDecimal grandTotal, PaymentMethod paymentMethod, String shippingAddress,
-            String phoneNumber, String orderNote) {
+            String phoneNumber, String orderNote,
+            String recipientName, String recipientPhone,
+            String province, String district, String ward, String street) {
         return handle.createUpdate("""
                     INSERT INTO orders
                     (user_id, sub_total, shipping_fee, grand_total,
-                     order_status, payment_method, payment_status, shipping_address, phone_number, order_note)
+                     order_status, payment_method, payment_status,
+                     shipping_address, phone_number, order_note,
+                     recipient_name, recipient_phone,
+                     province, district, ward, street)
                     VALUES
                     (:user_id, :sub_total, :shipping_fee, :grand_total,
-                     :order_status, :payment_method, :payment_status, :shipping_address, :phone_number, :order_note)
+                     :order_status, :payment_method, :payment_status,
+                     :shipping_address, :phone_number, :order_note,
+                     :recipient_name, :recipient_phone,
+                     :province, :district, :ward, :street)
                 """)
                 .bind("user_id", userId)
                 .bind("sub_total", subTotal)
@@ -42,6 +50,12 @@ public class OrderDao {
                 .bind("shipping_address", shippingAddress)
                 .bind("phone_number", phoneNumber)
                 .bind("order_note", orderNote)
+                .bind("recipient_name", recipientName)
+                .bind("recipient_phone", recipientPhone)
+                .bind("province", province)
+                .bind("district", district)
+                .bind("ward", ward)
+                .bind("street", street)
                 .executeAndReturnGeneratedKeys("id")
                 .mapTo(Integer.class)
                 .one();
@@ -93,7 +107,13 @@ public class OrderDao {
                     o.shipping_address,
                     o.phone_number,
                     o.payment_method,
-                    o.cancel_reason
+                    o.cancel_reason,
+                    o.recipient_name,
+                    o.recipient_phone,
+                    o.province,
+                    o.district,
+                    o.ward,
+                    o.street
                 FROM orders o
                 WHERE 1 = 1
                 """);
@@ -161,7 +181,13 @@ public class OrderDao {
                     o.shipping_address,
                     o.phone_number,
                     o.payment_method,
-                    o.cancel_reason
+                    o.cancel_reason,
+                    o.recipient_name,
+                    o.recipient_phone,
+                    o.province,
+                    o.district,
+                    o.ward,
+                    o.street
                 FROM orders o
                 WHERE o.user_id = :userId
                 ORDER BY o.created_at DESC
@@ -294,7 +320,13 @@ public class OrderDao {
                     o.shipping_address,
                     o.phone_number,
                     o.payment_method,
-                    o.cancel_reason
+                    o.cancel_reason,
+                    o.recipient_name,
+                    o.recipient_phone,
+                    o.province,
+                    o.district,
+                    o.ward,
+                    o.street
                 FROM orders o
                 WHERE o.id = :order_id
                 """;
@@ -303,6 +335,128 @@ public class OrderDao {
                 .mapToBean(Order.class)
                 .findOne()
                 .orElse(null));
+    }
+
+    public int countAll(String search, String status, String paymentStatus) {
+        StringBuilder sql = new StringBuilder("""
+                SELECT COUNT(*)
+                FROM orders o
+                WHERE 1 = 1
+                """);
+
+        if (search != null && !search.isBlank()) {
+            sql.append(" AND (o.id LIKE :search OR o.phone_number LIKE :search2 OR o.recipient_phone LIKE :search3)");
+        }
+        if (status != null && !status.isEmpty() && !"all".equals(status)) {
+            sql.append(" AND o.order_status = :status");
+        }
+        if (paymentStatus != null && !paymentStatus.isEmpty() && !"all".equals(paymentStatus)) {
+            sql.append(" AND o.payment_status = :paymentStatus");
+        }
+
+        final String queryStr = sql.toString();
+        return jdbi.withHandle(handle -> {
+            var query = handle.createQuery(queryStr);
+            if (search != null && !search.isBlank()) {
+                String searchPattern = "%" + search.trim() + "%";
+                query.bind("search", searchPattern);
+                query.bind("search2", searchPattern);
+                query.bind("search3", searchPattern);
+            }
+            if (status != null && !status.isEmpty() && !"all".equals(status)) {
+                query.bind("status", status.toUpperCase());
+            }
+            if (paymentStatus != null && !paymentStatus.isEmpty() && !"all".equals(paymentStatus)) {
+                query.bind("paymentStatus", paymentStatus.toUpperCase());
+            }
+            return query.mapTo(Integer.class).one();
+        });
+    }
+
+    public List<Order> findAllWithPaginationAndFilters(int page, int pageSize, String search, String status, String paymentStatus) {
+        StringBuilder sql = new StringBuilder("""
+                SELECT
+                    o.id,
+                    o.user_id,
+                    o.sub_total,
+                    o.shipping_fee,
+                    o.grand_total,
+                    o.order_status,
+                    o.payment_status,
+                    o.shipping_status,
+                    o.orders_id,
+                    o.created_at,
+                    o.shipping_address,
+                    o.phone_number,
+                    o.payment_method,
+                    o.cancel_reason,
+                    o.recipient_name,
+                    o.recipient_phone,
+                    o.province,
+                    o.district,
+                    o.ward,
+                    o.street
+                FROM orders o
+                WHERE 1 = 1
+                """);
+
+        if (search != null && !search.isBlank()) {
+            sql.append(" AND (o.id LIKE :search OR o.phone_number LIKE :search2 OR o.recipient_phone LIKE :search3)");
+        }
+        if (status != null && !status.isEmpty() && !"all".equals(status)) {
+            sql.append(" AND o.order_status = :status");
+        }
+        if (paymentStatus != null && !paymentStatus.isEmpty() && !"all".equals(paymentStatus)) {
+            sql.append(" AND o.payment_status = :paymentStatus");
+        }
+
+        sql.append(" ORDER BY o.created_at DESC");
+        sql.append(" LIMIT :limit OFFSET :offset");
+
+        int offset = (page - 1) * pageSize;
+        final String queryStr = sql.toString();
+        return jdbi.withHandle(handle -> {
+            var query = handle.createQuery(queryStr);
+            if (search != null && !search.isBlank()) {
+                String searchPattern = "%" + search.trim() + "%";
+                query.bind("search", searchPattern);
+                query.bind("search2", searchPattern);
+                query.bind("search3", searchPattern);
+            }
+            if (status != null && !status.isEmpty() && !"all".equals(status)) {
+                query.bind("status", status.toUpperCase());
+            }
+            if (paymentStatus != null && !paymentStatus.isEmpty() && !"all".equals(paymentStatus)) {
+                query.bind("paymentStatus", paymentStatus.toUpperCase());
+            }
+            query.bind("limit", pageSize);
+            query.bind("offset", offset);
+            return query.mapToBean(Order.class).list();
+        });
+    }
+
+    public void updateOrderStatus(int orderId, String newStatus) {
+        String sql = """
+                UPDATE orders
+                SET order_status = :order_status
+                WHERE id = :order_id
+                """;
+        jdbi.useHandle(handle -> handle.createUpdate(sql)
+                .bind("order_status", newStatus.toUpperCase())
+                .bind("order_id", orderId)
+                .execute());
+    }
+
+    public void updatePaymentStatus(int orderId, String newPaymentStatus) {
+        String sql = """
+                UPDATE orders
+                SET payment_status = :payment_status
+                WHERE id = :order_id
+                """;
+        jdbi.useHandle(handle -> handle.createUpdate(sql)
+                .bind("payment_status", newPaymentStatus.toUpperCase())
+                .bind("order_id", orderId)
+                .execute());
     }
 
     public boolean checkUserPurchasedProduct(int userId, int productId) {
