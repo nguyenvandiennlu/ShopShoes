@@ -1,0 +1,61 @@
+.variant-accordion { background: #f8fafb; }
+.variant-table { font-size: 13px; margin-bottom: 0; }
+.variant-table th { font-size: 11px; text-transform: uppercase;
+    color: #8a9bb0; font-weight: 700; }
+.variant-table td { vertical-align: middle; padding: 8px 12px; }
+
+.badge-instock  { background: #d1fae5; color: #065f46; }
+.badge-lowstock { background: #fef3c7; color: #92400e; }
+.badge-outstock { background: #fee2e2; color: #991b1b; }
+
+.product-row { cursor: pointer; transition: background 0.15s; }
+.product-row:hover { background: #f1f5f9; }
+.product-row.expanded { background: #f1f5f9; }
+
+.product-img {
+    width: 44px; height: 44px;
+    object-fit: cover; border-radius: 6px;
+    border: 1px solid #e2e8f0;
+}
+.product-img-placeholder {
+    width: 44px; height: 44px;
+    border-radius: 6px; border: 1px solid #e2e8f0;
+    background: #f1f5f9;
+    display: flex; align-items: center; justify-content: center;
+    color: #94a3b8;
+}
+
+.color-dot {
+    width: 14px; height: 14px;
+    border-radius: 50%; display: inline-block;
+    border: 1px solid rgba(0,0,0,0.1);
+    flex-shrink: 0;
+}
+
+#fab-add-product {
+    position: fixed; bottom: 32px; right: 32px; z-index: 1050;
+    width: 56px; height: 56px; border-radius: 50%;
+    background: var(--color-bittersweet, #ff675c);
+    color: white; border: none;
+    box-shadow: 0 4px 16px rgba(255,103,92,0.4);
+    display: flex; align-items: center; justify-content: center;
+    transition: transform 0.2s, box-shadow 0.2s;
+    cursor: pointer;
+}
+#fab-add-product:hover {
+    transform: scale(1.08);
+    box-shadow: 0 6px 20px rgba(255,103,92,0.5);
+}
+
+.page-link { color: #ff675c; border-color: #e2e8f0; }
+.page-item.active .page-link {
+    background-color: #ff675c; border-color: #ff675c; color: white;
+}
+.page-link:hover { color: #e55c52; background: #fff5f5; }
+
+.expand-icon { transition: transform 0.2s; font-size: 18px; color: #94a3b8; }
+.expand-icon.open { transform: rotate(180deg); }
+
+.form-select:focus, .form-control:focus {
+    border-color: #ff675c; box-shadow: 0 0 0 .2rem rgba(255,103,92,.15);
+}
