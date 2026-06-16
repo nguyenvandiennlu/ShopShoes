@@ -83,9 +83,11 @@
     }
 %>
 <nav class="admin-sidebar">
-    <div class="p-4">
-        <h4 class="mb-0 text-white" style="font-size: 22px;">BHD Sport</h4>
-        <small class="text-secondary" style="font-size: 12px;">Admin Panel</small>
+    <div class="p-4 d-flex align-items-center gap-2">
+        <a href="${pageContext.request.contextPath}/admin/adminHome.jsp" class="d-inline-block flex-shrink-0">
+            <img src="${pageContext.request.contextPath}/assets/images/BHD%20LOGO.png" alt="BHD Sport" style="max-height: 45px; width: auto;" />
+        </a>
+        <span class="text-secondary fw-semibold" style="font-size: 13px; white-space: nowrap;">Trang Admin</span>
     </div>
     <div class="flex-grow-1 overflow-auto">
         <ul class="nav flex-column mt-2">
@@ -96,7 +98,7 @@
                 </a>
             </li>
             <li class="nav-item">
-                <a class="admin-nav-link <%= "orders".equals(adminActive) ? "active" : "" %>" href="${pageContext.request.contextPath}/admin/quanlydonhang.jsp">
+                <a class="admin-nav-link <%= "orders".equals(adminActive) ? "active" : "" %>" href="${pageContext.request.contextPath}/admin/orders">
                     <span class="material-symbols-outlined">shopping_cart</span>
                     Đơn hàng
                 </a>
@@ -129,7 +131,11 @@
     </div>
     <div class="admin-sidebar-footer">
         <a class="admin-btn-bittersweet <%= "add-product".equals(adminActive) ? "active" : "" %>" href="${pageContext.request.contextPath}/admin/addproduct.jsp">Thêm sản phẩm mới</a>
-        <a class="admin-logout-link" href="${pageContext.request.contextPath}/logout">
+        <a class="admin-logout-link" href="${pageContext.request.contextPath}/menu">
+            <span class="material-symbols-outlined">home</span>
+            <span>Về trang chủ</span>
+        </a>
+        <a class="admin-logout-link" href="${pageContext.request.contextPath}/logout" style="margin-top: 0.25rem;">
             <span class="material-symbols-outlined">logout</span>
             <span>Đăng xuất</span>
         </a>

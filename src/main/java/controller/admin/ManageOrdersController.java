@@ -240,6 +240,7 @@ public class ManageOrdersController extends HttpServlet {
                 for (OrderDetailDTO item : items) {
                     JsonObject itemJo = new JsonObject();
                     itemJo.addProperty("productName", item.getProductName() != null ? item.getProductName() : "");
+                    itemJo.addProperty("imageUrl", item.getImageUrl() != null ? item.getImageUrl() : "");
                     itemJo.addProperty("colorName", item.getColorName() != null ? item.getColorName() : "");
                     itemJo.addProperty("sizeName", item.getSizeName() != null ? item.getSizeName() : "");
                     itemJo.addProperty("quantity", item.getQuantity());
