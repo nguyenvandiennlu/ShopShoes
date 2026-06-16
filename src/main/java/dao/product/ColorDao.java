@@ -12,9 +12,7 @@ public class ColorDao {
 
     private final Jdbi jdbi = JDBIConnector.getJdbi();
 
-
-    // COLORS
-    public List<Color> findAll()
+        public List<Color> findAll()
     {
         String sql = """
                 SELECT *
