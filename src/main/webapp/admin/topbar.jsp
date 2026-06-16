@@ -47,6 +47,7 @@
     display: flex;
     align-items: center;
     gap: 14px;
+    margin-left: auto;
   }
   .admin-topbar-icon {
     width: 38px;
@@ -193,10 +194,6 @@
 %>
 
 <header class="admin-topbar">
-  <div class="admin-topbar-search">
-    <span class="material-symbols-outlined">search</span>
-    <input type="text" id="adminSearchInput" placeholder="Tìm kiếm đơn hàng, khách hàng..." onkeypress="if(event.key==='Enter') adminSearch()" />
-  </div>
   <div class="admin-topbar-actions">
     <!-- Notifications -->
     <div style="position:relative;">

@@ -119,7 +119,7 @@
                     <th>THANH TOÁN</th>
                     <th>TRẠNG THÁI ĐƠN</th>
                     <th>NGÀY TẠO</th>
-                    <th class="text-end">THAO TÁC</th>
+                    <th class="text-end">XEM CHI TIẾT</th>
                 </tr>
                 </thead>
                 <tbody id="ordersTableBody">
@@ -228,7 +228,6 @@
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 <script>
-const contextPath = '${pageContext.request.contextPath}';
 let currentPage = parseInt('${currentPage}') || 1;
 let currentSearch = '${search}';
 let currentStatus = '${status}' === '' ? 'all' : '${status}';
