@@ -49,7 +49,6 @@ public class StatisticsDao {
                 .one());
     }
 
-    // --- TRUY VẤN THEO NGÀY (Dành cho bộ lọc ngắn hạn: ngày, tuần, tháng) ---
     public java.util.Map<java.time.LocalDate, Double> getRevenueByDay(LocalDateTime start, LocalDateTime end) {
         String sql = "SELECT DATE(created_at) as d, COALESCE(SUM(grand_total), 0) as val FROM orders " +
                 "WHERE order_status != 'CANCELLED' AND created_at BETWEEN :start AND :end GROUP BY DATE(created_at)";
