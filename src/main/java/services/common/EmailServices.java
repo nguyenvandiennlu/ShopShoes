@@ -41,7 +41,7 @@ public class EmailServices implements IJavaMail {
             props.put("mail.smtp.starttls.enable", mailStarttls);
             props.put("mail.smtp.ssl.trust", mailHost);
             
-            System.out.println("[DEBUG] Email config loaded: host=" + mailHost + ", port=" + mailPort + ", auth=" + mailAuth + ", starttls=" + mailStarttls);
+            System.out.println("[DEBUG] Đã nạp cấu hình Email: host=" + mailHost + ", port=" + mailPort + ", auth=" + mailAuth + ", starttls=" + mailStarttls);
             
             Session session = Session.getInstance(props, new jakarta.mail.Authenticator() {
                 @Override
@@ -57,14 +57,14 @@ public class EmailServices implements IJavaMail {
             message.setContent(messageContent, "text/html; charset=UTF-8");
 
             Transport.send(message);
-            System.out.println("[DEBUG] Email sent successfully to: " + to);
+            System.out.println("[DEBUG] Gửi email thành công tới: " + to);
             return true;
         } catch (MessagingException e) {
-            System.err.println("[ERROR] MessagingException when sending email to " + to + ": " + e.getMessage());
+            System.err.println("[LỖI] Lỗi gửi nhận thư (MessagingException) khi gửi tới " + to + ": " + e.getMessage());
             e.printStackTrace();
             return false;
         } catch (Exception e) {
-            System.err.println("[ERROR] Unexpected error in EmailServices.send(): " + e.getMessage());
+            System.err.println("[LỖI] Lỗi không mong muốn trong EmailServices.send(): " + e.getMessage());
             e.printStackTrace();
             return false;
         }

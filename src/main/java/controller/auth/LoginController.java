@@ -77,6 +77,19 @@ public class LoginController extends HttpServlet {
                 }
                 return;
             }
+            User checkLocked = userService.getUserDao().findByEmail(email);
+            if (checkLocked != null && !checkLocked.isActive()) {
+                String errorMsg = "Tài khoản của bạn đã bị khóa. Vui lòng liên hệ Admin để mở khóa.";
+                if (isAjax) {
+                    sendJson(resp, false, errorMsg, null, false);
+                } else {
+                    req.setAttribute("error", errorMsg);
+                    req.setAttribute("showRecaptcha", false);
+                    req.getRequestDispatcher("/Login.jsp").forward(req, resp);
+                }
+                return;
+            }
+
             User user = userService.loginByEmail(email, password);
 
             if (user == null) {

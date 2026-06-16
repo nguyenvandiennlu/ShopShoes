@@ -65,9 +65,7 @@ public class UserDao {
                 """;
 
         try {
-                // Convert LocalDateTime to SQL Timestamp for reliable JDBC binding
                 Object createdAtValue = user.getCreatedAt() == null ? null : Timestamp.valueOf(user.getCreatedAt());
-
                 int rows = jdbi.withHandle(handle -> handle.createUpdate(sql)
                     .bind("email", user.getEmail())
                     .bind("passwordHash", user.getPasswordHash())
@@ -231,6 +229,76 @@ public class UserDao {
         String sql = "UPDATE users SET avatar_url = :avatarUrl WHERE id = :id";
         return jdbi.withHandle(handle -> handle.createUpdate(sql)
                 .bind("avatarUrl", avatarUrl)
+                .bind("id", userId)
+                .execute()) > 0;
+    }
+
+    public List<User> findUsersWithPaginationAndFilters(int page, int pageSize, String search, String role, String status) {
+        int offset = (page - 1) * pageSize;
+        StringBuilder sql = new StringBuilder("SELECT * FROM users WHERE 1=1");
+        if (search != null && !search.isBlank()) {
+            sql.append(" AND (LOWER(full_name) LIKE LOWER(:search) OR LOWER(email) LIKE LOWER(:search) OR phone_number LIKE :search)");
+        }
+        if (role != null && !role.isBlank() && !"all".equalsIgnoreCase(role)) {
+            sql.append(" AND role = :role");
+        }
+        if (status != null && !status.isBlank() && !"all".equalsIgnoreCase(status)) {
+            if ("active".equalsIgnoreCase(status)) {
+                sql.append(" AND is_active = 1");
+            } else if ("locked".equalsIgnoreCase(status)) {
+                sql.append(" AND is_active = 0");
+            }
+        }
+        sql.append(" ORDER BY created_at DESC LIMIT :limit OFFSET :offset");
+        
+        return jdbi.withHandle(handle -> {
+            var q = handle.createQuery(sql.toString())
+                    .bind("limit", pageSize)
+                    .bind("offset", offset);
+            
+            if (search != null && !search.isBlank()) {
+                q.bind("search", "%" + search.trim() + "%");
+            }
+            if (role != null && !role.isBlank() && !"all".equalsIgnoreCase(role)) {
+                q.bind("role", role.trim().toUpperCase());
+            }
+            
+            return q.mapToBean(User.class).list();
+        });
+    }
+    public int countUsersWithFilters(String search, String role, String status) {
+        StringBuilder sql = new StringBuilder("SELECT COUNT(*) FROM users WHERE 1=1");
+        
+        if (search != null && !search.isBlank()) {
+            sql.append(" AND (LOWER(full_name) LIKE LOWER(:search) OR LOWER(email) LIKE LOWER(:search) OR phone_number LIKE :search)");
+        }
+        if (role != null && !role.isBlank() && !"all".equalsIgnoreCase(role)) {
+            sql.append(" AND role = :role");
+        }
+        if (status != null && !status.isBlank() && !"all".equalsIgnoreCase(status)) {
+            if ("active".equalsIgnoreCase(status)) {
+                sql.append(" AND is_active = 1");
+            } else if ("locked".equalsIgnoreCase(status)) {
+                sql.append(" AND is_active = 0");
+            }
+        }
+        return jdbi.withHandle(handle -> {
+            var q = handle.createQuery(sql.toString());
+            
+            if (search != null && !search.isBlank()) {
+                q.bind("search", "%" + search.trim() + "%");
+            }
+            if (role != null && !role.isBlank() && !"all".equalsIgnoreCase(role)) {
+                q.bind("role", role.trim().toUpperCase());
+            }
+            
+            return q.mapTo(Integer.class).one();
+        });
+    }
+    public boolean updateUserStatus(int userId, boolean isActive) {
+        String sql = "UPDATE users SET is_active = :isActive WHERE id = :id";
+        return jdbi.withHandle(handle -> handle.createUpdate(sql)
+                .bind("isActive", isActive ? 1 : 0)
                 .bind("id", userId)
                 .execute()) > 0;
     }
