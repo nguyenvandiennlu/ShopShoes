@@ -1,15 +1,17 @@
 /* Hero Slider Styles for Menu Page */
 
-/* Slider Container */
+/* Slider Container*/
 .hero-slider {
-    width: 100%;
+    width: 100% !important;
+    max-width: none !important;
     margin-bottom: 0;
     overflow: hidden;
     position: relative;
 }
 
 .hero-swiper {
-    width: 100%;
+    width: 100% !important;
+    max-width: none !important;
     height: 500px;
     position: relative;
     overflow: hidden;
