@@ -74,6 +74,10 @@
         </div>
 
         <input type="hidden" name="address" id="fullAddress" value=""/>
+        <input type="hidden" name="province" id="hiddenProvince" value=""/>
+        <input type="hidden" name="district" id="hiddenDistrict" value=""/>
+        <input type="hidden" name="ward" id="hiddenWard" value=""/>
+        <input type="hidden" name="street" id="hiddenStreet" value=""/>
         <div class="form-group">
           <label>Ghi chú</label>
           <input type="text" name="note"/>
