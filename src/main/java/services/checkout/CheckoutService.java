@@ -78,52 +78,12 @@ public class CheckoutService {
                     orderNote
             );
 
-            if (paymentMethod == PaymentMethod.COD) {
-                orderDetailDao.insertOrderDetails(
-                        handle,
-                        orderId,
-                        cart,
-                        unitPrices
-                );
-
-                for (CartItem item : cart.values()) {
-                    variantDao.updateStock(
-                            handle,
-                            item.getProductId(),
-                            item.getColorId(),
-                            item.getSizeId(),
-                            item.getQuantity()
-                    );
-                    System.out.println("[CheckoutService] Removing cart item from DB for userId=" + userId
-                            + ", product=" + item.getProductId()
-                            + ", color=" + item.getColorId()
-                            + ", size=" + item.getSizeId());
-                    cartDao.removeItem(
-                            handle,
-                            userId,
-                            item.getProductId(),
-                            item.getColorId(),
-                            item.getSizeId()
-                    );
-                }
-            }
-
-            return orderId;
-        });
-    }
-
-    public void completeMomoPayment(int orderId, Map<String, CartItem> cart) {
-        jdbi.useTransaction(handle -> {
-            Map<String, BigDecimal> unitPrices = new HashMap<>();
-
-            for (CartItem item : cart.values()) {
-                if (item.getQuantity() <= 0) {
-                    throw new RuntimeException("So luong san pham khong hop le");
-                }
-                unitPrices.put(item.getKey(), promotionService.parsePrice(item.getFinalPrice()));
-            }
-
-            orderDetailDao.insertOrderDetails(handle, orderId, cart, unitPrices);
+            orderDetailDao.insertOrderDetails(
+                    handle,
+                    orderId,
+                    cart,
+                    unitPrices
+            );
 
             for (CartItem item : cart.values()) {
                 variantDao.updateStock(
@@ -133,39 +93,55 @@ public class CheckoutService {
                         item.getSizeId(),
                         item.getQuantity()
                 );
+                System.out.println("[CheckoutService] Removing cart item from DB for userId=" + userId
+                        + ", product=" + item.getProductId()
+                        + ", color=" + item.getColorId()
+                        + ", size=" + item.getSizeId());
+                cartDao.removeItem(
+                        handle,
+                        userId,
+                        item.getProductId(),
+                        item.getColorId(),
+                        item.getSizeId()
+                );
             }
 
-            Integer userId = orderDao.findUserIdByOrderId(handle, orderId);
-            if (userId != null) {
-                for (CartItem item : cart.values()) {
-                    System.out.println("[CheckoutService] (MoMo) Removing cart item from DB for userId=" + userId
-                            + ", product=" + item.getProductId()
-                            + ", color=" + item.getColorId()
-                            + ", size=" + item.getSizeId());
-                    cartDao.removeItem(
-                            handle,
-                            userId,
-                            item.getProductId(),
-                            item.getColorId(),
-                            item.getSizeId()
-                    );
-                }
-            }
-
-            orderDao.updatePaymentStatus(handle, orderId, PaymentStatus.PAID);
+            return orderId;
         });
     }
 
-    public void failMomoPayment(int orderId) {
-        jdbi.useTransaction(handle -> orderDao.updatePaymentStatus(handle, orderId, PaymentStatus.FAILED));
+    public boolean completeMomoPayment(int orderId) {
+        return jdbi.inTransaction(handle -> {
+            PaymentStatus currentStatus = orderDao.getPaymentStatusByOrderId(orderId);
+            if (currentStatus == PaymentStatus.UNPAID) {
+                orderDao.updatePaymentStatus(handle, orderId, PaymentStatus.PAID);
+                return true;
+            }
+            return false;
+        });
     }
 
-    /**
-     * Sends an order confirmation email to the customer after a successful order placement.
-     *
-     * @param orderId The database order ID
-     * @param paymentMethod The payment method used (COD or MOMO)
-     */
+    public boolean failMomoPayment(int orderId) {
+        return jdbi.inTransaction(handle -> {
+            PaymentStatus currentStatus = orderDao.getPaymentStatusByOrderId(orderId);
+            if (currentStatus == PaymentStatus.UNPAID) {
+                List<model.Order.OrderDetail> details = orderDetailDao.findDetailByOrderId(orderId);
+                for (model.Order.OrderDetail item : details) {
+                    variantDao.restoreStock(
+                            handle,
+                            item.getProductId(),
+                            item.getColorId(),
+                            item.getSizeId(),
+                            item.getQuantity()
+                    );
+                }
+                orderDao.updatePaymentStatus(handle, orderId, PaymentStatus.FAILED);
+                orderDao.cancelOrder(handle, orderId, "Thanh toan MoMo that bai");
+                return true;
+            }
+            return false;
+        });
+    }
     public void sendOrderConfirmationEmail(int orderId, PaymentMethod paymentMethod) {
         try {
             model.Order.Order order = jdbi.withHandle(handle -> {
