@@ -11,200 +11,232 @@
                 <title>Sản phẩm - BHD SPORT SHOES</title>
                 <jsp:include page="head-resources.jsp" />
                 <link rel="stylesheet" href="https://unpkg.com/swiper@8/swiper-bundle.min.css" />
+                <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/hero-slider.css" />
                 <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/dangnhapvadangki.css" />
                 <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/products.css" />
             </head>
 
-            <body>
+            <body id="top">
                 <jsp:include page="Header.jsp" />
-                <div class="container">
-                    <jsp:include page="Breadcrumb.jsp" />
-                </div>
-                <div class="banner-slide">
-                    <div class="swiper-container">
-                        <div class="swiper-wrapper">
-                            <div class="swiper-slide">
-                                <a href="#" class="banner-link">
-                                    <img src="https://cdn.shopify.com/s/files/1/0456/5070/6581/files/HP_BACKFRI_KV_DESK_VN.jpg?v=1763548181&width=1440"
-                                        alt="Banner Slide 1" class="banner-img" width="1200" height="300" />
-                                </a>
-                            </div>
-
-                            <div class="swiper-slide">
-                                <a href="#" class="banner-link">
-                                    <img src="https://cdn.shopify.com/s/files/1/0456/5070/6581/files/LP_NIKE_FOOTBALL_KV.jpg?v=1746584732"
-                                        alt="Banner Slide 2" class="banner-img" width="1200" height="300" />
-                                </a>
-                            </div>
-
-                            <div class="swiper-slide">
-                                <a href="#" class="banner-link">
-                                    <img src="https://cdn.shopify.com/s/files/1/0456/5070/6581/files/LP_NIKE_RUNNING_KV.jpg?v=1746584732"
-                                        alt="Banner Slide 3" class="banner-img" width="1200" height="300" />
-                                </a>
-                            </div>
-                            <div class="swiper-slide">
-                                <a href="#" class="banner-link">
-                                    <img src="https://cdn.shopify.com/s/files/1/0456/5070/6581/files/LP_NIKE_TRAIN_KV.jpg?v=1746584732"
-                                        alt="Banner Slide 4" class="banner-img" width="1200" height="300" />
-                                </a>
-                            </div>
-                        </div>
-
-                        <div class="swiper-button-prev"></div>
-                        <div class="swiper-button-next"></div>
-
-                        <div class="swiper-pagination"></div>
-                    </div>
-                </div>
-                <div class="shop-layout">
-                    <aside class="filter-sidebar">
-                        <form id="filter-form" action="${pageContext.request.contextPath}/products" method="get">
-                            <div class="sidebar-header">
-                                <h2>Bộ Lọc</h2>
-                                <button type="button" class="clear-all" id="clear-all-btn">XÓA TẤT CẢ</button>
-                            </div>
-
-                            <div class="filter-group">
-                                <div class="filter-search-wrapper">
-                                    <input type="search" name="q" placeholder="Tìm kiếm theo tên..."
-                                        class="filter-search" id="filter-search-input" value="${searchQuery}" />
-                                </div>
-                                <div class="filter-group-header">
-                                    <h3>Hãng</h3>
-                                    <button type="button" class="toggle-btn">-</button>
-                                </div>
-                                <div class="filter-group-body">
-                                    <ul class="filter-list scrollable">
-                                        <c:forEach var="brand" items="${brands}">
-                                            <li>
-                                                <input type="checkbox" id="brand-${brand.id}" name="brand"
-                                                    value="${brand.id}" <c:if
-                                                    test="${selectedBrands != null && selectedBrands.contains(brand.id)}">checked
-                                                </c:if> />
-                                                <label for="brand-${brand.id}" class="brand-label">
-                                                    <img src="${brand.logoURL}" alt="${brand.name}" class="brand-icon"
-                                                        onerror="this.style.display='none'" />
-                                                    <span>${brand.name}</span>
-                                                </label>
-                                            </li>
-                                        </c:forEach>
-                                    </ul>
-                                </div>
-                            </div>
-
-
-                            <div class="filter-group">
-                                <div class="filter-group-header">
-                                    <h3>Size</h3>
-                                    <button type="button" class="toggle-btn">-</button>
-                                </div>
-                                <div class="filter-group-body">
-                                    <ul class="filter-list-grid" id="size-filter-list">
-                                        <c:forEach var="size" items="${sizes}">
-                                            <li>
-                                                <input type="checkbox" id="size-${size.id}" name="size"
-                                                    value="${size.id}" <c:if
-                                                    test="${selectedSizes != null && selectedSizes.contains(size.id)}">checked
-                                                </c:if> />
-                                                <label for="size-${size.id}">${size.name}</label>
-                                            </li>
-                                        </c:forEach>
-                                    </ul>
-                                </div>
-                            </div>
-
-                            <div class="filter-group">
-                                <div class="filter-group-header">
-                                    <h3>Khoảng giá</h3>
-                                    <button type="button" class="toggle-btn">-</button>
-                                </div>
-                                <div class="filter-group-body">
-                                    <div class="price-filter">
-                                        <div class="slider-container">
-                                            <div class="slider-track"></div>
-                                            <input type="range" min="${priceMinBound}" max="${priceMaxBound}"
-                                                value="${minPrice != null ? minPrice : priceMinBound}" id="slider-1"
-                                                oninput="slideOne()" />
-                                            <input type="range" min="${priceMinBound}" max="${priceMaxBound}"
-                                                value="${maxPrice != null ? maxPrice : priceMaxBound}" id="slider-2"
-                                                oninput="slideTwo()" />
-                                        </div>
-                                        <div class="price-input">
-                                            <div class="field">
-                                                <span>Từ</span>
-                                                <input type="text" id="range1" value="${minPrice != null ? minPrice : priceMinBound}đ" readonly />
-                                            </div>
-                                            <div class="separator">-</div>
-                                            <div class="field">
-                                                <span>Đến</span>
-                                                <input type="text" id="range2" value="${maxPrice != null ? maxPrice : priceMaxBound}đ" readonly />
+                <main>
+                    <article>
+                        <!-- HERO SLIDER -->
+                        <section class="banner-slide hero-slider">
+                            <div class="swiper-container hero-swiper">
+                                <div class="swiper-wrapper">
+                                    <div class="swiper-slide">
+                                        <div class="hero-slide-content" style="background-image: url('https://cdn.shopify.com/s/files/1/0456/5070/6581/files/HP_BACKFRI_KV_DESK_VN.jpg?v=1763548181&width=1440');">
+                                            <div class="hero-slide-overlay">
+                                                <div class="container">
+                                                    <h2 class="h1 hero-title">Bộ sưu tập mới</h2>
+                                                    <p class="hero-text">Khám phá những mẫu giày thể thao mới nhất</p>
+                                                    <button class="btn btn-primary">
+                                                        <a href="${pageContext.request.contextPath}/products" class="Menu_Banner_button">Mua ngay</a>
+                                                        <ion-icon name="arrow-forward-outline" aria-hidden="true"></ion-icon>
+                                                    </button>
+                                                </div>
                                             </div>
                                         </div>
-                                        <!-- Hidden inputs để submit giá -->
-                                        <input type="hidden" name="minPrice" id="minPriceInput" value="${minPrice}" />
-                                        <input type="hidden" name="maxPrice" id="maxPriceInput" value="${maxPrice}" />
-                                        <input type="hidden" id="priceMinBoundInput" value="${priceMinBound}" />
-                                        <input type="hidden" id="priceMaxBoundInput" value="${priceMaxBound}" />
+                                    </div>
+
+                                    <div class="swiper-slide">
+                                        <div class="hero-slide-content" style="background-image: url('https://cdn.shopify.com/s/files/1/0456/5070/6581/files/LP_NIKE_FOOTBALL_KV.jpg?v=1746584732');">
+                                            <div class="hero-slide-overlay">
+                                                <div class="container">
+                                                    <h2 class="h1 hero-title">Giày bóng đá</h2>
+                                                    <p class="hero-text">Trang bị cho mọi trận đấu</p>
+                                                    <button class="btn btn-primary">
+                                                        <a href="${pageContext.request.contextPath}/products" class="Menu_Banner_button">Mua ngay</a>
+                                                        <ion-icon name="arrow-forward-outline" aria-hidden="true"></ion-icon>
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="swiper-slide">
+                                        <div class="hero-slide-content" style="background-image: url('https://cdn.shopify.com/s/files/1/0456/5070/6581/files/LP_NIKE_RUNNING_KV.jpg?v=1746584732');">
+                                            <div class="hero-slide-overlay">
+                                                <div class="container">
+                                                    <h2 class="h1 hero-title">Giày chạy bộ</h2>
+                                                    <p class="hero-text">Chinh phục mọi cung đường</p>
+                                                    <button class="btn btn-primary">
+                                                        <a href="${pageContext.request.contextPath}/products" class="Menu_Banner_button">Mua ngay</a>
+                                                        <ion-icon name="arrow-forward-outline" aria-hidden="true"></ion-icon>
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="swiper-slide">
+                                        <div class="hero-slide-content" style="background-image: url('https://cdn.shopify.com/s/files/1/0456/5070/6581/files/LP_NIKE_TRAIN_KV.jpg?v=1746584732');">
+                                            <div class="hero-slide-overlay">
+                                                <div class="container">
+                                                    <h2 class="h1 hero-title">Giày tập luyện</h2>
+                                                    <p class="hero-text">Bền bỉ cho mọi bài tập</p>
+                                                    <button class="btn btn-primary">
+                                                        <a href="${pageContext.request.contextPath}/products" class="Menu_Banner_button">Mua ngay</a>
+                                                        <ion-icon name="arrow-forward-outline" aria-hidden="true"></ion-icon>
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
-                            </div>
 
-                            <div class="filter-group">
-                                <div class="filter-group-header">
-                                    <h3>Màu sắc</h3>
-                                    <button type="button" class="toggle-btn">-</button>
-                                </div>
-                                <div class="filter-group-body">
-                                    <ul class="filter-list-color">
-                                        <c:forEach var="color" items="${colors}">
-                                            <li style="--color-swatch: ${color.hexCode};">
-                                                <input type="checkbox" id="color-${color.id}" name="color"
-                                                    value="${color.id}" <c:if
-                                                    test="${selectedColors != null && selectedColors.contains(color.id)}">checked
-                                                </c:if> />
-                                                <label for="color-${color.id}">${color.name}</label>
-                                            </li>
-                                        </c:forEach>
-                                    </ul>
-                                </div>
+                                <div class="swiper-button-prev"></div>
+                                <div class="swiper-button-next"></div>
+                                <div class="swiper-pagination"></div>
                             </div>
-                        </form>
-                    </aside>
+                        </section>
 
-                    <main class="product-content">
-                        <c:if test="${not empty searchQuery}">
-                            <div class="search-result-info">
-                                <p>Kết quả tìm kiếm cho: <strong>"${searchQuery}"</strong></p>
-                                <a href="${pageContext.request.contextPath}/products" class="clear-search">Xóa tìm
-                                    kiếm</a>
-                            </div>
-                        </c:if>
-                        <div class="sort-toolbar">
-                            <label for="sort-select">Sắp xếp theo:</label>
-                            <select id="sort-select" name="sort" class="sort-dropdown">
-                                <option value="default" ${sortBy=='default' || sortBy==null ? 'selected' : '' }>Mặc định
-                                </option>
-                                <option value="newest" ${sortBy=='newest' ? 'selected' : '' }>Sản phẩm mới nhất</option>
-                                <option value="bestseller" ${sortBy=='bestseller' ? 'selected' : '' }>Sản phẩm bán chạy
-                                </option>
-                                <option value="price-asc" ${sortBy=='price-asc' ? 'selected' : '' }>Giá từ thấp đến cao
-                                </option>
-                                <option value="price-desc" ${sortBy=='price-desc' ? 'selected' : '' }>Giá từ cao đến
-                                    thấp
-                                </option>
-                            </select>
-                        </div>
-                        <div id="productsContainer">
-                            <jsp:include page="/ProductsFragment.jsp" />
+                        <div class="container">
+                            <jsp:include page="Breadcrumb.jsp" />
                         </div>
 
-                    </main>
-                </div>
+                        <div class="shop-layout">
+                            <!-- ... filter sidebar ... -->
+                            <aside class="filter-sidebar">
+                                <form id="filter-form" action="${pageContext.request.contextPath}/products" method="get">
+                                    <div class="sidebar-header">
+                                        <h2>Bộ Lọc</h2>
+                                        <button type="button" class="clear-all" id="clear-all-btn">XÓA TẤT CẢ</button>
+                                    </div>
 
-                <div id="toast-message" class="toast-message">
-                    <i class="fas fa-check-circle"></i> <span></span>
-                </div>
+                                    <div class="filter-group">
+                                        <div class="filter-search-wrapper">
+                                            <input type="search" name="q" placeholder="Tìm kiếm theo tên..."
+                                                class="filter-search" id="filter-search-input" value="${searchQuery}" />
+                                        </div>
+                                        <div class="filter-group-header">
+                                            <h3>Hãng</h3>
+                                            <button type="button" class="toggle-btn">-</button>
+                                        </div>
+                                        <div class="filter-group-body">
+                                            <ul class="filter-list scrollable">
+                                                <c:forEach var="brand" items="${brands}">
+                                                    <li>
+                                                        <input type="checkbox" id="brand-${brand.id}" name="brand"
+                                                            value="${brand.id}" <c:if
+                                                            test="${selectedBrands != null && selectedBrands.contains(brand.id)}">checked
+                                                        </c:if> />
+                                                        <label for="brand-${brand.id}" class="brand-label">
+                                                            <img src="${brand.logoURL}" alt="${brand.name}" class="brand-icon"
+                                                                onerror="this.style.display='none'" />
+                                                            <span>${brand.name}</span>
+                                                        </label>
+                                                    </li>
+                                                </c:forEach>
+                                            </ul>
+                                        </div>
+                                    </div>
+
+                                    <div class="filter-group">
+                                        <div class="filter-group-header">
+                                            <h3>Size</h3>
+                                            <button type="button" class="toggle-btn">-</button>
+                                        </div>
+                                        <div class="filter-group-body">
+                                            <ul class="filter-list-grid" id="size-filter-list">
+                                                <c:forEach var="size" items="${sizes}">
+                                                    <li>
+                                                        <input type="checkbox" id="size-${size.id}" name="size"
+                                                            value="${size.id}" <c:if
+                                                            test="${selectedSizes != null && selectedSizes.contains(size.id)}">checked
+                                                        </c:if> />
+                                                        <label for="size-${size.id}">${size.name}</label>
+                                                    </li>
+                                                </c:forEach>
+                                            </ul>
+                                        </div>
+                                    </div>
+
+                                    <div class="filter-group">
+                                        <div class="filter-group-header">
+                                            <h3>Khoảng giá</h3>
+                                            <button type="button" class="toggle-btn">-</button>
+                                        </div>
+                                        <div class="filter-group-body">
+                                            <div class="price-filter">
+                                                <div class="slider-container">
+                                                    <div class="slider-track"></div>
+                                                    <input type="range" min="${priceMinBound}" max="${priceMaxBound}"
+                                                        value="${minPrice != null ? minPrice : priceMinBound}" id="slider-1"
+                                                        oninput="slideOne()" />
+                                                    <input type="range" min="${priceMinBound}" max="${priceMaxBound}"
+                                                        value="${maxPrice != null ? maxPrice : priceMaxBound}" id="slider-2"
+                                                        oninput="slideTwo()" />
+                                                </div>
+                                                <div class="price-input">
+                                                    <div class="field">
+                                                        <span>Từ</span>
+                                                        <input type="text" id="range1" value="${minPrice != null ? minPrice : priceMinBound}đ" readonly />
+                                                    </div>
+                                                    <div class="separator">-</div>
+                                                    <div class="field">
+                                                        <span>Đến</span>
+                                                        <input type="text" id="range2" value="${maxPrice != null ? maxPrice : priceMaxBound}đ" readonly />
+                                                    </div>
+                                                </div>
+                                                <input type="hidden" name="minPrice" id="minPriceInput" value="${minPrice}" />
+                                                <input type="hidden" name="maxPrice" id="maxPriceInput" value="${maxPrice}" />
+                                                <input type="hidden" id="priceMinBoundInput" value="${priceMinBound}" />
+                                                <input type="hidden" id="priceMaxBoundInput" value="${priceMaxBound}" />
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="filter-group">
+                                        <div class="filter-group-header">
+                                            <h3>Màu sắc</h3>
+                                            <button type="button" class="toggle-btn">-</button>
+                                        </div>
+                                        <div class="filter-group-body">
+                                            <ul class="filter-list-color">
+                                                <c:forEach var="color" items="${colors}">
+                                                    <li style="--color-swatch: ${color.hexCode};">
+                                                        <input type="checkbox" id="color-${color.id}" name="color"
+                                                            value="${color.id}" <c:if
+                                                            test="${selectedColors != null && selectedColors.contains(color.id)}">checked
+                                                        </c:if> />
+                                                        <label for="color-${color.id}">${color.name}</label>
+                                                    </li>
+                                                </c:forEach>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </form>
+                            </aside>
+
+                            <main class="product-content">
+                                <c:if test="${not empty searchQuery}">
+                                    <div class="search-result-info">
+                                        <p>Kết quả tìm kiếm cho: <strong>"${searchQuery}"</strong></p>
+                                        <a href="${pageContext.request.contextPath}/products" class="clear-search">Xóa tìm kiếm</a>
+                                    </div>
+                                </c:if>
+                                <div class="sort-toolbar">
+                                    <label for="sort-select">Sắp xếp theo:</label>
+                                    <select id="sort-select" name="sort" class="sort-dropdown">
+                                        <option value="default" ${sortBy=='default' || sortBy==null ? 'selected' : '' }>Mặc định</option>
+                                        <option value="newest" ${sortBy=='newest' ? 'selected' : '' }>Sản phẩm mới nhất</option>
+                                        <option value="bestseller" ${sortBy=='bestseller' ? 'selected' : '' }>Sản phẩm bán chạy</option>
+                                        <option value="price-asc" ${sortBy=='price-asc' ? 'selected' : '' }>Giá từ thấp đến cao</option>
+                                        <option value="price-desc" ${sortBy=='price-desc' ? 'selected' : '' }>Giá từ cao đến thấp</option>
+                                    </select>
+                                </div>
+                                <div id="productsContainer">
+                                    <jsp:include page="/ProductsFragment.jsp" />
+                                </div>
+                            </main>
+                        </div>
+
+                        <div id="toast-message" class="toast-message">
+                            <i class="fas fa-check-circle"></i> <span></span>
+                        </div>
+                    </article>
+                </main>
 
                 <jsp:include page="Footer.jsp" />
 
@@ -217,9 +249,34 @@
                 <script src="https://unpkg.com/swiper@8/swiper-bundle.min.js"></script>
                 <script src="${pageContext.request.contextPath}/assets/script/reponsive.js"></script>
 
-                <script src="${pageContext.request.contextPath}/assets/script/SliderBanner.js"></script>
+                <!-- Hero Slider Initialization -->
+                <script>
+                    document.addEventListener('DOMContentLoaded', function () {
+                        new Swiper('.hero-swiper', {
+                            slidesPerView: 1,
+                            spaceBetween: 0,
+                            loop: true,
+                            autoplay: {
+                                delay: 4000,
+                                disableOnInteraction: false,
+                            },
+                            effect: 'fade',
+                            fadeEffect: {
+                                crossFade: true
+                            },
+                            speed: 800,
+                            pagination: {
+                                el: '.swiper-pagination',
+                                clickable: true,
+                            },
+                            navigation: {
+                                nextEl: '.swiper-button-next',
+                                prevEl: '.swiper-button-prev',
+                            },
+                        });
+                    });
+                </script>
+
                 <script src="${pageContext.request.contextPath}/assets/script/filter.js"></script>
-
             </body>
-
             </html>
