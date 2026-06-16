@@ -120,7 +120,7 @@
                 </a>
             </li>
             <li class="nav-item">
-                <a class="admin-nav-link <%= "settings".equals(adminActive) ? "active" : "" %>" href="${pageContext.request.contextPath}/admin/settingadmin.jsp">
+                <a class="admin-nav-link <%= "settings".equals(adminActive) ? "active" : "" %>" href="${pageContext.request.contextPath}/admin/settings">
                     <span class="material-symbols-outlined">settings</span>
                     Cài đặt
                 </a>

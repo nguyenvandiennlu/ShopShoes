@@ -17,7 +17,7 @@ public class FirebaseInitializer implements ServletContextListener {
                         .getResourceAsStream("/WEB-INF/firebase-service-account.json");
 
                 if (serviceAccount == null) {
-                    System.out.println("Firebase skipped: missing /WEB-INF/firebase-service-account.json");
+                    System.out.println("Bỏ qua cấu hình Firebase: Thiếu file /WEB-INF/firebase-service-account.json");
                     return;
                 }
 
@@ -27,11 +27,11 @@ public class FirebaseInitializer implements ServletContextListener {
                             .build();
 
                     FirebaseApp.initializeApp(options);
-                    System.out.println("Firebase initialized!");
+                    System.out.println("Firebase đã khởi tạo thành công!");
                 }
             }
         } catch (Exception e) {
-            System.out.println("Firebase skipped due to init error: " + e.getMessage());
+            System.out.println("Bỏ qua cấu hình Firebase do lỗi: " + e.getMessage());
         }
     }
     @Override
