@@ -68,6 +68,9 @@ public class MomoReturnController extends HttpServlet {
             String normalizedOrderId = orderIdRaw.startsWith("ORD")
                     ? orderIdRaw.substring(3)
                     : orderIdRaw;
+            if (normalizedOrderId.contains("_")) {
+                normalizedOrderId = normalizedOrderId.substring(0, normalizedOrderId.indexOf("_"));
+            }
             orderId = Integer.parseInt(normalizedOrderId);
         } catch (NumberFormatException e) {
             resp.sendRedirect(req.getContextPath() + "/cart");
