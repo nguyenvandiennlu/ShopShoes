@@ -126,7 +126,7 @@ public class CheckoutController extends HttpServlet {
                 session.setAttribute("pendingShippingFeeRaw", shippingFee);
 
                 long amount = calculateTotalAmount(cart, shippingFee);
-                String momoOrderId = "ORD" + orderId;
+                String momoOrderId = "ORD" + orderId + "_" + System.currentTimeMillis();
                 String orderInfo = "Thanh toan don hang ShopShoes #" + orderId;
 
                 try {
