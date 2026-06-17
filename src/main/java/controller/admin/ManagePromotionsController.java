@@ -57,7 +57,15 @@ public class ManagePromotionsController extends HttpServlet {
         resp.setCharacterEncoding("UTF-8");
         PrintWriter out = resp.getWriter();
         try {
-            int id = Integer.parseInt(req.getParameter("id"));
+            String idParam = req.getParameter("id");
+            if (idParam == null || idParam.trim().isEmpty()) {
+                resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+                JsonObject error = new JsonObject();
+                error.addProperty("error", "Missing or empty ID parameter");
+                out.print(error.toString());
+                return;
+            }
+            int id = Integer.parseInt(idParam.trim());
             List<Integer> linkedIds = promotionDao.getLinkedProductIds(id);
             
             JsonArray array = new JsonArray();
@@ -65,11 +73,16 @@ public class ManagePromotionsController extends HttpServlet {
                 array.add(pId);
             }
             out.print(array.toString());
-        } catch (Exception e) {
-            e.printStackTrace();
+        } catch (NumberFormatException e) {
             resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
             JsonObject error = new JsonObject();
-            error.addProperty("error", "Invalid ID parameter");
+            error.addProperty("error", "Invalid ID format");
+            out.print(error.toString());
+        } catch (Exception e) {
+            e.printStackTrace();
+            resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+            JsonObject error = new JsonObject();
+            error.addProperty("error", "Internal server error: " + e.getMessage());
             out.print(error.toString());
         }
     }

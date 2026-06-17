@@ -45,6 +45,8 @@
             color: #ff675c;
         }
         .promo-status-badge {
+            display: inline-block;
+            white-space: nowrap;
             font-size: 12px;
             font-weight: 600;
             padding: 6px 12px;
@@ -521,8 +523,17 @@
             const id = this.getAttribute('data-id');
             const isActive = this.checked;
             
-            fetch(`${pageContext.request.contextPath}/admin/promotions?action=toggle&id=${id}&is_active=${isActive}`, {
-                method: 'POST'
+            const params = new URLSearchParams();
+            params.append('action', 'toggle');
+            params.append('id', id);
+            params.append('is_active', isActive);
+
+            fetch(`${pageContext.request.contextPath}/admin/promotions`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded'
+                },
+                body: params.toString()
             })
             .then(res => res.json())
             .then(data => {
