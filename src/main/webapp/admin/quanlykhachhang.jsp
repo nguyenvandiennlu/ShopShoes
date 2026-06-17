@@ -1,8 +1,31 @@
 <%@ page contentType="text/html;charset=UTF-8" pageEncoding="UTF-8" language="java" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %>
+<%@ page import="model.user.User" %>
+<%@ page import="enums.Role" %>
+<%@ page import="java.util.Map" %>
 <%
     request.setAttribute("adminActive", "customers");
+    User currentUser = (session != null) ? (User) session.getAttribute("currentUser") : null;
+    Role role = (currentUser != null) ? currentUser.getRole() : null;
+    boolean isSuperAdmin = (role == Role.SUPER_ADMIN);
+    
+    Map<String, Integer> permissions = null;
+    if (!isSuperAdmin && session != null) {
+        permissions = (Map<String, Integer>) session.getAttribute("userPermissions");
+        if (permissions == null && role != null) {
+            dao.user.RolePermissionDao rpDao = new dao.user.RolePermissionDao();
+            permissions = rpDao.getPermissionsForRole(role.name());
+            session.setAttribute("userPermissions", permissions);
+        }
+    }
+    
+    boolean canAddUser = isSuperAdmin || (permissions != null && (permissions.getOrDefault("users", 0) & 2) == 2);
+    boolean canEditUser = isSuperAdmin || (permissions != null && (permissions.getOrDefault("users", 0) & 4) == 4);
+    boolean canDeleteUser = isSuperAdmin || (permissions != null && (permissions.getOrDefault("users", 0) & 8) == 8);
+    pageContext.setAttribute("canAddUser", Boolean.valueOf(canAddUser));
+    pageContext.setAttribute("canEditUser", Boolean.valueOf(canEditUser));
+    pageContext.setAttribute("canDeleteUser", Boolean.valueOf(canDeleteUser));
 %>
 <!DOCTYPE html>
 
@@ -24,82 +47,9 @@
 </head>
 <body>
 <jsp:include page="sidebar.jsp"/>
-<%--
-<!-- Sidebar -->
-<aside class="sidebar">
-    <div class="sidebar-logo">
-        <img alt="BHD Sport Logo" src="https://lh3.googleusercontent.com/aida-public/AB6AXuA3HW64KcdI-KoR6kIMYLV_jZBO6TEyUktf1dG1ql68AoO93b4Y0Tx8Tpx5iOiiBRJ8v0eRf4HvXhO6pJj0RWR_YmSx2mAdx7XT6xWfPW87URd09NRPeLPajNfkYRK3WfUj98vHLp8uqM-4jqrg2x550_s7oEEjsSEzLVDII3gRXcY0NlVgFg1VJyUX0Qu0Leq5BWTZYQ9IaQCJ_XNtKTgjrcv38DzYl6wcQI0wnbB7RKDU39BRgxZQ5e3u9DWyOEHFFCFe_gSDPE8m"/>
-        <div class="sidebar-logo-text">
-            <h1>BHD Sport</h1>
-            <p>Admin Panel</p>
-        </div>
-    </div>
-    <nav class="sidebar-nav">
-        <a class="nav-link sidebar-item" href="${pageContext.request.contextPath}/admin/adminHome.jsp">
-            <span class="material-symbols-outlined">dashboard</span>
-            Bảng điều khiển
-        </a>
-        <a class="nav-link sidebar-item" href="${pageContext.request.contextPath}/admin/quanlydonhang.jsp">
-            <span class="material-symbols-outlined">shopping_cart</span>
-            Đơn hàng
-        </a>
-        <a class="nav-link sidebar-item" href="${pageContext.request.contextPath}/admin/quanlykhohang.jsp">
-            <span class="material-symbols-outlined">inventory_2</span>
-            Kho hàng
-        </a>
-        <a class="nav-link sidebar-item active" href="${pageContext.request.contextPath}/admin/quanlykhachhang.jsp">
-            <span class="material-symbols-outlined">group</span>
-            Khách hàng
-        </a>
-        <a class="nav-link sidebar-item" href="${pageContext.request.contextPath}/admin/thongke.jsp">
-            <span class="material-symbols-outlined">assessment</span>
-            Báo cáo
-        </a>
-        <a class="nav-link sidebar-item" href="${pageContext.request.contextPath}/admin/settingadmin.jsp">
-            <span class="material-symbols-outlined">settings</span>
-            Cài đặt
-        </a>
-    </nav>
-    <div class="sidebar-footer">
-        <button class="btn-bittersweet w-100">
-            <span class="material-symbols-outlined fs-6">add</span>
-            Thêm sản phẩm mới
-        </button>
-        <a class="nav-link sidebar-item p-0 mt-3" href="${pageContext.request.contextPath}/logout" style="margin-left: 1rem; margin-bottom: 1rem;">
-            <span class="material-symbols-outlined">logout</span>
-            Đăng xuất
-        </a>
-    </div>
-</aside>
---%>
+
 <jsp:include page="topbar.jsp"/>
-<%--
-<!-- Header -->
-<header class="top-header">
-    <div class="search-bar">
-        <span class="material-symbols-outlined">search</span>
-        <input class="form-control" placeholder="Tìm kiếm nhanh..." type="text"/>
-    </div>
-    <div class="header-actions">
-        <button class="icon-btn">
-            <span class="material-symbols-outlined">notifications</span>
-            <span class="notification-dot"></span>
-        </button>
-        <button class="icon-btn">
-            <span class="material-symbols-outlined">help</span>
-        </button>
-        <div class="divider"></div>
-        <div class="user-profile">
-            <div class="user-info d-none d-sm-block">
-                <p class="name">Quản trị viên</p>
-                <p class="email">admin@bhdsport.com</p>
-            </div>
-            <img alt="Admin Avatar" src="https://lh3.googleusercontent.com/aida-public/AB6AXuACx6QPr6esEQ3y6Pmnopwpd1kOWsPGVMrwD_G3NTs5J1UT8mw0u98-rpKZZlEMRlh8GQhmT6Ra1NgoxWOrjKlLlDt96_edHMIIZX6GAYmQQF1-F6dB7Fom0U17dsMDe5BOtmuOcC6klpFzFiirGQIZ0M2ZLrQrDBUwXKbJJkSErb_lE4KRiTyQfht2nJRQ09FOV54n0Q6fK6-NpRziF5zcrhx47T5IPBik7W5Lof-ZP4Y3KY2yDPAAYE7HNBC6SBZEd8G5zqjzS5A1"/>
-        </div>
-    </div>
-</header>
---%>
-<!-- Main Content -->
+
 <main class="main-content">
     <!-- Breadcrumb & Header -->
     <div>
@@ -114,10 +64,12 @@
                 <h2 class="page-title">Quản lý Khách hàng</h2>
                 <p class="page-subtitle">Theo dõi và quản lý danh sách người dùng hệ thống.</p>
             </div>
+            <% if (canAddUser) { %>
             <button class="btn btn-bittersweet" id="btnAddUser">
                 <span class="material-symbols-outlined fs-6">person_add</span>
                 Thêm Khách Hàng
             </button>
+            <% } %>
         </div>
     </div>
     <!-- Filter Bar -->
@@ -137,8 +89,11 @@
                     <label class="form-label-custom">Vai trò</label>
                     <select id="roleFilter" class="form-select-custom" name="role">
                         <option value="all" ${role == 'all' ? 'selected' : ''}>Tất cả</option>
-                        <option value="USER" ${role == 'USER' ? 'selected' : ''}>USER</option>
+                        <option value="SUPER_ADMIN" ${role == 'SUPER_ADMIN' ? 'selected' : ''}>SUPER_ADMIN</option>
                         <option value="ADMIN" ${role == 'ADMIN' ? 'selected' : ''}>ADMIN</option>
+                        <option value="SALES_STAFF" ${role == 'SALES_STAFF' ? 'selected' : ''}>SALES_STAFF</option>
+                        <option value="WAREHOUSE_STAFF" ${role == 'WAREHOUSE_STAFF' ? 'selected' : ''}>WAREHOUSE_STAFF</option>
+                        <option value="USER" ${role == 'USER' ? 'selected' : ''}>USER</option>
                     </select>
                 </div>
                 <div class="col-12 col-md-4 col-lg-2">
@@ -194,7 +149,7 @@
                                 <td class="text-secondary email-cell"><c:out value="${u.email}"/></td>
                                 <td><c:out value="${u.phoneNumber}" default="Chưa cập nhật"/></td>
                                 <td>
-                                    <span class="badge-role ${u.role == 'ADMIN' ? 'badge-role-admin' : ''}">
+                                    <span class="badge-role ${u.role == 'SUPER_ADMIN' ? 'badge-role-superadmin' : (u.role == 'ADMIN' ? 'badge-role-admin' : (u.role == 'SALES_STAFF' ? 'badge-role-sales' : (u.role == 'WAREHOUSE_STAFF' ? 'badge-role-warehouse' : '')))}">
                                         <c:out value="${u.role}"/>
                                     </span>
                                 </td>
@@ -239,23 +194,27 @@
                                                 data-createdat="<c:choose><c:when test='${not empty u.createdAt}'><c:set var='dd' value='${u.createdAt.dayOfMonth}'/><c:set var='mm' value='${u.createdAt.monthValue}'/><c:set var='yy' value='${u.createdAt.year}'/>${dd < 10 ? '0' : ''}${dd}/${mm < 10 ? '0' : ''}${mm}/${yy}</c:when><c:otherwise>Chưa rõ</c:otherwise></c:choose>">
                                             <span class="material-symbols-outlined">visibility</span>
                                         </button>
-                                        <button class="action-btn btn-edit-user" title="Chỉnh sửa"
-                                                data-id="${u.id}"
-                                                data-fullname="<c:out value='${u.fullName}'/>"
-                                                data-email="<c:out value='${u.email}'/>"
-                                                data-phone="<c:out value='${u.phoneNumber}'/>"
-                                                data-address="<c:out value='${u.address}'/>"
-                                                data-role="${u.role}"
-                                                data-active="${u.active}">
-                                            <span class="material-symbols-outlined">edit</span>
-                                        </button>
-                                        <button class="action-btn btn-toggle-status ${!u.active ? 'locked' : ''}"
-                                                title="${u.active ? 'Khóa tài khoản' : 'Mở khóa tài khoản'}"
-                                                data-id="${u.id}"
-                                                data-name="<c:out value='${u.fullName}'/>"
-                                                data-active="${u.active}">
-                                            <span class="material-symbols-outlined icon-lock">${u.active ? 'lock_open' : 'lock'}</span>
-                                        </button>
+                                        <c:if test="${canEditUser}">
+                                            <button class="action-btn btn-edit-user" title="Chỉnh sửa"
+                                                    data-id="${u.id}"
+                                                    data-fullname="<c:out value='${u.fullName}'/>"
+                                                    data-email="<c:out value='${u.email}'/>"
+                                                    data-phone="<c:out value='${u.phoneNumber}'/>"
+                                                    data-address="<c:out value='${u.address}'/>"
+                                                    data-role="${u.role}"
+                                                    data-active="${u.active}">
+                                                <span class="material-symbols-outlined">edit</span>
+                                            </button>
+                                        </c:if>
+                                        <c:if test="${canDeleteUser}">
+                                            <button class="action-btn btn-toggle-status ${!u.active ? 'locked' : ''}"
+                                                    title="${u.active ? 'Khóa tài khoản' : 'Mở khóa tài khoản'}"
+                                                    data-id="${u.id}"
+                                                    data-name="<c:out value='${u.fullName}'/>"
+                                                    data-active="${u.active}">
+                                                <span class="material-symbols-outlined icon-lock">${u.active ? 'lock_open' : 'lock'}</span>
+                                            </button>
+                                        </c:if>
                                     </div>
                                 </td>
                             </tr>
@@ -343,7 +302,10 @@
                     <label for="editRole" class="form-label-custom" style="display:block; margin-bottom: 6px; font-weight:500;">Vai trò</label>
                     <select id="editRole" name="role" class="form-select-custom" style="width:100%;">
                         <option value="USER">USER</option>
+                        <option value="SALES_STAFF">SALES_STAFF</option>
+                        <option value="WAREHOUSE_STAFF">WAREHOUSE_STAFF</option>
                         <option value="ADMIN">ADMIN</option>
+                        <option value="SUPER_ADMIN">SUPER_ADMIN</option>
                     </select>
                 </div>
             </form>
@@ -394,7 +356,10 @@
                     <label for="addRole" class="form-label-custom" style="display:block; margin-bottom: 6px; font-weight:500;">Vai trò</label>
                     <select id="addRole" name="role" class="form-select-custom" style="width:100%;">
                         <option value="USER" selected>USER</option>
+                        <option value="SALES_STAFF">SALES_STAFF</option>
+                        <option value="WAREHOUSE_STAFF">WAREHOUSE_STAFF</option>
                         <option value="ADMIN">ADMIN</option>
+                        <option value="SUPER_ADMIN">SUPER_ADMIN</option>
                     </select>
                 </div>
             </form>
@@ -410,12 +375,15 @@
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" defer></script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
+    const canEditUser = <%= canEditUser %>;
+    const canDeleteUser = <%= canDeleteUser %>;
+
     // ============================================================
     // AJAX FILTER / PAGINATION
     // ============================================================
     var BASE_URL = '${pageContext.request.contextPath}/admin/users';
     var DEFAULT_AVATAR = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='32' height='32' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='50' fill='%23e8e8e8'/%3E%3Ccircle cx='50' cy='38' r='18' fill='%23bbb'/%3E%3Cellipse cx='50' cy='85' rx='28' ry='20' fill='%23bbb'/%3E%3C/svg%3E";
-    var currentPage = ${currentPage};
+    var currentPage = ${not empty currentPage ? currentPage : 1};
     var debounceTimer = null;
 
     document.getElementById('filterForm').addEventListener('submit', function(e) {
@@ -456,7 +424,11 @@
             var locked    = !u.active;
             var nameClass = locked ? 'user-name text-secondary text-decoration-line-through' : 'user-name';
             var rowClass  = locked ? 'locked' : '';
-            var roleClass = u.role === 'ADMIN' ? 'badge-role badge-role-admin' : 'badge-role';
+            var roleClass = 'badge-role';
+            if (u.role === 'SUPER_ADMIN') roleClass += ' badge-role-superadmin';
+            else if (u.role === 'ADMIN') roleClass += ' badge-role-admin';
+            else if (u.role === 'SALES_STAFF') roleClass += ' badge-role-sales';
+            else if (u.role === 'WAREHOUSE_STAFF') roleClass += ' badge-role-warehouse';
             var statusBadge = u.active
                 ? '<span class="badge-status badge-active" id="status-badge-' + u.id + '"><span class="dot"></span> Đang hoạt động</span>'
                 : '<span class="badge-status badge-locked" id="status-badge-' + u.id + '"><span class="dot"></span> Bị khóa</span>';
@@ -488,20 +460,24 @@
                   + ' data-avatar="' + escAttr(u.avatarUrl) + '"'
                   + ' data-createdat="' + escAttr(u.createdAt) + '">'
                   + '<span class="material-symbols-outlined">visibility</span></button>';
-            html += '<button class="action-btn btn-edit-user" title="Chỉnh sửa"'
-                  + ' data-id="' + u.id + '"'
-                  + ' data-fullname="' + escAttr(u.fullName) + '"'
-                  + ' data-email="' + escAttr(u.email) + '"'
-                  + ' data-phone="' + escAttr(u.phoneNumber) + '"'
-                  + ' data-address="' + escAttr(u.address) + '"'
-                  + ' data-role="' + escAttr(u.role) + '"'
-                  + ' data-active="' + u.active + '">'
-                  + '<span class="material-symbols-outlined">edit</span></button>';
-            html += '<button class="' + lockClass + '" title="' + lockTitle + '"'
-                  + ' data-id="' + u.id + '"'
-                  + ' data-name="' + escAttr(u.fullName) + '"'
-                  + ' data-active="' + u.active + '">'
-                  + '<span class="material-symbols-outlined icon-lock">' + lockIcon + '</span></button>';
+            if (canEditUser) {
+                html += '<button class="action-btn btn-edit-user" title="Chỉnh sửa"'
+                      + ' data-id="' + u.id + '"'
+                      + ' data-fullname="' + escAttr(u.fullName) + '"'
+                      + ' data-email="' + escAttr(u.email) + '"'
+                      + ' data-phone="' + escAttr(u.phoneNumber) + '"'
+                      + ' data-address="' + escAttr(u.address) + '"'
+                      + ' data-role="' + escAttr(u.role) + '"'
+                      + ' data-active="' + u.active + '">'
+                      + '<span class="material-symbols-outlined">edit</span></button>';
+            }
+            if (canDeleteUser) {
+                html += '<button class="' + lockClass + '" title="' + lockTitle + '"'
+                      + ' data-id="' + u.id + '"'
+                      + ' data-name="' + escAttr(u.fullName) + '"'
+                      + ' data-active="' + u.active + '">'
+                      + '<span class="material-symbols-outlined icon-lock">' + lockIcon + '</span></button>';
+            }
             html += '</div></td></tr>';
         });
         tbody.innerHTML = html;
@@ -567,7 +543,12 @@
         document.getElementById('modalIdBadge').textContent   = '#' + u.id;
         var roleBadge = document.getElementById('modalRoleBadge');
         roleBadge.textContent = u.role || '---';
-        roleBadge.className   = 'badge-role' + (u.role === 'ADMIN' ? ' badge-role-admin' : '');
+        var roleSuffix = '';
+        if (u.role === 'SUPER_ADMIN') roleSuffix = ' badge-role-superadmin';
+        else if (u.role === 'ADMIN') roleSuffix = ' badge-role-admin';
+        else if (u.role === 'SALES_STAFF') roleSuffix = ' badge-role-sales';
+        else if (u.role === 'WAREHOUSE_STAFF') roleSuffix = ' badge-role-warehouse';
+        roleBadge.className   = 'badge-role' + roleSuffix;
         var phoneHtml   = u.phoneNumber ? u.phoneNumber : '<span class="empty">Chưa cập nhật</span>';
         var addressHtml = u.address     ? u.address     : '<span class="empty">Chưa cập nhật</span>';
         var createdHtml = u.createdAt   ? u.createdAt   : '<span class="empty">Chưa rõ</span>';
@@ -751,10 +732,13 @@
         document.body.style.overflow = '';
     }
 
-    document.getElementById('btnAddUser').addEventListener('click', function(e) {
-        e.preventDefault();
-        openAddModal();
-    });
+    var btnAddUser = document.getElementById('btnAddUser');
+    if (btnAddUser) {
+        btnAddUser.addEventListener('click', function(e) {
+            e.preventDefault();
+            openAddModal();
+        });
+    }
 
     document.getElementById('addModalCloseTop').addEventListener('click', closeAddModal);
     document.getElementById('addModalCloseBottom').addEventListener('click', closeAddModal);

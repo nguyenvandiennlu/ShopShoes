@@ -76,10 +76,27 @@
     color: white;
   }
 </style>
+<%@ page import="model.user.User" %>
+<%@ page import="enums.Role" %>
+<%@ page import="java.util.Map" %>
 <%
     String adminActive = (String) request.getAttribute("adminActive");
     if (adminActive == null) {
         adminActive = "";
+    }
+
+    User currentUser = (session != null) ? (User) session.getAttribute("currentUser") : null;
+    Role role = (currentUser != null) ? currentUser.getRole() : null;
+    boolean isSuperAdmin = (role == Role.SUPER_ADMIN);
+
+    Map<String, Integer> permissions = null;
+    if (!isSuperAdmin && session != null) {
+        permissions = (Map<String, Integer>) session.getAttribute("userPermissions");
+        if (permissions == null && role != null) {
+            dao.user.RolePermissionDao rpDao = new dao.user.RolePermissionDao();
+            permissions = rpDao.getPermissionsForRole(role.name());
+            session.setAttribute("userPermissions", permissions);
+        }
     }
 %>
 <nav class="admin-sidebar">
@@ -89,18 +106,23 @@
     </div>
     <div class="flex-grow-1 overflow-auto">
         <ul class="nav flex-column mt-2">
+            <% if (isSuperAdmin || (permissions != null && permissions.getOrDefault("dashboard", 0) > 0)) { %>
             <li class="nav-item">
                 <a class="admin-nav-link <%= "dashboard".equals(adminActive) ? "active" : "" %>" href="${pageContext.request.contextPath}/admin/adminHome.jsp">
                     <span class="material-symbols-outlined">dashboard</span>
                     Bảng điều khiển
                 </a>
             </li>
+            <% } %>
+            <% if (isSuperAdmin || (permissions != null && permissions.getOrDefault("orders", 0) > 0)) { %>
             <li class="nav-item">
                 <a class="admin-nav-link <%= "orders".equals(adminActive) ? "active" : "" %>" href="${pageContext.request.contextPath}/admin/quanlydonhang.jsp">
                     <span class="material-symbols-outlined">shopping_cart</span>
                     Đơn hàng
                 </a>
             </li>
+            <% } %>
+            <% if (isSuperAdmin || (permissions != null && permissions.getOrDefault("products", 0) > 0)) { %>
             <li class="nav-item">
                 <a class="admin-nav-link <%= "inventory".equals(adminActive) ? "active" : "" %>" href="${pageContext.request.contextPath}/admin/quanlykhohang.jsp">
                     <span class="material-symbols-outlined">inventory_2</span>
@@ -108,27 +130,42 @@
                 </a>
             </li>
             <li class="nav-item">
+                <a class="admin-nav-link <%= "promotions".equals(adminActive) ? "active" : "" %>" href="${pageContext.request.contextPath}/admin/promotions">
+                    <span class="material-symbols-outlined">sell</span>
+                    Khuyến mãi
+                </a>
+            </li>
+            <% } %>
+            <% if (isSuperAdmin || (permissions != null && permissions.getOrDefault("users", 0) > 0)) { %>
+            <li class="nav-item">
                 <a class="admin-nav-link <%= "customers".equals(adminActive) ? "active" : "" %>" href="${pageContext.request.contextPath}/admin/users">
                     <span class="material-symbols-outlined">group</span>
                     Khách hàng
                 </a>
             </li>
+            <% } %>
+            <% if (isSuperAdmin || (permissions != null && permissions.getOrDefault("statistics", 0) > 0)) { %>
             <li class="nav-item">
                 <a class="admin-nav-link <%= "reports".equals(adminActive) ? "active" : "" %>" href="${pageContext.request.contextPath}/admin/thongke.jsp">
                     <span class="material-symbols-outlined">bar_chart</span>
                     Báo cáo
                 </a>
             </li>
+            <% } %>
+            <% if (isSuperAdmin || (permissions != null && permissions.getOrDefault("settings", 0) > 0)) { %>
             <li class="nav-item">
                 <a class="admin-nav-link <%= "settings".equals(adminActive) ? "active" : "" %>" href="${pageContext.request.contextPath}/admin/settings">
                     <span class="material-symbols-outlined">settings</span>
                     Cài đặt
                 </a>
             </li>
+            <% } %>
         </ul>
     </div>
     <div class="admin-sidebar-footer">
+        <% if (isSuperAdmin || (permissions != null && permissions.getOrDefault("products", 0) >= 2)) { %>
         <a class="admin-btn-bittersweet <%= "add-product".equals(adminActive) ? "active" : "" %>" href="${pageContext.request.contextPath}/admin/addproduct.jsp">Thêm sản phẩm mới</a>
+        <% } %>
         <a class="admin-logout-link" href="${pageContext.request.contextPath}/logout">
             <span class="material-symbols-outlined">logout</span>
             <span>Đăng xuất</span>

@@ -34,10 +34,14 @@ public class SystemSettingsController extends HttpServlet {
         HttpSession session = req.getSession(false);
         User currentUser = (session != null) ? (User) session.getAttribute("currentUser") : null;
 
-        if (currentUser == null || !enums.Role.ADMIN.equals(currentUser.getRole())) {
+        if (currentUser == null || (!enums.Role.ADMIN.equals(currentUser.getRole()) && !enums.Role.SUPER_ADMIN.equals(currentUser.getRole()))) {
             resp.sendRedirect(req.getContextPath() + "/login");
             return;
         }
+
+        dao.user.RolePermissionDao rpDao = new dao.user.RolePermissionDao();
+        req.setAttribute("salesPermissions", rpDao.getPermissionsForRole("SALES_STAFF"));
+        req.setAttribute("warehousePermissions", rpDao.getPermissionsForRole("WAREHOUSE_STAFF"));
 
         req.getRequestDispatcher("/admin/settingadmin.jsp").forward(req, resp);
     }
@@ -52,7 +56,7 @@ public class SystemSettingsController extends HttpServlet {
         HttpSession session = req.getSession(false);
         User currentAdmin = (session != null) ? (User) session.getAttribute("currentUser") : null;
 
-        if (currentAdmin == null || !enums.Role.ADMIN.equals(currentAdmin.getRole())) {
+        if (currentAdmin == null || (!enums.Role.ADMIN.equals(currentAdmin.getRole()) && !enums.Role.SUPER_ADMIN.equals(currentAdmin.getRole()))) {
             resp.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
             jsonResponse.addProperty("success", false);
             jsonResponse.addProperty("message", "Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.");
@@ -204,6 +208,59 @@ public class SystemSettingsController extends HttpServlet {
                         jsonResponse.addProperty("success", false);
                         jsonResponse.addProperty("message", "Gửi email thất bại. Vui lòng kiểm tra lại log hoặc cấu hình SMTP.");
                     }
+                }
+                break;
+
+            case "save-permissions":
+                String targetRole = req.getParameter("role");
+                if (targetRole == null || targetRole.isBlank()) {
+                    jsonResponse.addProperty("success", false);
+                    jsonResponse.addProperty("message", "Thiếu vai trò cần cấu hình.");
+                    break;
+                }
+
+                if ("SUPER_ADMIN".equalsIgnoreCase(targetRole) || "ADMIN".equalsIgnoreCase(targetRole) || "USER".equalsIgnoreCase(targetRole)) {
+                    jsonResponse.addProperty("success", false);
+                    jsonResponse.addProperty("message", "Không thể chỉnh sửa quyền của nhóm này.");
+                    break;
+                }
+
+                try {
+                    int dashboardVal = Integer.parseInt(req.getParameter("dashboard"));
+                    int statisticsVal = Integer.parseInt(req.getParameter("statistics"));
+                    int ordersVal = Integer.parseInt(req.getParameter("orders"));
+                    int productsVal = Integer.parseInt(req.getParameter("products"));
+                    int usersVal = Integer.parseInt(req.getParameter("users"));
+                    int settingsVal = Integer.parseInt(req.getParameter("settings"));
+
+                    java.util.Map<String, Integer> permsMap = new java.util.HashMap<>();
+                    permsMap.put("dashboard", dashboardVal);
+                    permsMap.put("statistics", statisticsVal);
+                    permsMap.put("orders", ordersVal);
+                    permsMap.put("products", productsVal);
+                    permsMap.put("users", usersVal);
+                    permsMap.put("settings", settingsVal);
+
+                    dao.user.RolePermissionDao rpDao = new dao.user.RolePermissionDao();
+                    boolean saved = rpDao.updateAllPermissions(targetRole.toUpperCase().trim(), permsMap);
+
+                    if (saved) {
+                        HttpSession currentSession = req.getSession(false);
+                        if (currentSession != null) {
+                            User currentUser = (User) currentSession.getAttribute("currentUser");
+                            if (currentUser != null && targetRole.equalsIgnoreCase(currentUser.getRole().name())) {
+                                currentSession.removeAttribute("userPermissions");
+                            }
+                        }
+                        jsonResponse.addProperty("success", true);
+                        jsonResponse.addProperty("message", "Cập nhật phân quyền thành công!");
+                    } else {
+                        jsonResponse.addProperty("success", false);
+                        jsonResponse.addProperty("message", "Có lỗi xảy ra khi lưu vào database.");
+                    }
+                } catch (NumberFormatException e) {
+                    jsonResponse.addProperty("success", false);
+                    jsonResponse.addProperty("message", "Định dạng giá trị quyền không hợp lệ.");
                 }
                 break;
 
