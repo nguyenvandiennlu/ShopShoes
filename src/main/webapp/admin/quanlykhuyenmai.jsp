@@ -107,6 +107,78 @@
             background-color: #ff675c;
             border-color: #ff675c;
         }
+
+        /* Action Buttons */
+        .action-btns {
+            display: flex;
+            gap: 0.5rem;
+            justify-content: center;
+        }
+        .action-btn {
+            background: none;
+            border: none;
+            color: #585f6a;
+            padding: 0.375rem;
+            border-radius: 0.25rem;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+        }
+        .action-btn:hover {
+            color: #ff675c;
+            background-color: rgba(255, 103, 92, 0.1);
+        }
+        .action-btn.delete:hover {
+            color: #ba1a1a;
+            background-color: rgba(186, 26, 26, 0.1);
+        }
+
+        /* Discount Badges */
+        .badge-percent {
+            background: #eff6ff;
+            color: #1d4ed8;
+            font-size: 12px;
+            font-weight: 600;
+            padding: 6px 12px;
+            border-radius: 50px;
+            display: inline-block;
+        }
+        .badge-fixed {
+            background: #ecfdf5;
+            color: #047857;
+            font-size: 12px;
+            font-weight: 600;
+            padding: 6px 12px;
+            border-radius: 50px;
+            display: inline-block;
+        }
+
+        /* Breadcrumb Style */
+        .breadcrumb {
+            margin-bottom: 0.5rem;
+            font-size: 14px;
+        }
+        .breadcrumb-item a {
+            color: #585f6a;
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+        .breadcrumb-item a:hover {
+            color: #ff675c;
+        }
+        .breadcrumb-item.active {
+            color: #191c1d;
+            font-weight: 500;
+        }
+        .breadcrumb-item + .breadcrumb-item::before {
+            content: "chevron_right";
+            font-family: 'Material Symbols Outlined';
+            font-size: 16px;
+            vertical-align: middle;
+            color: #585f6a;
+        }
     </style>
 </head>
 <body>
@@ -126,8 +198,8 @@
             </nav>
             <h1 class="font-headline fw-bold mb-0">Quản lý Khuyến mãi</h1>
         </div>
-        <button class="btn btn-bittersweet d-flex align-items-center gap-1 px-3 py-2" onclick="openAddModal()">
-            <span class="material-symbols-outlined">add_circle</span>
+        <button class="btn btn-bittersweet d-flex align-items-center gap-2 px-3 py-2 fw-semibold" onclick="openAddModal()">
+            <span class="material-symbols-outlined" style="font-size: 20px;">add</span>
             Thêm khuyến mãi mới
         </button>
     </div>
@@ -180,14 +252,14 @@
             <table class="table table-hover align-middle mb-0" id="promotions-table">
                 <thead class="table-light">
                     <tr>
-                        <th style="width: 5%">ID</th>
+                        <th class="text-center" style="width: 5%">ID</th>
                         <th style="width: 25%">Tên chương trình</th>
-                        <th style="width: 15%">Loại giảm giá</th>
-                        <th style="width: 15%">Mức giảm</th>
+                        <th class="text-center" style="width: 15%">Loại giảm giá</th>
+                        <th class="text-center" style="width: 15%">Mức giảm</th>
                         <th style="width: 15%">Thời gian</th>
-                        <th style="width: 10%">Trạng thái</th>
-                        <th style="width: 8%">Kích hoạt</th>
-                        <th style="width: 7%">Thao tác</th>
+                        <th class="text-center" style="width: 10%">Trạng thái</th>
+                        <th class="text-center" style="width: 8%">Kích hoạt</th>
+                        <th class="text-center" style="width: 7%">Thao tác</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -220,22 +292,22 @@
                         </c:choose>
                         
                         <tr class="promo-row" data-name="${promo.name.toLowerCase()}" data-status="${status}">
-                            <td><strong>#${promo.getId()}</strong></td>
+                            <td class="text-center"><strong>#${promo.getId()}</strong></td>
                             <td>
                                 <div class="fw-bold">${promo.name}</div>
                                 <small class="text-muted">Slug: ${promo.slug}</small>
                             </td>
-                            <td>
+                            <td class="text-center">
                                 <c:choose>
                                     <c:when test="${'PERCENT'.equalsIgnoreCase(promo.discountType)}">
-                                        <span class="badge bg-primary">Phần trăm (%)</span>
+                                        <span class="badge-percent">Phần trăm (%)</span>
                                     </c:when>
                                     <c:otherwise>
-                                        <span class="badge bg-success">Số tiền cố định</span>
+                                        <span class="badge-fixed">Số tiền cố định</span>
                                     </c:otherwise>
                                 </c:choose>
                             </td>
-                            <td>
+                            <td class="text-center">
                                 <c:choose>
                                     <c:when test="${'PERCENT'.equalsIgnoreCase(promo.discountType)}">
                                         <span class="fs-6 fw-bold text-bittersweet">
@@ -265,18 +337,18 @@
                                     </c:choose>
                                 </div>
                             </td>
-                            <td>
+                            <td class="text-center">
                                 <span class="promo-status-badge ${statusClass}">${statusLabel}</span>
                             </td>
-                            <td>
-                                <div class="form-check form-switch">
+                            <td class="text-center">
+                                <div class="form-check form-switch d-inline-block">
                                     <input class="form-check-input toggle-active-switch" type="checkbox" 
                                            data-id="${promo.getId()}" ${promo.isActive() ? 'checked' : ''} />
                                 </div>
                             </td>
-                            <td>
-                                <div class="d-flex gap-2">
-                                    <button class="btn btn-sm btn-outline-primary d-flex align-items-center p-1" 
+                            <td class="text-center">
+                                <div class="action-btns">
+                                    <button class="action-btn" 
                                             title="Chỉnh sửa"
                                             onclick="openEditModal({
                                                 id: '${promo.getId()}',
@@ -287,12 +359,12 @@
                                                 endDate: '${promo.endDate != null ? promo.endDate.format(dtfInput) : ""}',
                                                 isActive: ${promo.isActive()}
                                             })">
-                                        <span class="material-symbols-outlined" style="font-size:18px;">edit</span>
+                                        <span class="material-symbols-outlined">edit</span>
                                     </button>
-                                    <button class="btn btn-sm btn-outline-danger d-flex align-items-center p-1" 
+                                    <button class="action-btn delete" 
                                             title="Xóa"
                                             onclick="confirmDelete('${promo.getId()}', '${promo.name}')">
-                                        <span class="material-symbols-outlined" style="font-size:18px;">delete</span>
+                                        <span class="material-symbols-outlined">delete</span>
                                     </button>
                                 </div>
                             </td>

@@ -121,19 +121,29 @@
             margin-bottom: 0;
         }
 
+        /* Breadcrumb Style */
         .breadcrumb {
-            margin-bottom: 8px;
+            margin-bottom: 0.5rem;
             font-size: 14px;
         }
-
         .breadcrumb-item a {
-            color: var(--text-muted);
+            color: #585f6a;
             text-decoration: none;
+            transition: color 0.2s;
         }
-
+        .breadcrumb-item a:hover {
+            color: #ff675c;
+        }
         .breadcrumb-item.active {
-            color: var(--text-main);
+            color: #191c1d;
             font-weight: 500;
+        }
+        .breadcrumb-item + .breadcrumb-item::before {
+            content: "chevron_right";
+            font-family: 'Material Symbols Outlined';
+            font-size: 16px;
+            vertical-align: middle;
+            color: #585f6a;
         }
 
         /* Card Styles */

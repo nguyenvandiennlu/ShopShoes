@@ -36,6 +36,17 @@ public class AdminFilter implements Filter {
             return;
         }
 
+        String path = httpRequest.getServletPath();
+        if (path == null) {
+            path = "";
+        }
+        path = path.toLowerCase().trim();
+
+        if (path.contains("quanlykhachhang.jsp") && httpRequest.getDispatcherType() == jakarta.servlet.DispatcherType.REQUEST) {
+            httpResponse.sendRedirect(httpRequest.getContextPath() + "/admin/users");
+            return;
+        }
+
         Role role = currentUser.getRole();
 
         if (role == Role.SUPER_ADMIN) {
@@ -57,11 +68,6 @@ public class AdminFilter implements Filter {
             }
         }
 
-        String path = httpRequest.getServletPath();
-        if (path == null) {
-            path = "";
-        }
-        path = path.toLowerCase().trim();
         int requiredAction = "GET".equalsIgnoreCase(httpRequest.getMethod()) ? Permission.VIEW : Permission.EDIT;
         boolean isAllowed = false;
         if (path.equals("/admin") || path.equals("/admin/") || path.contains("adminhome.jsp")) {
@@ -78,19 +84,34 @@ public class AdminFilter implements Filter {
         else if (path.contains("chart-statistics") || path.contains("api/statistics")) {
             isAllowed = hasPerm(permissions, "statistics", Permission.VIEW) || hasPerm(permissions, "dashboard", Permission.VIEW);
         }
-        else if (path.contains("quanlydonhang.jsp") || path.contains("api/orders")) {
+        else if (path.contains("quanlydonhang.jsp") || path.contains("/orders")) {
             isAllowed = hasPerm(permissions, "orders", requiredAction);
         }
         else if (path.contains("urgent-orders") || path.contains("recent-reviews")) {
             isAllowed = hasPerm(permissions, "orders", Permission.VIEW) || hasPerm(permissions, "dashboard", Permission.VIEW);
         }
-        else if (path.contains("quanlykhohang.jsp") || path.contains("addproduct.jsp") || path.contains("api/inventory")
-                || path.contains("promotions") || path.contains("quanlykhuyenmai.jsp")) {
+        else if (path.contains("quanlykhohang.jsp") || path.contains("addproduct.jsp") || path.contains("api/inventory") || path.contains("upload-image")) {
             int action = requiredAction;
-            if ("POST".equalsIgnoreCase(httpRequest.getMethod()) && path.contains("addproduct.jsp")) {
-                action = Permission.ADD;
+            if ("POST".equalsIgnoreCase(httpRequest.getMethod())) {
+                if (path.contains("addproduct.jsp")) {
+                    action = Permission.ADD;
+                }
             }
             isAllowed = hasPerm(permissions, "products", action);
+        }
+        else if (path.contains("promotions") || path.contains("quanlykhuyenmai.jsp")) {
+            int action = requiredAction;
+            if ("POST".equalsIgnoreCase(httpRequest.getMethod())) {
+                String actionParam = httpRequest.getParameter("action");
+                if ("add".equalsIgnoreCase(actionParam)) {
+                    action = Permission.ADD;
+                } else if ("delete".equalsIgnoreCase(actionParam)) {
+                    action = Permission.DELETE;
+                } else if ("edit".equalsIgnoreCase(actionParam) || "toggle".equalsIgnoreCase(actionParam)) {
+                    action = Permission.EDIT;
+                }
+            }
+            isAllowed = hasPerm(permissions, "promotions", action);
         }
         else if (path.contains("product-stats")) {
             isAllowed = hasPerm(permissions, "products", Permission.VIEW) || hasPerm(permissions, "dashboard", Permission.VIEW);

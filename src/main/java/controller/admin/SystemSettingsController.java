@@ -34,12 +34,27 @@ public class SystemSettingsController extends HttpServlet {
         HttpSession session = req.getSession(false);
         User currentUser = (session != null) ? (User) session.getAttribute("currentUser") : null;
 
-        if (currentUser == null || (!enums.Role.ADMIN.equals(currentUser.getRole()) && !enums.Role.SUPER_ADMIN.equals(currentUser.getRole()))) {
+        if (currentUser == null) {
             resp.sendRedirect(req.getContextPath() + "/login");
             return;
         }
 
+        boolean hasSettingsPermission = false;
+        if (enums.Role.SUPER_ADMIN.equals(currentUser.getRole())) {
+            hasSettingsPermission = true;
+        } else if (currentUser.getRole() != null) {
+            dao.user.RolePermissionDao rpDao = new dao.user.RolePermissionDao();
+            hasSettingsPermission = rpDao.hasPermission(currentUser.getRole().name(), "settings", 1);
+        }
+
+        if (!hasSettingsPermission) {
+            resp.sendError(HttpServletResponse.SC_FORBIDDEN, "Bạn không có quyền truy cập trang này.");
+            return;
+        }
+
         dao.user.RolePermissionDao rpDao = new dao.user.RolePermissionDao();
+        req.setAttribute("superadminPermissions", rpDao.getPermissionsForRole("SUPER_ADMIN"));
+        req.setAttribute("adminPermissions", rpDao.getPermissionsForRole("ADMIN"));
         req.setAttribute("salesPermissions", rpDao.getPermissionsForRole("SALES_STAFF"));
         req.setAttribute("warehousePermissions", rpDao.getPermissionsForRole("WAREHOUSE_STAFF"));
 
@@ -56,10 +71,26 @@ public class SystemSettingsController extends HttpServlet {
         HttpSession session = req.getSession(false);
         User currentAdmin = (session != null) ? (User) session.getAttribute("currentUser") : null;
 
-        if (currentAdmin == null || (!enums.Role.ADMIN.equals(currentAdmin.getRole()) && !enums.Role.SUPER_ADMIN.equals(currentAdmin.getRole()))) {
+        if (currentAdmin == null) {
             resp.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
             jsonResponse.addProperty("success", false);
             jsonResponse.addProperty("message", "Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.");
+            out.print(jsonResponse.toString());
+            return;
+        }
+
+        boolean hasSettingsPermission = false;
+        if (enums.Role.SUPER_ADMIN.equals(currentAdmin.getRole())) {
+            hasSettingsPermission = true;
+        } else if (currentAdmin.getRole() != null) {
+            dao.user.RolePermissionDao rpDao = new dao.user.RolePermissionDao();
+            hasSettingsPermission = rpDao.hasPermission(currentAdmin.getRole().name(), "settings", 4);
+        }
+
+        if (!hasSettingsPermission) {
+            resp.setStatus(HttpServletResponse.SC_FORBIDDEN);
+            jsonResponse.addProperty("success", false);
+            jsonResponse.addProperty("message", "Bạn không có quyền thực hiện hành động này.");
             out.print(jsonResponse.toString());
             return;
         }
@@ -219,7 +250,7 @@ public class SystemSettingsController extends HttpServlet {
                     break;
                 }
 
-                if ("SUPER_ADMIN".equalsIgnoreCase(targetRole) || "ADMIN".equalsIgnoreCase(targetRole) || "USER".equalsIgnoreCase(targetRole)) {
+                if ("USER".equalsIgnoreCase(targetRole)) {
                     jsonResponse.addProperty("success", false);
                     jsonResponse.addProperty("message", "Không thể chỉnh sửa quyền của nhóm này.");
                     break;
@@ -230,6 +261,7 @@ public class SystemSettingsController extends HttpServlet {
                     int statisticsVal = Integer.parseInt(req.getParameter("statistics"));
                     int ordersVal = Integer.parseInt(req.getParameter("orders"));
                     int productsVal = Integer.parseInt(req.getParameter("products"));
+                    int promotionsVal = Integer.parseInt(req.getParameter("promotions"));
                     int usersVal = Integer.parseInt(req.getParameter("users"));
                     int settingsVal = Integer.parseInt(req.getParameter("settings"));
 
@@ -238,6 +270,7 @@ public class SystemSettingsController extends HttpServlet {
                     permsMap.put("statistics", statisticsVal);
                     permsMap.put("orders", ordersVal);
                     permsMap.put("products", productsVal);
+                    permsMap.put("promotions", promotionsVal);
                     permsMap.put("users", usersVal);
                     permsMap.put("settings", settingsVal);
 

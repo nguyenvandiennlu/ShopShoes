@@ -253,19 +253,24 @@
         margin-bottom: 0.5rem;
         font-size: 14px;
     }
-    .breadcrumb a {
-        color: var(--secondary);
+    .breadcrumb-item a {
+        color: #585f6a;
         text-decoration: none;
+        transition: color 0.2s;
     }
-    .breadcrumb a:hover {
-        color: var(--bittersweet);
+    .breadcrumb-item a:hover {
+        color: #ff675c;
+    }
+    .breadcrumb-item.active {
+        color: #191c1d;
+        font-weight: 500;
     }
     .breadcrumb-item + .breadcrumb-item::before {
         content: "chevron_right";
         font-family: 'Material Symbols Outlined';
         font-size: 16px;
         vertical-align: middle;
-        color: var(--secondary);
+        color: #585f6a;
     }
     .page-title {
         font-size: 28px;
@@ -519,9 +524,9 @@
     <main class="content-area">
         <!-- Breadcrumb & Title -->
         <nav aria-label="breadcrumb">
-            <ol class="breadcrumb">
-                <li class="breadcrumb-item"><a href="${pageContext.request.contextPath}/admin/adminHome.jsp" class="">Trang chủ</a></li>
-                <li aria-current="page" class="breadcrumb-item active text-dark fw-medium">Cài đặt</li>
+            <ol class="breadcrumb mb-1">
+                <li class="breadcrumb-item"><a href="${pageContext.request.contextPath}/admin/adminHome.jsp">Trang chủ</a></li>
+                <li aria-current="page" class="breadcrumb-item active">Cài đặt</li>
             </ol>
         </nav>
         <h2 class="page-title font-heading">Cài đặt hệ thống</h2>
@@ -696,23 +701,17 @@
                         <!-- Left Column: Role List Selector -->
                         <div class="col-md-4 col-lg-3">
                             <div class="list-group" id="permission-roles-list">
-                                <button type="button" class="list-group-item list-group-item-action disabled bg-light text-muted py-2" style="cursor: not-allowed;" title="Chủ cửa hàng - Toàn quyền hệ thống">
-                                    <small class="text-uppercase fw-bold d-block text-secondary" style="font-size: 9px; letter-spacing: 0.5px;">Hệ thống (Toàn quyền)</small>
+                                <button type="button" class="list-group-item list-group-item-action active fw-semibold" data-role="SUPER_ADMIN">
                                     Super Admin
                                 </button>
-                                <button type="button" class="list-group-item list-group-item-action disabled bg-light text-muted py-2" style="cursor: not-allowed;" title="Quản trị viên vận hành - Full quyền trừ Cài đặt">
-                                    <small class="text-uppercase fw-bold d-block text-secondary" style="font-size: 9px; letter-spacing: 0.5px;">Hệ thống (Quản lý vận hành)</small>
+                                <button type="button" class="list-group-item list-group-item-action fw-semibold" data-role="ADMIN">
                                     Admin
                                 </button>
-                                <button type="button" class="list-group-item list-group-item-action active fw-semibold" data-role="SALES_STAFF">
+                                <button type="button" class="list-group-item list-group-item-action fw-semibold" data-role="SALES_STAFF">
                                     Nhân viên đơn hàng
                                 </button>
                                 <button type="button" class="list-group-item list-group-item-action fw-semibold" data-role="WAREHOUSE_STAFF">
                                     Nhân viên kho
-                                </button>
-                                <button type="button" class="list-group-item list-group-item-action disabled bg-light text-muted py-2" style="cursor: not-allowed;" title="Khách hàng mua sắm - Không được phép truy cập Admin">
-                                    <small class="text-uppercase fw-bold d-block text-secondary" style="font-size: 9px; letter-spacing: 0.5px;">Client-side (Không có quyền)</small>
-                                    Khách hàng (User)
                                 </button>
                             </div>
                         </div>
@@ -721,7 +720,7 @@
                         <div class="col-md-8 col-lg-9">
                             <div class="p-3 border rounded bg-white shadow-sm">
                                 <h4 class="fs-6 fw-bold mb-3 text-dark border-bottom pb-2" id="selected-role-title">
-                                    Cấu hình quyền: Nhân viên đơn hàng
+                                    Cấu hình quyền: Super Admin (Quản trị tối cao)
                                 </h4>
                                 
                                 <div class="table-responsive">
@@ -797,6 +796,29 @@
                                                         <div class="form-check">
                                                             <input class="form-check-input perm-cb" type="checkbox" data-mask="8" id="prod_delete">
                                                             <label class="form-check-label" for="prod_delete">Khóa/Xóa</label>
+                                                        </div>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                            <tr data-module="promotions">
+                                                <td class="fw-semibold">Quản lý khuyến mãi</td>
+                                                <td>
+                                                    <div class="d-flex flex-wrap gap-3">
+                                                        <div class="form-check">
+                                                            <input class="form-check-input perm-cb" type="checkbox" data-mask="1" id="promo_view">
+                                                            <label class="form-check-label" for="promo_view">Xem</label>
+                                                        </div>
+                                                        <div class="form-check">
+                                                            <input class="form-check-input perm-cb" type="checkbox" data-mask="2" id="promo_add">
+                                                            <label class="form-check-label" for="promo_add">Thêm</label>
+                                                        </div>
+                                                        <div class="form-check">
+                                                            <input class="form-check-input perm-cb" type="checkbox" data-mask="4" id="promo_edit">
+                                                            <label class="form-check-label" for="promo_edit">Sửa</label>
+                                                        </div>
+                                                        <div class="form-check">
+                                                            <input class="form-check-input perm-cb" type="checkbox" data-mask="8" id="promo_delete">
+                                                            <label class="form-check-label" for="promo_delete">Khóa/Xóa</label>
                                                         </div>
                                                     </div>
                                                 </td>
@@ -1092,14 +1114,33 @@
         });
     });
 
-    let activePermissionRole = "SALES_STAFF";
+    let activePermissionRole = "SUPER_ADMIN";
 
     const rolePermissionsData = {
+        "SUPER_ADMIN": {
+            "dashboard": <%= request.getAttribute("superadminPermissions") != null ? ((java.util.Map<String, Integer>)request.getAttribute("superadminPermissions")).getOrDefault("dashboard", 0) : 0 %>,
+            "statistics": <%= request.getAttribute("superadminPermissions") != null ? ((java.util.Map<String, Integer>)request.getAttribute("superadminPermissions")).getOrDefault("statistics", 0) : 0 %>,
+            "orders": <%= request.getAttribute("superadminPermissions") != null ? ((java.util.Map<String, Integer>)request.getAttribute("superadminPermissions")).getOrDefault("orders", 0) : 0 %>,
+            "products": <%= request.getAttribute("superadminPermissions") != null ? ((java.util.Map<String, Integer>)request.getAttribute("superadminPermissions")).getOrDefault("products", 0) : 0 %>,
+            "promotions": <%= request.getAttribute("superadminPermissions") != null ? ((java.util.Map<String, Integer>)request.getAttribute("superadminPermissions")).getOrDefault("promotions", 0) : 0 %>,
+            "users": <%= request.getAttribute("superadminPermissions") != null ? ((java.util.Map<String, Integer>)request.getAttribute("superadminPermissions")).getOrDefault("users", 0) : 0 %>,
+            "settings": <%= request.getAttribute("superadminPermissions") != null ? ((java.util.Map<String, Integer>)request.getAttribute("superadminPermissions")).getOrDefault("settings", 0) : 0 %>
+        },
+        "ADMIN": {
+            "dashboard": <%= request.getAttribute("adminPermissions") != null ? ((java.util.Map<String, Integer>)request.getAttribute("adminPermissions")).getOrDefault("dashboard", 0) : 0 %>,
+            "statistics": <%= request.getAttribute("adminPermissions") != null ? ((java.util.Map<String, Integer>)request.getAttribute("adminPermissions")).getOrDefault("statistics", 0) : 0 %>,
+            "orders": <%= request.getAttribute("adminPermissions") != null ? ((java.util.Map<String, Integer>)request.getAttribute("adminPermissions")).getOrDefault("orders", 0) : 0 %>,
+            "products": <%= request.getAttribute("adminPermissions") != null ? ((java.util.Map<String, Integer>)request.getAttribute("adminPermissions")).getOrDefault("products", 0) : 0 %>,
+            "promotions": <%= request.getAttribute("adminPermissions") != null ? ((java.util.Map<String, Integer>)request.getAttribute("adminPermissions")).getOrDefault("promotions", 0) : 0 %>,
+            "users": <%= request.getAttribute("adminPermissions") != null ? ((java.util.Map<String, Integer>)request.getAttribute("adminPermissions")).getOrDefault("users", 0) : 0 %>,
+            "settings": <%= request.getAttribute("adminPermissions") != null ? ((java.util.Map<String, Integer>)request.getAttribute("adminPermissions")).getOrDefault("settings", 0) : 0 %>
+        },
         "SALES_STAFF": {
             "dashboard": <%= request.getAttribute("salesPermissions") != null ? ((java.util.Map<String, Integer>)request.getAttribute("salesPermissions")).getOrDefault("dashboard", 0) : 0 %>,
             "statistics": <%= request.getAttribute("salesPermissions") != null ? ((java.util.Map<String, Integer>)request.getAttribute("salesPermissions")).getOrDefault("statistics", 0) : 0 %>,
             "orders": <%= request.getAttribute("salesPermissions") != null ? ((java.util.Map<String, Integer>)request.getAttribute("salesPermissions")).getOrDefault("orders", 0) : 0 %>,
             "products": <%= request.getAttribute("salesPermissions") != null ? ((java.util.Map<String, Integer>)request.getAttribute("salesPermissions")).getOrDefault("products", 0) : 0 %>,
+            "promotions": <%= request.getAttribute("salesPermissions") != null ? ((java.util.Map<String, Integer>)request.getAttribute("salesPermissions")).getOrDefault("promotions", 0) : 0 %>,
             "users": <%= request.getAttribute("salesPermissions") != null ? ((java.util.Map<String, Integer>)request.getAttribute("salesPermissions")).getOrDefault("users", 0) : 0 %>,
             "settings": <%= request.getAttribute("salesPermissions") != null ? ((java.util.Map<String, Integer>)request.getAttribute("salesPermissions")).getOrDefault("settings", 0) : 0 %>
         },
@@ -1108,6 +1149,7 @@
             "statistics": <%= request.getAttribute("warehousePermissions") != null ? ((java.util.Map<String, Integer>)request.getAttribute("warehousePermissions")).getOrDefault("statistics", 0) : 0 %>,
             "orders": <%= request.getAttribute("warehousePermissions") != null ? ((java.util.Map<String, Integer>)request.getAttribute("warehousePermissions")).getOrDefault("orders", 0) : 0 %>,
             "products": <%= request.getAttribute("warehousePermissions") != null ? ((java.util.Map<String, Integer>)request.getAttribute("warehousePermissions")).getOrDefault("products", 0) : 0 %>,
+            "promotions": <%= request.getAttribute("warehousePermissions") != null ? ((java.util.Map<String, Integer>)request.getAttribute("warehousePermissions")).getOrDefault("promotions", 0) : 0 %>,
             "users": <%= request.getAttribute("warehousePermissions") != null ? ((java.util.Map<String, Integer>)request.getAttribute("warehousePermissions")).getOrDefault("users", 0) : 0 %>,
             "settings": <%= request.getAttribute("warehousePermissions") != null ? ((java.util.Map<String, Integer>)request.getAttribute("warehousePermissions")).getOrDefault("settings", 0) : 0 %>
         }
@@ -1118,6 +1160,8 @@
         const perms = rolePermissionsData[role] || {};
         
         const roleTitles = {
+            "SUPER_ADMIN": "Super Admin (Quản trị tối cao)",
+            "ADMIN": "Admin (Quản lý vận hành)",
             "SALES_STAFF": "Nhân viên đơn hàng (CSKH)",
             "WAREHOUSE_STAFF": "Nhân viên kho"
         };
@@ -1148,7 +1192,7 @@
         });
     });
 
-    renderPermissions("SALES_STAFF");
+    renderPermissions("SUPER_ADMIN");
 
     document.getElementById('btnSavePermissions').addEventListener('click', function(e) {
         e.preventDefault();
@@ -1201,6 +1245,7 @@
                     statistics: dataToSave.statistics,
                     orders: dataToSave.orders,
                     products: dataToSave.products,
+                    promotions: dataToSave.promotions,
                     users: dataToSave.users,
                     settings: dataToSave.settings
                 };

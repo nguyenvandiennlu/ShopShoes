@@ -51,6 +51,31 @@
         .badge-refunded { background-color: #e0e7ff; color: #3730a3; }
         .badge-pending { background-color: #fef3c7; color: #92400e; }
         .status-select { min-width: 130px; font-size: 13px; }
+
+        /* Breadcrumb Style */
+        .breadcrumb {
+            margin-bottom: 0.5rem;
+            font-size: 14px;
+        }
+        .breadcrumb-item a {
+            color: #585f6a;
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+        .breadcrumb-item a:hover {
+            color: #ff675c;
+        }
+        .breadcrumb-item.active {
+            color: #191c1d;
+            font-weight: 500;
+        }
+        .breadcrumb-item + .breadcrumb-item::before {
+            content: "chevron_right";
+            font-family: 'Material Symbols Outlined';
+            font-size: 16px;
+            vertical-align: middle;
+            color: #585f6a;
+        }
     </style>
 </head>
 <body>
@@ -58,7 +83,16 @@
 <jsp:include page="topbar.jsp"/>
 
 <main class="main-content">
-    <h2 class="font-heading fs-3 fw-bold mb-3 d-md-none text-dark">Quản lý Đơn hàng</h2>
+    <!-- Breadcrumb & Title -->
+    <div class="mb-4">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb mb-1">
+                <li class="breadcrumb-item"><a href="${pageContext.request.contextPath}/admin/adminHome.jsp">Trang chủ</a></li>
+                <li aria-current="page" class="breadcrumb-item active">Đơn hàng</li>
+            </ol>
+        </nav>
+        <h1 class="font-heading fw-bold mb-0 text-dark" style="font-size: 28px;">Quản lý Đơn hàng</h1>
+    </div>
 
     <!-- Filter & Search Section -->
     <div class="card p-4">

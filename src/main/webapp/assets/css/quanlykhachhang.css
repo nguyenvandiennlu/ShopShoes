@@ -628,28 +628,29 @@ h1, h2, h3, h4, h5, h6, .heading-font {
 /* ==================== BREADCRUMB ==================== */
 .breadcrumb {
     margin-bottom: 0.5rem;
-}
-
-.breadcrumb .breadcrumb-item {
     font-size: 14px;
 }
 
-.breadcrumb .breadcrumb-item a {
+.breadcrumb-item a {
     color: #585f6a;
     text-decoration: none;
     transition: color 0.2s;
 }
 
-.breadcrumb .breadcrumb-item a:hover {
-    color: var(--bittersweet);
+.breadcrumb-item a:hover {
+    color: #ff675c;
 }
 
-.breadcrumb .breadcrumb-item.active {
-    color: var(--bittersweet);
+.breadcrumb-item.active {
+    color: #191c1d;
+    font-weight: 500;
 }
 
-.breadcrumb .breadcrumb-item + .breadcrumb-item::before {
-    content: "›";
+.breadcrumb-item + .breadcrumb-item::before {
+    content: "chevron_right";
+    font-family: 'Material Symbols Outlined';
+    font-size: 16px;
+    vertical-align: middle;
     color: #585f6a;
 }
 

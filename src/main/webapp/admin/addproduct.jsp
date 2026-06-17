@@ -180,22 +180,29 @@
             border-bottom-width: 1px;
         }
 
+        /* Breadcrumb Style */
+        .breadcrumb {
+            margin-bottom: 0.5rem;
+            font-size: 14px;
+        }
         .breadcrumb-item a {
-            color: var(--secondary-text);
+            color: #585f6a;
             text-decoration: none;
+            transition: color 0.2s;
         }
         .breadcrumb-item a:hover {
-            color: var(--bs-primary);
+            color: #ff675c;
         }
         .breadcrumb-item.active {
-            color: var(--on-surface);
+            color: #191c1d;
+            font-weight: 500;
         }
         .breadcrumb-item + .breadcrumb-item::before {
-            content: "\e5cc"; /* chevron_right */
+            content: "chevron_right";
             font-family: 'Material Symbols Outlined';
+            font-size: 16px;
             vertical-align: middle;
-            color: var(--secondary-text);
-            font-size: 18px;
+            color: #585f6a;
         }
     </style>
 </head>
@@ -297,7 +304,7 @@
     <!-- Breadcrumb & Title -->
     <div class="mb-4">
         <nav aria-label="breadcrumb">
-            <ol class="breadcrumb mb-2 small">
+            <ol class="breadcrumb mb-1">
                 <li class="breadcrumb-item"><a href="${pageContext.request.contextPath}/admin/adminHome.jsp">Trang chủ</a></li>
                 <li class="breadcrumb-item"><a href="${pageContext.request.contextPath}/admin/quanlykhohang.jsp">Quản lý Sản phẩm</a></li>
                 <li aria-current="page" class="breadcrumb-item active">Thêm mới</li>

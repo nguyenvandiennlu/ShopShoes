@@ -78,6 +78,31 @@
         .form-select:focus, .form-control:focus {
             border-color: #ff675c; box-shadow: 0 0 0 .2rem rgba(255,103,92,.15);
         }
+
+        /* Breadcrumb Style */
+        .breadcrumb {
+            margin-bottom: 0.5rem;
+            font-size: 14px;
+        }
+        .breadcrumb-item a {
+            color: #585f6a;
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+        .breadcrumb-item a:hover {
+            color: #ff675c;
+        }
+        .breadcrumb-item.active {
+            color: #191c1d;
+            font-weight: 500;
+        }
+        .breadcrumb-item + .breadcrumb-item::before {
+            content: "chevron_right";
+            font-family: 'Material Symbols Outlined';
+            font-size: 16px;
+            vertical-align: middle;
+            color: #585f6a;
+        }
     </style>
 </head>
 <body>
