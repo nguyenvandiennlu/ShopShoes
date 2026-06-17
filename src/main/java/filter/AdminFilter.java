@@ -78,7 +78,7 @@ public class AdminFilter implements Filter {
         else if (path.contains("chart-statistics") || path.contains("api/statistics")) {
             isAllowed = hasPerm(permissions, "statistics", Permission.VIEW) || hasPerm(permissions, "dashboard", Permission.VIEW);
         }
-        else if (path.contains("quanlydonhang.jsp") || path.contains("api/orders")) {
+        else if (path.contains("quanlydonhang.jsp") || path.contains("api/orders") || path.endsWith("/orders")) {
             isAllowed = hasPerm(permissions, "orders", requiredAction);
         }
         else if (path.contains("urgent-orders") || path.contains("recent-reviews")) {
