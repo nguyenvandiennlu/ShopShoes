@@ -1,14 +1,17 @@
 package dao.admin;
 
 import DTO.ProductEditDTO;
+import DTO.ProductRequestDTO;
 import dao.JDBIConnector;
 import model.admin.InventoryProductRow;
 import model.admin.InventoryVariantRow;
 import org.jdbi.v3.core.Jdbi;
 
+import java.math.BigDecimal;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
+import org.jdbi.v3.core.statement.Query;
 
 public class InventoryDao {
 
@@ -35,7 +38,7 @@ public class InventoryDao {
         sql.append(") ");
     }
 
-    private void bindTokens(org.jdbi.v3.core.statement.Query query, List<String> tokens) {
+    private void bindTokens(Query query, List<String> tokens) {
         for (int i = 0; i < tokens.size(); i++) {
             query.bind("token" + i, "%" + tokens.get(i) + "%");
         }
@@ -220,7 +223,7 @@ public class InventoryDao {
                 .orElse(null));
     }
 
-    public void updateProduct(int productId, String name, java.math.BigDecimal price,
+    public void updateProduct(int productId, String name, BigDecimal price,
                               int brandId, boolean isAvailable, String mainImgUrl) {
         jdbi.useHandle(h -> h.createUpdate("""
                 UPDATE product
@@ -313,5 +316,79 @@ public class InventoryDao {
                 .bind("imgUrl", imgUrl)
                 .bind("sortOrder", sortOrder)
                 .execute());
+    }
+
+    public boolean insertFullProduct(ProductRequestDTO payload) {
+        try {
+            return jdbi.inTransaction(handle -> {
+
+                int productId = handle.createUpdate("""
+                        INSERT INTO product(name, price, brand_id, added_at, is_discontinue, is_available)
+                        VALUES(:name, :price, :brandId, NOW(), 0, 1)
+                        """)
+                        .bind("name", payload.getName())
+                        .bind("price", payload.getPrice())
+                        .bind("brandId", payload.getBrandId())
+                        .executeAndReturnGeneratedKeys("id")
+                        .mapTo(Integer.class)
+                        .one();
+
+                if (payload.getMainImageUrl() != null && !payload.getMainImageUrl().isBlank()) {
+                    handle.createUpdate("""
+                            INSERT INTO product_main_img (product_id, img_url, is_active)
+                            VALUES (:productId, :imgUrl, 1)
+                            """)
+                            .bind("productId", productId)
+                            .bind("imgUrl", payload.getMainImageUrl())
+                            .execute();
+                }
+
+                if (payload.getVariants() != null) {
+                    for (DTO.VariantDTO variant : payload.getVariants()) {
+
+                        handle.createUpdate("""
+                                INSERT INTO product_variant (product_id, color_id, size_id, stock, is_discontinue_variant)
+                                VALUES (:pId, :cId, :sId, :stock, 0)
+                                """)
+                                .bind("pId", productId)
+                                .bind("cId", variant.getColorId())
+                                .bind("sId", variant.getSizeId())
+                                .bind("stock", variant.getStock())
+                                .execute();
+
+                        if (variant.getImageUrls() != null && !variant.getImageUrls().isEmpty()) {
+                            int currentSortOrder = handle.createQuery("""
+                                    SELECT COALESCE(MAX(sort_order), 0) 
+                                    FROM product_img 
+                                    WHERE product_id = :pId AND color_id = :cId
+                                    """)
+                                    .bind("pId", productId)
+                                    .bind("cId", variant.getColorId())
+                                    .mapTo(Integer.class)
+                                    .one();
+
+                            for (String imgUrl : variant.getImageUrls()) {
+                                currentSortOrder++;
+                                handle.createUpdate("""
+                                        INSERT INTO product_img (product_id, color_id, img_url, sort_order, is_active)
+                                        VALUES (:pId, :cId, :imgUrl, :sortOrder, 1)
+                                        """)
+                                        .bind("pId", productId)
+                                        .bind("cId", variant.getColorId())
+                                        .bind("imgUrl", imgUrl)
+                                        .bind("sortOrder", currentSortOrder)
+                                        .execute();
+                            }
+                        }
+                    }
+                }
+
+                return true;
+            });
+        } catch (Exception e) {
+            System.err.println("Lỗi khi thêm sản phẩm Full: " + e.getMessage());
+            e.printStackTrace();
+            return false;
+        }
     }
 }
