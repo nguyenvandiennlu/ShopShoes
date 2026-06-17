@@ -95,7 +95,7 @@
                     </li>
                     <li>
                         <a
-                                href="${pageContext.request.contextPath}/carts"
+                                href="${pageContext.request.contextPath}/cart"
                                 class="footer-link"
                         >
                             <ion-icon name="chevron-forward-outline"></ion-icon>

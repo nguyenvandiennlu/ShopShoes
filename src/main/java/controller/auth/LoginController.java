@@ -140,7 +140,7 @@ public class LoginController extends HttpServlet {
             } else {
                 switch (role) {
                     case ADMIN:
-                        redirectUrl = req.getContextPath() + "/admin/dashboard";
+                        redirectUrl = req.getContextPath() + "/admin/adminHome.jsp";
                         break;
                     default:
                         redirectUrl = req.getContextPath() + "/menu";
