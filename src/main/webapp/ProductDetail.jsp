@@ -18,7 +18,6 @@
       <main>
         <div class="container">
 
-          <!-- BREADCRUMB -->
           <div class="breadcrumb-container">
             <nav aria-label="breadcrumb">
               <ol class="breadcrumb">
@@ -29,10 +28,8 @@
             </nav>
           </div>
 
-          <!-- PRODUCT DETAIL -->
           <div class="product-detail-wrapper">
 
-            <!-- IMAGE -->
             <div class="product-gallery-box">
               <div class="sub-img-container">
                 <c:forEach var="img" items="${product.productImg}">
@@ -45,7 +42,6 @@
               </div>
             </div>
 
-            <!-- INFO -->
             <div class="product-info-box" data-product-id="${product.productDTO.id}" data-context-path="${pageContext.request.contextPath}">
               <h1 class="product-title">${product.productDTO.name}</h1>
 
@@ -96,7 +92,6 @@
                   </span>
                 </c:if>
               </div>
-              <!-- COLOR -->
               <div class="option-block">
                 <label>Màu sắc:</label>
                 <div class="filter-group-body">
@@ -114,7 +109,6 @@
                   </ul>
                 </div>
               </div>
-              <!-- SIZE -->
               <div class="option-block">
                 <label>Kích thước:</label>
                 <div class="size-list">
@@ -127,17 +121,13 @@
                   </c:forEach>
                 </div>
               </div>
-              <!-- ACTION -->
               <form action="${pageContext.request.contextPath}/cart/add" method="post" class="action-area">
 
                 <input type="hidden" name="productId" value="${product.productDTO.id}" />
                 <input type="hidden" name="colorId" value="${product.currentColorId}" />
 
-<%--                <c:if test="${not empty product.currentSizeId}">--%>
                   <input type="hidden" name="sizeId" value="${product.currentSizeId}" />
-<%--                </c:if>--%>
 
-                <!-- QUANTITY -->
                 <div class="qty-row">
                   <label>Số lượng:</label>
                   <div class="qty-input-group">
@@ -146,7 +136,6 @@
                     <button type="button" onclick="this.previousElementSibling.stepUp()">+</button>
                   </div>
                 </div>
-                <!-- BUTTONS -->
                 <div class="action-buttons">
                   <button type="submit" class="btn-main btn-add-cart" <c:if
                     test="${empty product.currentSizeId}">disabled</c:if>>
@@ -176,7 +165,6 @@
             </div>
           </div>
 
-          <!-- DESCRIPTION -->
           <section class="product-desc-full">
             <h2 class="section-title-desc">Mô tả sản phẩm</h2>
             <div class="desc-content">
@@ -317,16 +305,13 @@
                 <li class="product-item">
                   <div class="product-card" tabindex="0">
 
-                    <!-- IMAGE -->
                     <figure class="card-banner">
                       <img src="${p.mainImageUrl}" loading="lazy" alt="${p.name}" class="image-contain" />
-                      <!-- BADGE NEW -->
                       <c:if test="${p.isNew}">
                         <div class="card-badge">New</div>
                       </c:if>
                     </figure>
 
-                    <!-- CONTENT -->
                     <div class="card-content">
                       <h3 class="h3 card-title">
                         <a href="${pageContext.request.contextPath}/product?id=${p.id}">
@@ -369,16 +354,11 @@
 
       <script src="${pageContext.request.contextPath}/assets/script/reponsive.js"></script>
       <script src="${pageContext.request.contextPath}/assets/script/chitietsanpham.js"></script>
-      <!-- Enhanced Lazy Loading -->
       <script src="${pageContext.request.contextPath}/assets/script/lazy-loading.js"></script>
-      <!-- Image Zoom & Lightbox -->
       <script src="${pageContext.request.contextPath}/assets/script/image-zoom.js"></script>
       <script>
         window.CONTEXT_PATH = window.CONTEXT_PATH || "${pageContext.request.contextPath}";
       </script>
-      <!--
-    - ionicon link
-  -->
       <script type="module" src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.esm.js"></script>
       <script nomodule src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.js"></script>
 

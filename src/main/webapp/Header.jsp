@@ -93,6 +93,9 @@
                                     </a>
                                     <div class="dropdown-content">
                                         <a href="${pageContext.request.contextPath}/account">Tài khoản</a>
+                                        <c:if test="${sessionScope.currentUser.role eq 'ADMIN'}">
+                                            <a href="${pageContext.request.contextPath}/admin/adminHome.jsp">Admin</a>
+                                        </c:if>
                                         <a href="${pageContext.request.contextPath}/logout">Đăng xuất</a>
                                     </div>
                                 </c:otherwise>
@@ -211,6 +214,9 @@
                                     </a>
                                     <div class="dropdown-content">
                                         <a href="${pageContext.request.contextPath}/account">Tài khoản</a>
+                                        <c:if test="${sessionScope.currentUser.role eq 'ADMIN'}">
+                                            <a href="${pageContext.request.contextPath}/admin/dashboard">Admin</a>
+                                        </c:if>
                                         <a href="${pageContext.request.contextPath}/logout">Đăng xuất</a>
                                     </div>
                                 </c:otherwise>

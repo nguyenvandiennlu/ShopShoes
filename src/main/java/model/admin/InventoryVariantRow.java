@@ -9,6 +9,7 @@ public class InventoryVariantRow {
     private String colorName;
     private String hexcode;
     private int    stock;
+    private boolean isDiscontinued;
 
     public InventoryVariantRow() {}
 
@@ -28,4 +29,6 @@ public class InventoryVariantRow {
     public void   setHexcode(String v)     { this.hexcode = v; }
     public int    getStock()               { return stock; }
     public void   setStock(int v)          { this.stock = v; }
+    public boolean getIsDiscontinued()     {return isDiscontinued;}
+    public void setIsDiscontinued(boolean isDiscontinued) {this.isDiscontinued = isDiscontinued;}
 }

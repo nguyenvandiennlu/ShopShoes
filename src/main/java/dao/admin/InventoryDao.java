@@ -168,25 +168,31 @@ public class InventoryDao {
         });
     }
 
-    public List<InventoryVariantRow> findVariantsByProduct(int productId) {
-        String sql = """
-            SELECT
-                pv.id         AS variantId,
-                pv.product_id AS productId,
-                pv.size_id    AS sizeId,
-                s.name        AS sizeName,
-                pv.color_id   AS colorId,
-                c.name        AS colorName,
-                c.hexcode     AS hexcode,
-                pv.stock      AS stock
-            FROM product_variant pv
-            JOIN size  s ON s.id = pv.size_id
-            JOIN color c ON c.id = pv.color_id
-            WHERE pv.product_id = :productId
-              AND pv.is_discontinue_variant = 0
-            ORDER BY s.sort_order ASC, c.id ASC
-        """;
-        return jdbi.withHandle(h -> h.createQuery(sql)
+    public List<InventoryVariantRow> findVariantsByProduct(int productId, boolean includeDiscontinued) {
+        StringBuilder sql = new StringBuilder("""
+        SELECT
+            pv.id         AS variantId,
+            pv.product_id AS productId,
+            pv.size_id    AS sizeId,
+            s.name        AS sizeName,
+            pv.color_id   AS colorId,
+            c.name        AS colorName,
+            c.hexcode     AS hexcode,
+            pv.stock      AS stock,
+            pv.is_discontinue_variant AS isDiscontinued
+        FROM product_variant pv
+        JOIN size  s ON s.id = pv.size_id
+        JOIN color c ON c.id = pv.color_id
+        WHERE pv.product_id = :productId
+    """);
+
+        if (!includeDiscontinued) {
+            sql.append(" AND pv.is_discontinue_variant = 0 \n");
+        }
+
+        sql.append(" ORDER BY s.sort_order ASC, c.id ASC");
+
+        return jdbi.withHandle(h -> h.createQuery(sql.toString())
                 .bind("productId", productId)
                 .mapToBean(InventoryVariantRow.class)
                 .list());
@@ -241,5 +247,71 @@ public class InventoryDao {
                     .bind("imgUrl",    mainImgUrl)
                     .execute());
         }
+    }
+
+    public void updateStock(int variantId, int productId, int qty) {
+        String sql = """
+        UPDATE product_variant 
+        SET stock = stock + :qty 
+        WHERE id = :variantId AND product_id = :productId
+    """;
+        jdbi.useHandle(h -> h.createUpdate(sql)
+                .bind("qty", qty)
+                .bind("variantId", variantId)
+                .bind("productId", productId)
+                .execute());
+    }
+
+    public void updateVariantStatus(int variantId, boolean isDiscontinued) {
+        String sql = "UPDATE product_variant SET is_discontinue_variant = :status WHERE id = :id";
+        jdbi.useHandle(h -> h.createUpdate(sql)
+                .bind("status", isDiscontinued)
+                .bind("id", variantId)
+                .execute());
+    }
+
+    public boolean checkVariantExists(int productId, int colorId, int sizeId) {
+        String sql = "SELECT COUNT(*) FROM product_variant WHERE product_id = :pId AND color_id = :cId AND size_id = :sId";
+        return jdbi.withHandle(h -> h.createQuery(sql)
+                .bind("pId", productId)
+                .bind("cId", colorId)
+                .bind("sId", sizeId)
+                .mapTo(Integer.class)
+                .one() > 0);
+    }
+
+    public void insertVariant(int productId, int colorId, int sizeId, int stock) {
+        String sql = """
+        INSERT INTO product_variant (product_id, color_id, size_id, stock, is_discontinue_variant)
+        VALUES (:pId, :cId, :sId, :stock, 0)
+    """;
+        jdbi.useHandle(h -> h.createUpdate(sql)
+                .bind("pId", productId)
+                .bind("cId", colorId)
+                .bind("sId", sizeId)
+                .bind("stock", stock)
+                .execute());
+    }
+
+    public int getMaxSortOrder(int productId, int colorId) {
+        String sql = "SELECT COALESCE(MAX(sort_order), 0) FROM product_img WHERE product_id = :pId AND color_id = :cId";
+        return jdbi.withHandle(h -> h.createQuery(sql)
+                .bind("pId", productId)
+                .bind("cId", colorId)
+                .mapTo(Integer.class)
+                .one());
+    }
+
+    public void insertProductImage(int productId, int colorId, String imgUrl, int sortOrder) {
+        String sql = """
+        INSERT INTO product_img (product_id, color_id, img_url, sort_order, is_active)
+        VALUES (:pId, :cId, :imgUrl, :sortOrder, 1)
+    """;
+        jdbi.useHandle(h -> h.createUpdate(sql)
+                .bind("pId", productId)
+                .bind("cId", colorId)
+                .bind("imgUrl", imgUrl)
+                .bind("sortOrder", sortOrder)
+                .execute());
     }
 }

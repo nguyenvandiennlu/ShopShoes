@@ -6,12 +6,24 @@ const elEditId          = document.getElementById('edit-product-id');
 const elEditName        = document.getElementById('edit-name');
 const elEditPrice       = document.getElementById('edit-price');
 const elEditBrand       = document.getElementById('edit-brand');
-const elEditImgUrl      = document.getElementById('edit-img-url');
-const elEditImgPrev     = document.getElementById('edit-img-preview');
-const elEditImgNoPrev   = document.getElementById('edit-img-placeholder');
 const elEditError       = document.getElementById('edit-error-alert');
 const elEditErrorMsg    = document.getElementById('edit-error-msg');
 const elBtnSave         = document.getElementById('btn-save-product');
+
+const elImgPreview      = document.getElementById('edit-img-preview');
+const elImgPlaceholder  = document.getElementById('edit-img-placeholder');
+const elImgUrlDisplay   = document.getElementById('edit-img-url-display');
+const elFileInput       = document.getElementById('edit-img-file');
+const elUploadBtn       = document.getElementById('btn-upload-image');
+const elUploadSpinner   = document.getElementById('upload-spinner');
+const elUploadLabel     = document.getElementById('upload-label');
+const elUploadError     = document.getElementById('upload-error');
+
+let currentImgUrl = '';
+let newImgUrl = null;
+
+let selectedImageFile = null;
+let blobPreviewUrl = null;
 
 function populateEditBrandSelect(brands) {
     elEditBrand.innerHTML = '<option value="">-- Chọn thương hiệu --</option>';
@@ -29,6 +41,7 @@ async function openEditModal(productId) {
     elEditForm.style.display    = 'none';
     elBtnSave.disabled          = true;
     hideEditError();
+    resetImageUpload();
     editModal.show();
 
     try {
@@ -37,13 +50,14 @@ async function openEditModal(productId) {
 
         if (data.error) { showEditError(data.error); return; }
 
-        elEditId.value     = data.id         ?? '';
-        elEditName.value   = data.name       ?? '';
-        elEditPrice.value  = data.price      ?? '';
-        elEditBrand.value  = data.brandId    ?? '';
-        elEditImgUrl.value = data.mainImgUrl ?? '';
+        elEditId.value    = data.id      ?? '';
+        elEditName.value  = data.name    ?? '';
+        elEditPrice.value = data.price   ?? '';
+        elEditBrand.value = data.brandId ?? '';
 
-        updateImgPreview(elEditImgUrl.value);
+        currentImgUrl = data.mainImgUrl ?? '';
+        newImgUrl     = null;
+        setImgPreview(currentImgUrl);
 
         const radioVal = data.available ? '1' : '0';
         const radio = document.querySelector(`input[name="edit-available"][value="${radioVal}"]`);
@@ -59,23 +73,78 @@ async function openEditModal(productId) {
     }
 }
 
-elEditImgUrl.addEventListener('input', () => {
-    updateImgPreview(elEditImgUrl.value.trim());
+function setImgPreview(url) {
+    if (url) {
+        elImgPlaceholder.style.display = 'none';
+        elImgPreview.onerror = () => {
+            elImgPreview.style.display    = 'none';
+            elImgPlaceholder.style.display = '';
+            elImgUrlDisplay.textContent   = '';
+        };
+        elImgPreview.src           = url;
+        elImgPreview.style.display = '';
+        elImgUrlDisplay.textContent = url;
+    } else {
+        elImgPreview.style.display     = 'none';
+        elImgPlaceholder.style.display = '';
+        elImgUrlDisplay.textContent    = '';
+    }
+}
+
+function resetImageUpload() {
+    currentImgUrl = '';
+    newImgUrl = null;
+    selectedImageFile = null;
+
+    if (blobPreviewUrl) {
+        URL.revokeObjectURL(blobPreviewUrl);
+        blobPreviewUrl = null;
+    }
+
+    elFileInput.value = '';
+    setImgPreview('');
+    hideUploadError();
+    setUploadLoading(false);
+    elUploadLabel.textContent = 'Chọn ảnh';
+}
+
+elUploadBtn.addEventListener('click', () => {
+    elFileInput.click();
 });
 
-function updateImgPreview(url) {
-    if (url) {
-        elEditImgNoPrev.style.display = 'none';
-        elEditImgPrev.onerror = () => {
-            elEditImgPrev.style.display   = 'none';
-            elEditImgNoPrev.style.display = '';
-        };
-        elEditImgPrev.src           = url;
-        elEditImgPrev.style.display = '';
-    } else {
-        elEditImgPrev.style.display   = 'none';
-        elEditImgNoPrev.style.display = '';
+elFileInput.addEventListener('change', () => {
+    const file = elFileInput.files[0];
+    if (!file) return;
+
+    const allowed = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
+    if (!allowed.includes(file.type)) {
+        showUploadError('Chỉ chấp nhận file ảnh.'); return;
     }
+    if (file.size > 5 * 1024 * 1024) {
+        showUploadError('File quá lớn.'); return;
+    }
+
+    hideUploadError();
+    selectedImageFile = file;
+
+    if (blobPreviewUrl) URL.revokeObjectURL(blobPreviewUrl);
+    blobPreviewUrl = URL.createObjectURL(file);
+    setImgPreview(blobPreviewUrl);
+    elUploadLabel.textContent = file.name;
+});
+
+function setUploadLoading(loading) {
+    elUploadBtn.disabled          = loading;
+    elUploadSpinner.style.display = loading ? '' : 'none';
+    elUploadLabel.textContent     = loading ? 'Đang upload...' : 'Chọn ảnh';
+}
+
+function showUploadError(msg) {
+    elUploadError.textContent = msg;
+    elUploadError.classList.remove('d-none');
+}
+function hideUploadError() {
+    elUploadError.classList.add('d-none');
 }
 
 elBtnSave.addEventListener('click', async () => {
@@ -108,8 +177,7 @@ elBtnSave.addEventListener('click', async () => {
     params.set('brandId',     elEditBrand.value);
     params.set('isAvailable', isAvailable);
 
-    const imgUrl = elEditImgUrl.value.trim();
-    if (imgUrl) params.set('mainImgUrl', imgUrl);
+    if (newImgUrl) params.set('mainImgUrl', newImgUrl);
 
     elBtnSave.disabled = true;
     elBtnSave.innerHTML = `
@@ -117,6 +185,24 @@ elBtnSave.addEventListener('click', async () => {
         Đang lưu...`;
 
     try {
+        if (selectedImageFile) {
+            elBtnSave.innerHTML = `Đang tải ảnh lên...`;
+            const formData = new FormData();
+            formData.append('file', selectedImageFile);
+            formData.append('folder', 'products');
+
+            const uploadRes = await fetch(window.contextPath + '/admin/upload-image', {
+                method: 'POST', body: formData
+            });
+            const uploadData = await uploadRes.json();
+            if (uploadData.success) {
+                newImgUrl = uploadData.url;
+                params.set('mainImgUrl', newImgUrl);
+            } else {
+                showEditError(uploadData.error); return;
+            }
+        }
+
         const res  = await fetch(API, { method: 'POST', body: params });
         const data = await res.json();
 
@@ -124,6 +210,7 @@ elBtnSave.addEventListener('click', async () => {
             editModal.hide();
             fetchList();
             showToast('Cập nhật sản phẩm thành công!', 'success');
+            resetImageUpload()
         } else {
             showEditError(data.error || 'Lưu thất bại. Vui lòng thử lại.');
         }

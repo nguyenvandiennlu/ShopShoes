@@ -42,7 +42,13 @@ public class CheckoutService {
             PaymentMethod paymentMethod,
             String shippingAddress,
             String phoneNumber,
-            String orderNote
+            String orderNote,
+            String recipientName,
+            String recipientPhone,
+            String province,
+            String district,
+            String ward,
+            String street
     ) {
 
         return jdbi.inTransaction(handle -> {
@@ -75,7 +81,13 @@ public class CheckoutService {
                     paymentMethod,
                     shippingAddress,
                     phoneNumber,
-                    orderNote
+                    orderNote,
+                    recipientName,
+                    recipientPhone,
+                    province,
+                    district,
+                    ward,
+                    street
             );
 
             orderDetailDao.insertOrderDetails(
