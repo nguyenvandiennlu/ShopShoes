@@ -21,6 +21,14 @@ public class Order implements Serializable {
     private String shipping_address;
     private String phone_number;
 
+    // Recipient info & address components
+    private String recipient_name;
+    private String recipient_phone;
+    private String province;
+    private String district;
+    private String ward;
+    private String street;
+
     private OrderStatus order_status;
     private PaymentMethod payment_method;
     private PaymentStatus payment_status;
@@ -99,6 +107,54 @@ public class Order implements Serializable {
 
     public void setPhoneNumber(String phone_number) {
         this.phone_number = phone_number;
+    }
+
+    public String getRecipientName() {
+        return recipient_name;
+    }
+
+    public void setRecipientName(String recipient_name) {
+        this.recipient_name = recipient_name;
+    }
+
+    public String getRecipientPhone() {
+        return recipient_phone;
+    }
+
+    public void setRecipientPhone(String recipient_phone) {
+        this.recipient_phone = recipient_phone;
+    }
+
+    public String getProvince() {
+        return province;
+    }
+
+    public void setProvince(String province) {
+        this.province = province;
+    }
+
+    public String getDistrict() {
+        return district;
+    }
+
+    public void setDistrict(String district) {
+        this.district = district;
+    }
+
+    public String getWard() {
+        return ward;
+    }
+
+    public void setWard(String ward) {
+        this.ward = ward;
+    }
+
+    public String getStreet() {
+        return street;
+    }
+
+    public void setStreet(String street) {
+        this.street = street;
     }
 
     public OrderStatus getOrderStatus() {

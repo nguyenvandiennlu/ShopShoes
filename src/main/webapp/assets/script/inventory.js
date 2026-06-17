@@ -209,7 +209,7 @@ function buildProductRow(row, idx, expanded) {
             </button>
             <button class="btn btn-sm btn-link p-1 text-secondary"
                     title="Nhập thêm hàng"
-                    onclick="openRestockModal(${row.productId}, '${escHtml(row.productName)}')">
+                    onclick="openRestockModal(${row.productId}, '${escHtml(row.productName)}', ${row.available})">
                 <span class="material-symbols-outlined" style="font-size:20px;">add_shopping_cart</span>
             </button>
         </td>
@@ -393,17 +393,458 @@ function escHtml(str) {
         .replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }
 
-function openEditModal(productId) {
-    console.log('Edit product:', productId);
-    // TODO: implement
+let currentRestockProductId = null;
+let currentRestockData = { active: [], discontinued: [] };
+let hasUnsavedRestockChanges = false;
+
+function getRestockModalInstance() {
+    return bootstrap.Modal.getOrCreateInstance(document.getElementById('restockModal'));
 }
 
-function openRestockModal(productId, productName) {
-    console.log('Restock product:', productId, productName);
-    // TODO: implement
+async function openRestockModal(productId, productName, isAvailable) {
+    currentRestockProductId = productId;
+    hasUnsavedRestockChanges = false;
+
+    document.getElementById('restock-product-name').textContent = productName;
+    const warningEl = document.getElementById('restock-unavailable-warning');
+    const btnSaveQty = document.getElementById('btn-save-restock');
+
+    if (!isAvailable) {
+        warningEl.classList.remove('d-none');
+        btnSaveQty.disabled = true;
+    } else {
+        warningEl.classList.add('d-none');
+        btnSaveQty.disabled = false;
+    }
+
+    document.getElementById('restock-modal-loading').style.display = 'block';
+    document.getElementById('restock-modal-content').style.display = 'none';
+
+    getRestockModalInstance().show();
+
+    try {
+        const res = await fetch(`${API}?action=variants&productId=${productId}&all=true`);
+        const data = await res.json();
+
+        if (data.variants) {
+            currentRestockData.active = data.variants.filter(v => !v.isDiscontinued);
+            currentRestockData.discontinued = data.variants.filter(v => v.isDiscontinued);
+
+            renderRestockActiveTab(currentRestockData.active);
+            renderRestockDiscontinuedTab(currentRestockData.discontinued);
+        }
+
+        document.getElementById('restock-modal-loading').style.display = 'none';
+        document.getElementById('restock-modal-content').style.display = 'block';
+
+    } catch (err) {
+        console.error('Lỗi tải thông tin biến thể:', err);
+    }
 }
+
+function renderRestockActiveTab(activeVariants) {
+    const tbody = document.getElementById('restock-qty-tbody');
+    if (activeVariants.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="5" class="text-center text-muted py-3">Chưa có biến thể nào đang bán.</td></tr>`;
+        return;
+    }
+
+    tbody.innerHTML = activeVariants.map(v => {
+        const dot = v.hexcode ? `<span class="color-dot me-1" style="background:${escHtml(v.hexcode)};"></span>` : '';
+        return `
+        <tr>
+            <td class="align-middle">${escHtml(v.sizeName)}</td>
+            <td class="align-middle"><div class="d-flex align-items-center gap-1">${dot}${escHtml(v.colorName)}</div></td>
+            <td class="align-middle text-center fw-medium">${v.stock}</td>
+            <td class="align-middle text-center" style="width: 100px;">
+                <input type="number" class="form-control form-control-sm text-center restock-input" 
+                       data-variant-id="${v.variantId}" placeholder="+0" min="0">
+            </td>
+            <td class="align-middle text-center">
+                <button class="btn btn-sm btn-outline-danger p-1 border-0" title="Ngừng bán"
+                        onclick="toggleVariantStatus(${v.variantId}, true)">
+                    <span class="material-symbols-outlined align-middle" style="font-size:18px;">block</span>
+                </button>
+            </td>
+        </tr>`;
+    }).join('');
+}
+
+function renderRestockDiscontinuedTab(discontinuedVariants) {
+    const tbody = document.getElementById('restock-discontinued-tbody');
+    if (discontinuedVariants.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="3" class="text-center text-muted py-3">Không có biến thể nào đang ngừng bán.</td></tr>`;
+        return;
+    }
+
+    tbody.innerHTML = discontinuedVariants.map(v => {
+        const dot = v.hexcode ? `<span class="color-dot me-1" style="background:${escHtml(v.hexcode)};"></span>` : '';
+        return `
+        <tr>
+            <td>${escHtml(v.sizeName)}</td>
+            <td><div class="d-flex align-items-center gap-1">${dot}${escHtml(v.colorName)}</div></td>
+            <td class="text-center">
+                <button class="btn btn-sm btn-outline-success py-1 px-2" 
+                        onclick="reactivateVariant(${v.variantId})">
+                    <span class="material-symbols-outlined align-middle" style="font-size:16px;">restore</span> Mở lại
+                </button>
+            </td>
+        </tr>`;
+    }).join('');
+}
+
+document.getElementById('restock-qty-tbody').addEventListener('input', (e) => {
+    if (e.target.classList.contains('restock-input')) {
+        const allInputs = document.querySelectorAll('.restock-input');
+        hasUnsavedRestockChanges = Array.from(allInputs).some(input => (parseInt(input.value) || 0) > 0);
+    }
+});
+
+async function saveRestock(closeModalOnSuccess = true) {
+    const inputs = document.querySelectorAll('.restock-input');
+    const updateList = [];
+
+    inputs.forEach(input => {
+        const val = parseInt(input.value) || 0;
+        if (val > 0) {
+            updateList.push({
+                variantId: parseInt(input.dataset.variantId),
+                quantity: val
+            });
+        }
+    });
+
+    if (updateList.length === 0) {
+        Swal.fire({ icon: 'info', title: 'Thông báo', text: 'Vui lòng nhập số lượng cho ít nhất một biến thể.' });
+        return false;
+    }
+
+    Swal.fire({ title: 'Đang lưu...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
+
+    try {
+        const res = await fetch(`${API}?action=saveRestock`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                productId: currentRestockProductId,
+                updates: updateList
+            })
+        });
+
+        const result = await res.json();
+
+        if (result.success) {
+            Swal.fire({ icon: 'success', title: 'Thành công!', text: 'Đã cập nhật tồn kho.', timer: 1500 });
+            hasUnsavedRestockChanges = false;
+
+            document.querySelectorAll('.restock-input').forEach(input => input.value = '');
+
+            if (closeModalOnSuccess) {
+                getRestockModalInstance().hide();
+            }
+            fetchList();
+            return true;
+        } else {
+            Swal.fire({ icon: 'error', title: 'Lỗi', text: result.message || 'Không thể lưu dữ liệu.' });
+            return false;
+        }
+    } catch (err) {
+        Swal.fire({ icon: 'error', title: 'Lỗi', text: err.message });
+        return false;
+    }
+}
+
+document.getElementById('btn-save-restock').addEventListener('click', () => saveRestock(true));
+
+document.getElementById('btn-close-restock-modal').addEventListener('click', async () => {
+    if (!hasUnsavedRestockChanges) {
+        getRestockModalInstance().hide();
+        return;
+    }
+
+    const result = await Swal.fire({
+        title: 'Bạn có thay đổi chưa lưu!',
+        text: "Bạn có muốn lưu các thay đổi này không?",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#3085d6',
+        cancelButtonColor: '#d33',
+        confirmButtonText: 'Lưu',
+        cancelButtonText: 'Không lưu'
+    });
+
+    if (result.isConfirmed) {
+        await saveRestock(true);
+    } else if (result.dismiss === Swal.DismissReason.cancel) {
+        hasUnsavedRestockChanges = false;
+        document.querySelectorAll('.restock-input').forEach(input => input.value = '');
+        getRestockModalInstance().hide();
+    }
+});
+
+document.querySelectorAll('#restockModal button[data-bs-toggle="tab"]').forEach(tabBtn => {
+    tabBtn.addEventListener('hide.bs.tab', async (e) => {
+        if (hasUnsavedRestockChanges) {
+            e.preventDefault();
+
+            const targetTab = e.relatedTarget;
+
+            const result = await Swal.fire({
+                title: 'Dữ liệu chưa lưu',
+                text: 'Bạn có muốn lưu số lượng nhập hàng trước khi chuyển tab không?',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#3085d6',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'Lưu',
+                cancelButtonText: 'Không lưu'
+            });
+
+            if (result.isConfirmed) {
+                const saved = await saveRestock(false);
+                if (saved) {
+                    hasUnsavedRestockChanges = false;
+                    bootstrap.Tab.getOrCreateInstance(targetTab).show();
+                }
+            } else if (result.dismiss === Swal.DismissReason.cancel) {
+                hasUnsavedRestockChanges = false;
+                document.querySelectorAll('.restock-input').forEach(input => input.value = '');
+                bootstrap.Tab.getOrCreateInstance(targetTab).show();
+            }
+        }
+    });
+});
 
 document.getElementById('fab-add-product').addEventListener('click', () => {
     console.log('Open add product modal');
     // TODO: implement
+});
+
+function reactivateVariant(variantId) {
+    toggleVariantStatus(variantId, false);
+}
+
+async function toggleVariantStatus(variantId, isDiscontinued) {
+    const actionText = isDiscontinued ? "ngừng bán" : "mở lại";
+
+    if (isDiscontinued) {
+        const confirm = await Swal.fire({
+            title: 'Xác nhận ngừng bán?',
+            text: 'Biến thể này sẽ bị ẩn khỏi danh sách bán hàng.',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#d33',
+            cancelButtonColor: '#6c757d',
+            confirmButtonText: 'Ngừng bán',
+            cancelButtonText: 'Hủy'
+        });
+        if (!confirm.isConfirmed) return;
+    }
+
+    Swal.fire({ title: 'Đang xử lý...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
+
+    try {
+        const formData = new URLSearchParams();
+        formData.append('variantId', variantId);
+        formData.append('isDiscontinued', isDiscontinued);
+
+        const res = await fetch(`${API}?action=toggleVariantStatus`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            body: formData.toString()
+        });
+
+        const result = await res.json();
+
+        if (result.success) {
+            Swal.fire({
+                icon: 'success',
+                title: 'Thành công!',
+                text: `Đã ${actionText} biến thể.`,
+                timer: 1500,
+                showConfirmButton: false
+            });
+
+            const reloadRes = await fetch(`${API}?action=variants&productId=${currentRestockProductId}&all=true`);
+            const reloadData = await reloadRes.json();
+
+            if (reloadData.variants) {
+                currentRestockData.active = reloadData.variants.filter(v => !v.isDiscontinued);
+                currentRestockData.discontinued = reloadData.variants.filter(v => v.isDiscontinued);
+
+                renderRestockActiveTab(currentRestockData.active);
+                renderRestockDiscontinuedTab(currentRestockData.discontinued);
+            }
+
+            fetchList();
+        } else {
+            Swal.fire({ icon: 'error', title: 'Lỗi', text: result.message || 'Không thể xử lý dữ liệu.' });
+        }
+    } catch (err) {
+        Swal.fire({ icon: 'error', title: 'Lỗi', text: err.message });
+    }
+}
+
+let globalSizes = [];
+let globalColors = [];
+let variantSelectedFiles = [];
+
+const newVariantFileInput = document.getElementById('new-variant-images');
+const variantPreviewContainer = document.getElementById('variant-image-preview-container');
+
+if (newVariantFileInput) {
+    newVariantFileInput.addEventListener('change', function(e) {
+        const files = Array.from(e.target.files);
+        if (files.length === 0) return;
+
+        variantSelectedFiles = variantSelectedFiles.concat(files);
+        renderVariantImagePreviews();
+
+        newVariantFileInput.value = '';
+    });
+}
+
+function renderVariantImagePreviews() {
+    if (!variantPreviewContainer) return;
+    variantPreviewContainer.innerHTML = '';
+
+    variantSelectedFiles.forEach((file, index) => {
+        const blobUrl = URL.createObjectURL(file);
+
+        const imgWrapper = document.createElement('div');
+        imgWrapper.className = 'position-relative border rounded p-1 bg-white';
+        imgWrapper.style.width = '70px';
+        imgWrapper.style.height = '70px';
+
+        imgWrapper.innerHTML = `
+            <img src="${blobUrl}" class="w-100 h-100 object-fit-cover rounded" alt="preview">
+            <button type="button" class="btn btn-danger btn-sm position-absolute rounded-circle p-0 d-flex align-items-center justify-content-center" 
+                    style="top: -5px; right: -5px; width: 20px; height: 20px;"
+                    onclick="removeVariantFile(${index})">
+                <span class="material-symbols-outlined" style="font-size: 14px;">close</span>
+            </button>
+        `;
+        variantPreviewContainer.appendChild(imgWrapper);
+    });
+}
+
+window.removeVariantFile = function(index) {
+    variantSelectedFiles.splice(index, 1);
+    renderVariantImagePreviews();
+};
+
+async function loadFilterOptions() {
+    try {
+        const res  = await fetch(`${API}?action=filterOptions`);
+        const data = await res.json();
+
+        globalSizes = data.sizes || [];
+        globalColors = data.colors || [];
+
+        populateSelect(elBrand, data.brands, 'id', 'name');
+        populateSelect(elColor, globalColors, 'id', 'name');
+        populateSelect(elSize,  globalSizes,  'id', 'name');
+
+        const newColorSelect = document.getElementById('new-variant-color');
+        const newSizeSelect = document.getElementById('new-variant-size');
+
+        if (newColorSelect && newSizeSelect) {
+            newColorSelect.innerHTML = '<option value="">-- Chọn Màu --</option>';
+            newSizeSelect.innerHTML = '<option value="">-- Chọn Size --</option>';
+            populateSelect(newColorSelect, globalColors, 'id', 'name');
+            populateSelect(newSizeSelect, globalSizes, 'id', 'name');
+        }
+
+        if (typeof populateEditBrandSelect === 'function') {
+            populateEditBrandSelect(data.brands);
+        }
+    } catch (err) {
+        console.error('Lỗi tải filter options:', err);
+    }
+}
+
+document.getElementById('btn-save-new-variant').addEventListener('click', async () => {
+    const colorId = document.getElementById('new-variant-color').value;
+    const sizeId = document.getElementById('new-variant-size').value;
+    const stock = document.getElementById('new-variant-stock').value || 0;
+
+    if (!colorId || !sizeId) {
+        Swal.fire({ icon: 'warning', title: 'Thiếu thông tin', text: 'Vui lòng chọn cả Màu sắc và Kích cỡ.' });
+        return;
+    }
+    if (stock < 0) {
+        Swal.fire({ icon: 'warning', title: 'Lỗi', text: 'Số lượng tồn kho không được âm.' });
+        return;
+    }
+
+    Swal.fire({ title: 'Đang xử lý...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
+
+    try {
+        let uploadedImageUrls = [];
+
+        if (variantSelectedFiles.length > 0) {
+            Swal.update({ title: `Đang tải lên ${variantSelectedFiles.length} ảnh...` });
+
+            for (const file of variantSelectedFiles) {
+                const formData = new FormData();
+                formData.append('file', file);
+                formData.append('folder', 'variants');
+
+                const uploadRes = await fetch(window.contextPath + '/admin/upload-image', {
+                    method: 'POST', body: formData
+                });
+
+                const uploadData = await uploadRes.json();
+                if (uploadData.success) {
+                    uploadedImageUrls.push(uploadData.url);
+                } else {
+                    throw new Error(`Lỗi upload ảnh: ${uploadData.error}`);
+                }
+            }
+        }
+
+        Swal.update({ title: 'Đang lưu biến thể mới...' });
+
+        const params = new URLSearchParams();
+        params.append('productId', currentRestockProductId);
+        params.append('colorId', colorId);
+        params.append('sizeId', sizeId);
+        params.append('stock', stock);
+
+        if (uploadedImageUrls.length > 0) {
+            params.append('imageUrls', JSON.stringify(uploadedImageUrls));
+        }
+
+        const res = await fetch(`${API}?action=addVariant`, {
+            method: 'POST',
+            body: params
+        });
+
+        const result = await res.json();
+
+        if (result.success) {
+            Swal.fire({ icon: 'success', title: 'Thành công!', text: 'Đã thêm biến thể mới.', timer: 1500 });
+
+            document.getElementById('new-variant-color').value = '';
+            document.getElementById('new-variant-size').value = '';
+            document.getElementById('new-variant-stock').value = '';
+            variantSelectedFiles = [];
+            renderVariantImagePreviews();
+
+            const reloadRes = await fetch(`${API}?action=variants&productId=${currentRestockProductId}&all=true`);
+            const reloadData = await reloadRes.json();
+
+            if (reloadData.variants) {
+                currentRestockData.active = reloadData.variants.filter(v => !v.isDiscontinued);
+                currentRestockData.discontinued = reloadData.variants.filter(v => v.isDiscontinued);
+                renderRestockActiveTab(currentRestockData.active);
+                renderRestockDiscontinuedTab(currentRestockData.discontinued);
+            }
+            fetchList();
+        } else {
+            Swal.fire({ icon: 'error', title: 'Lỗi', text: result.message || 'Không thể tạo biến thể.' });
+        }
+    } catch (err) {
+        Swal.fire({ icon: 'error', title: 'Lỗi hệ thống', text: err.message });
+    }
 });
