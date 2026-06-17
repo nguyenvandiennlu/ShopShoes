@@ -457,6 +457,69 @@
         </div>
     </div>
 </div>
+
+<div class="modal fade" id="addProductModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title fw-bold">Thêm Sản Phẩm Mới</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="add-product-form">
+                    <h6 class="fw-bold text-primary mb-3">1. Thông tin cơ bản</h6>
+                    <div class="row g-3">
+                        <div class="col-md-12">
+                            <label class="form-label small fw-semibold">Tên sản phẩm <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control form-control-sm" id="add-prod-name" placeholder="" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label small fw-semibold">Giá bán (VNĐ) <span class="text-danger">*</span></label>
+                            <input type="number" class="form-control form-control-sm" id="add-prod-price" placeholder="Ví dụ: 250000" min="0" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label small fw-semibold">Thương hiệu <span class="text-danger">*</span></label>
+                            <select class="form-select form-select-sm" id="add-prod-brand" required>
+                                <option value="">-- Chọn thương hiệu --</option>
+                            </select>
+                        </div>
+                        <div class="col-md-12">
+                            <label class="form-label small fw-semibold">Ảnh đại diện <span class="text-danger">*</span></label>
+                            <input type="file" class="form-control form-control-sm mb-2" id="add-prod-main-img" accept="image/*" required>
+                            <div id="add-prod-main-img-preview" class="border rounded d-flex align-items-center justify-content-center bg-light" style="width: 100px; height: 100px; overflow: hidden; display: none !important;">
+                                <span class="text-muted small">No image</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <hr class="my-4">
+
+                    <div class="d-flex align-items-center justify-content-between mb-3">
+                        <h6 class="fw-bold text-success mb-0">2. Biến thể ban đầu (Tùy chọn)</h6>
+                        <div class="form-check form-switch">
+                            <input class="form-check-input" type="checkbox" id="toggle-optional-variant">
+                            <label class="form-check-label small text-muted" for="toggle-optional-variant">Bật để thêm</label>
+                        </div>
+                    </div>
+
+                    <div id="optional-variant-section" class="d-none p-3 bg-light border rounded mt-3">
+                        <div id="variants-dynamic-container"></div>
+
+                        <div class="text-center mt-3 border-top pt-3">
+                            <button type="button" class="btn btn-dark btn-sm rounded-pill px-4" onclick="addNewVariantRow()">
+                                <span class="material-symbols-outlined align-middle me-1" style="font-size: 18px;">add_circle</span> Thêm một biến thể khác
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Hủy</button>
+                <button type="button" class="btn btn-primary btn-sm" id="btn-submit-add-product">Lưu sản phẩm</button>
+            </div>
+        </div>
+    </div>
+</div>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>

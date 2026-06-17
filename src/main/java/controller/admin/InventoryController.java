@@ -1,6 +1,7 @@
 package controller.admin;
 
 import DTO.ProductEditDTO;
+import DTO.ProductRequestDTO;
 import com.google.gson.*;
 import dao.JDBIConnector;
 import dao.admin.InventoryDao;
@@ -19,6 +20,7 @@ import jakarta.servlet.http.HttpServletResponse;
 
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.math.BigDecimal;
 import java.util.HashMap;
 import java.util.List;
@@ -249,6 +251,41 @@ public class InventoryController extends HttpServlet {
                     res.getWriter().write(gson.toJson(errorMap));
                 }
                 return;
+            }
+
+            if ("addProduct".equals(action)) {
+                try {
+                    StringBuilder sb = new StringBuilder();
+                    String line;
+                    try (BufferedReader reader = req.getReader()) {
+                        while ((line = reader.readLine()) != null) sb.append(line);
+                    }
+
+                    DTO.ProductRequestDTO payload = gson.fromJson(sb.toString(), DTO.ProductRequestDTO.class);
+
+                    boolean isSuccess = inventoryDao.insertFullProduct(payload);
+
+                    Map<String, Object> responseMap = new HashMap<>();
+                    responseMap.put("success", isSuccess);
+                    if (isSuccess) {
+                        responseMap.put("message", "Thêm sản phẩm thành công");
+                    } else {
+                        responseMap.put("message", "Lỗi khi lưu dữ liệu vào Database");
+                    }
+
+                    res.getWriter().write(gson.toJson(responseMap));
+                    return;
+
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    Map<String, Object> errorMap = new HashMap<>();
+                    errorMap.put("success", false);
+                    errorMap.put("message", "Lỗi Server: " + e.getMessage());
+
+                    res.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+                    res.getWriter().write(gson.toJson(errorMap));
+                    return;
+                }
             }
 
             badRequest(res, "Action không hợp lệ.");

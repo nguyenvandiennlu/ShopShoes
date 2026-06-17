@@ -26,6 +26,19 @@ const elTbody      = document.getElementById('inventory-tbody');
 const elSummary    = document.getElementById('result-summary');
 const elPagWrapper = document.getElementById('pagination-wrapper');
 const elPagList    = document.getElementById('pagination-list');
+const newVariantFileInput = document.getElementById('new-variant-images');
+const variantPreviewContainer = document.getElementById('variant-image-preview-container');
+const debouncedApply = debounce(applyFilters, 400);
+
+
+let addProdMainFile = null;
+
+let currentRestockProductId = null;
+let currentRestockData = { active: [], discontinued: [] };
+let hasUnsavedRestockChanges = false;
+let globalSizes = [];
+let globalColors = [];
+let variantSelectedFiles = [];
 
 function debounce(fn, delay) {
     let timer;
@@ -46,8 +59,6 @@ function applyFilters() {
     expandedRows.clear();
     fetchList();
 }
-
-const debouncedApply = debounce(applyFilters, 400);
 
 document.addEventListener('DOMContentLoaded', () => {
     loadFilterOptions();
@@ -78,23 +89,6 @@ document.addEventListener('DOMContentLoaded', () => {
         fetchList();
     });
 });
-
-async function loadFilterOptions() {
-    try {
-        const res  = await fetch(`${API}?action=filterOptions`);
-        const data = await res.json();
-
-        populateSelect(elBrand, data.brands, 'id', 'name');
-        populateSelect(elColor, data.colors, 'id', 'name');
-        populateSelect(elSize,  data.sizes,  'id', 'name');
-
-        if (typeof populateEditBrandSelect === 'function') {
-            populateEditBrandSelect(data.brands);
-        }
-    } catch (err) {
-        console.error('Lỗi tải filter options:', err);
-    }
-}
 
 function populateSelect(selectEl, items, valKey, labelKey) {
     if (!items) return;
@@ -393,10 +387,6 @@ function escHtml(str) {
         .replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }
 
-let currentRestockProductId = null;
-let currentRestockData = { active: [], discontinued: [] };
-let hasUnsavedRestockChanges = false;
-
 function getRestockModalInstance() {
     return bootstrap.Modal.getOrCreateInstance(document.getElementById('restockModal'));
 }
@@ -616,8 +606,8 @@ document.querySelectorAll('#restockModal button[data-bs-toggle="tab"]').forEach(
 });
 
 document.getElementById('fab-add-product').addEventListener('click', () => {
-    console.log('Open add product modal');
-    // TODO: implement
+    const addModal = new bootstrap.Modal(document.getElementById('addProductModal'));
+    addModal.show();
 });
 
 function reactivateVariant(variantId) {
@@ -685,13 +675,6 @@ async function toggleVariantStatus(variantId, isDiscontinued) {
     }
 }
 
-let globalSizes = [];
-let globalColors = [];
-let variantSelectedFiles = [];
-
-const newVariantFileInput = document.getElementById('new-variant-images');
-const variantPreviewContainer = document.getElementById('variant-image-preview-container');
-
 if (newVariantFileInput) {
     newVariantFileInput.addEventListener('change', function(e) {
         const files = Array.from(e.target.files);
@@ -738,13 +721,19 @@ async function loadFilterOptions() {
         const res  = await fetch(`${API}?action=filterOptions`);
         const data = await res.json();
 
+        // 1. Lưu data vào biến toàn cục để dùng cho phần tạo Form động
         globalSizes = data.sizes || [];
         globalColors = data.colors || [];
 
+        // 2. Đổ data cho thanh Bộ lọc (Filter) bên ngoài bảng
         populateSelect(elBrand, data.brands, 'id', 'name');
         populateSelect(elColor, globalColors, 'id', 'name');
         populateSelect(elSize,  globalSizes,  'id', 'name');
 
+        // 3. Đổ data cho Modal Thêm Sản Phẩm (Bây giờ chỉ cần Brand)
+        populateSelect(document.getElementById('add-prod-brand'), data.brands, 'id', 'name');
+
+        // 4. Đổ data cho tab "Thêm biến thể mới" trong Modal Nhập hàng (Restock)
         const newColorSelect = document.getElementById('new-variant-color');
         const newSizeSelect = document.getElementById('new-variant-size');
 
@@ -755,6 +744,7 @@ async function loadFilterOptions() {
             populateSelect(newSizeSelect, globalSizes, 'id', 'name');
         }
 
+        // 5. Đổ data cho Modal Chỉnh sửa sản phẩm (Nếu bạn có file editProduct.js riêng)
         if (typeof populateEditBrandSelect === 'function') {
             populateEditBrandSelect(data.brands);
         }
@@ -848,3 +838,212 @@ document.getElementById('btn-save-new-variant').addEventListener('click', async 
         Swal.fire({ icon: 'error', title: 'Lỗi hệ thống', text: err.message });
     }
 });
+
+const toggleVariantCheckbox = document.getElementById('toggle-optional-variant');
+if (toggleVariantCheckbox) {
+    toggleVariantCheckbox.addEventListener('change', function() {
+        const optionalSection = document.getElementById('optional-variant-section');
+        if (this.checked) {
+            optionalSection.classList.remove('d-none');
+
+            const container = document.getElementById('variants-dynamic-container');
+            if (container && container.children.length === 0) {
+                addNewVariantRow();
+            }
+        } else {
+            optionalSection.classList.add('d-none');
+        }
+    });
+}
+
+document.getElementById('btn-submit-add-product').addEventListener('click', async () => {
+    const name = document.getElementById('add-prod-name').value.trim();
+    const price = document.getElementById('add-prod-price').value;
+    const brandId = document.getElementById('add-prod-brand').value;
+    const mainImgInput = document.getElementById('add-prod-main-img');
+
+    if (!name || !price || !brandId || !mainImgInput.files[0]) {
+        Swal.fire({ icon: 'warning', title: 'Thiếu thông tin', text: 'Vui lòng điền đầy đủ thông tin cơ bản.' });
+        return;
+    }
+
+    Swal.fire({ title: 'Đang xử lý...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
+
+    try {
+        const formData = new FormData();
+        formData.append('file', mainImgInput.files[0]);
+        formData.append('folder', 'products');
+
+        const uploadRes = await fetch(window.contextPath + '/admin/upload-image', { method: 'POST', body: formData });
+        const uploadData = await uploadRes.json();
+        if (!uploadData.success) throw new Error('Lỗi upload ảnh đại diện');
+
+        const productPayload = {
+            name: name,
+            price: price,
+            brandId: brandId,
+            mainImageUrl: uploadData.url,
+            variants: []
+        };
+
+        const isVariantEnabled = document.getElementById('toggle-optional-variant').checked;
+        if (isVariantEnabled) {
+            const variantRows = document.querySelectorAll('.variant-row-item');
+
+            if (variantRows.length === 0) {
+                throw new Error("Bạn đã bật thêm biến thể nhưng chưa có dòng dữ liệu nào.");
+            }
+
+            for (const row of variantRows) {
+                const rowId = row.id;
+                const colorId = row.querySelector('.variant-color').value;
+                const sizeId = row.querySelector('.variant-size').value;
+                const stock = row.querySelector('.variant-stock').value || 0;
+
+                if (!colorId || !sizeId) {
+                    throw new Error("Vui lòng chọn đầy đủ Màu sắc và Kích cỡ cho các biến thể.");
+                }
+
+                let imageUrls = [];
+                const files = window.addProdVariantFilesMap[rowId] || [];
+                for (const file of files) {
+                    const vForm = new FormData();
+                    vForm.append('file', file);
+                    vForm.append('folder', 'variants');
+                    const vRes = await fetch(window.contextPath + '/admin/upload-image', { method: 'POST', body: vForm });
+                    const vData = await vRes.json();
+                    if (vData.success) imageUrls.push(vData.url);
+                }
+
+                productPayload.variants.push({
+                    colorId: parseInt(colorId),
+                    sizeId: parseInt(sizeId),
+                    stock: parseInt(stock),
+                    imageUrls: imageUrls
+                });
+            }
+        }
+
+        const res = await fetch(`${API}?action=addProduct`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(productPayload)
+        });
+
+        const result = await res.json();
+
+        if (result.success) {
+            Swal.fire({ icon: 'success', title: 'Thành công!', text: 'Đã thêm sản phẩm mới.', timer: 1500 });
+            bootstrap.Modal.getInstance(document.getElementById('addProductModal')).hide();
+            document.getElementById('add-product-form').reset();
+            document.getElementById('variants-dynamic-container').innerHTML = '';
+            window.addProdVariantFilesMap = {};
+            document.getElementById('add-prod-main-img-preview').style.display = 'none';
+            fetchList();
+        } else {
+            Swal.fire({ icon: 'error', title: 'Lỗi', text: result.message });
+        }
+    } catch (err) {
+        Swal.fire({ icon: 'error', title: 'Lỗi', text: err.message });
+    }
+});
+
+let variantRowIndex = 0;
+window.addProdVariantFilesMap = {};
+
+window.addNewVariantRow = function() {
+    const container = document.getElementById('variants-dynamic-container');
+    if (!container) return;
+
+    const rowId = `row-${variantRowIndex++}`;
+    window.addProdVariantFilesMap[rowId] = [];
+
+    const colorOptions = '<option value="">-- Chọn Màu --</option>' + globalColors.map(c => `<option value="${c.id}">${c.name}</option>`).join('');
+    const sizeOptions = '<option value="">-- Chọn Size --</option>' + globalSizes.map(s => `<option value="${s.id}">${s.name}</option>`).join('');
+
+    const rowHtml = `
+        <div class="position-relative variant-row-item mb-4" id="${rowId}">
+            <div class="card card-body bg-light border-0">
+                <button type="button" class="btn btn-sm btn-outline-danger position-absolute bg-white shadow-sm" 
+                        style="top: 15px; right: 15px; padding: 4px; display: flex; z-index: 10;" 
+                        onclick="removeVariantRow('${rowId}')" title="Xóa biến thể này">
+                    <span class="material-symbols-outlined" style="font-size: 18px;">delete</span>
+                </button>
+                
+                <h6 class="fw-bold mb-3">Thông tin biến thể</h6>
+                
+                <div class="row g-3 align-items-end">
+                    <div class="col-md-4">
+                        <label class="form-label small fw-semibold">Màu sắc <span class="text-danger">*</span></label>
+                        <select class="form-select variant-color">${colorOptions}</select>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label small fw-semibold">Kích cỡ <span class="text-danger">*</span></label>
+                        <select class="form-select variant-size">${sizeOptions}</select>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label small fw-semibold">Tồn kho ban đầu <span class="text-danger">*</span></label>
+                        <input type="number" class="form-control variant-stock" placeholder="0" min="0">
+                    </div>
+                    
+                    <div class="col-12 mt-3">
+                        <label class="form-label small fw-semibold">Ảnh biến thể (Theo màu sắc)</label>
+                        <div class="d-flex align-items-center gap-2 mb-2">
+                            <label for="file-${rowId}" class="btn btn-sm btn-outline-secondary d-flex align-items-center bg-white">
+                                <span class="material-symbols-outlined me-1" style="font-size: 18px;">cloud_upload</span>
+                                Chọn ảnh
+                            </label>
+                            <input type="file" id="file-${rowId}" class="d-none" accept="image/*" multiple onchange="handleVariantRowFiles(this, '${rowId}')">
+                            <span class="text-muted small">Có thể chọn nhiều ảnh.</span>
+                        </div>
+                        <div id="preview-${rowId}" class="d-flex flex-wrap gap-2"></div>
+                    </div>
+                </div>
+            </div>
+            
+            <hr class="text-secondary opacity-25 mt-4 mb-0">
+        </div>
+    `;
+
+    container.insertAdjacentHTML('beforeend', rowHtml);
+};
+
+window.removeVariantRow = function(rowId) {
+    const rowEl = document.getElementById(rowId);
+    if (rowEl) rowEl.remove();
+    delete window.addProdVariantFilesMap[rowId];
+};
+
+window.handleVariantRowFiles = function(inputEl, rowId) {
+    const files = Array.from(inputEl.files);
+    if (files.length === 0) return;
+
+    window.addProdVariantFilesMap[rowId] = window.addProdVariantFilesMap[rowId].concat(files);
+    inputEl.value = '';
+    renderVariantRowPreviews(rowId);
+};
+
+window.removeRowFile = function(rowId, fileIndex) {
+    window.addProdVariantFilesMap[rowId].splice(fileIndex, 1);
+    renderVariantRowPreviews(rowId);
+};
+
+function renderVariantRowPreviews(rowId) {
+    const previewContainer = document.getElementById(`preview-${rowId}`);
+    if (!previewContainer) return;
+    previewContainer.innerHTML = '';
+
+    window.addProdVariantFilesMap[rowId].forEach((file, index) => {
+        const blobUrl = URL.createObjectURL(file);
+        previewContainer.insertAdjacentHTML('beforeend', `
+            <div class="position-relative border rounded p-1 bg-white" style="width: 70px; height: 70px;">
+                <img src="${blobUrl}" class="w-100 h-100 object-fit-cover rounded" alt="preview">
+                <button type="button" class="btn btn-danger btn-sm position-absolute rounded-circle p-0 d-flex align-items-center justify-content-center" 
+                        style="top: -5px; right: -5px; width: 20px; height: 20px;"
+                        onclick="removeRowFile('${rowId}', ${index})">
+                    <span class="material-symbols-outlined" style="font-size: 14px;">close</span>
+                </button>
+            </div>
+        `);
+    });
+}
