@@ -27,7 +27,8 @@ document.addEventListener("DOMContentLoaded", function() {
     }
 
     function renderGrowthBadge(element, growthValue) {
-        const val = growthValue.toFixed(1);
+        if (!element) return;
+        const val = (growthValue || 0).toFixed(1);
         if (growthValue > 0) {
             element.className = "ms-1 fw-bold text-success";
             element.innerText = `▲ ${val}%`;

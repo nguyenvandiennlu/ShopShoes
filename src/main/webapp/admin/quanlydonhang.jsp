@@ -515,6 +515,8 @@ document.addEventListener('DOMContentLoaded', function() {
             applyFilters();
         }
     });
+    // Load orders via AJAX on initial page load
+    loadOrders();
 });
 </script>
 </body>
