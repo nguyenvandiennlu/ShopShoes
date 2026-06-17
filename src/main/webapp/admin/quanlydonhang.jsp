@@ -119,7 +119,7 @@
                     <th>THANH TOÁN</th>
                     <th>TRẠNG THÁI ĐƠN</th>
                     <th>NGÀY TẠO</th>
-                    <th class="text-end">THAO TÁC</th>
+                    <th class="text-end">XEM CHI TIẾT</th>
                 </tr>
                 </thead>
                 <tbody id="ordersTableBody">
@@ -228,7 +228,6 @@
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 <script>
-const contextPath = '${pageContext.request.contextPath}';
 let currentPage = parseInt('${currentPage}') || 1;
 let currentSearch = '${search}';
 let currentStatus = '${status}' === '' ? 'all' : '${status}';
@@ -421,9 +420,12 @@ function showOrderDetail(orderId) {
         let itemsHtml = '';
         if (d.items && d.items.length > 0) {
             itemsHtml = '<h6 class="font-heading fw-bold mt-3 mb-2">Sản phẩm trong đơn:</h6><div class="table-responsive"><table class="table table-sm">' +
-                '<thead><tr><th>Sản phẩm</th><th>Phân loại</th><th>SL</th><th>Đơn giá</th><th>Thành tiền</th></tr></thead><tbody>';
+                '<thead><tr><th style="width:60px">Ảnh</th><th>Sản phẩm</th><th>Phân loại</th><th>SL</th><th>Đơn giá</th><th>Thành tiền</th></tr></thead><tbody>';
             d.items.forEach(item => {
-                itemsHtml += '<tr><td>' + item.productName + '</td><td>' +
+                const imgHtml = item.imageUrl
+                    ? '<img src="' + item.imageUrl + '" alt="' + item.productName + '" style="width:50px;height:50px;object-fit:cover;border-radius:4px;" onerror="this.style.display=\'none\'">'
+                    : '<span class="text-muted"><span class="material-symbols-outlined fs-5">image</span></span>';
+                itemsHtml += '<tr><td>' + imgHtml + '</td><td>' + item.productName + '</td><td>' +
                     (item.colorName || '') + (item.sizeName ? ' / ' + item.sizeName : '') + '</td><td>' +
                     item.quantity + '</td><td>' + item.unitPrice + ' ₫</td><td>' + item.subtotal + ' ₫</td></tr>';
             });
