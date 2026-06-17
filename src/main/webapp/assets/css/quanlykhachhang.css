@@ -484,9 +484,28 @@ h1, h2, h3, h4, h5, h6, .heading-font {
     white-space: nowrap;
 }
 
+.badge-role-superadmin {
+    background-color: #fae8ff;
+    color: #86198f;
+    border: 1px solid #f5d0fe;
+}
+
 .badge-role-admin {
     background-color: #ffb4ab;
     color: #410002;
+    border: 1px solid #ffdad6;
+}
+
+.badge-role-sales {
+    background-color: #e0f2fe;
+    color: #0369a1;
+    border: 1px solid #bae6fd;
+}
+
+.badge-role-warehouse {
+    background-color: #fef3c7;
+    color: #b45309;
+    border: 1px solid #fde68a;
 }
 
 .dot {

@@ -30,6 +30,6 @@ public class LogoutController extends HttpServlet {
 
             System.out.println("✓ [LogoutController] Remember Me token cleared.");
         }
-        resp.sendRedirect(req.getContextPath() + "/menu");
+        resp.sendRedirect(req.getContextPath() + "/login");
     }
 }

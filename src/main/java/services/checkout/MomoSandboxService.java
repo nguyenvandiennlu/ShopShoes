@@ -110,7 +110,7 @@ public class MomoSandboxService {
         return new MomoCreateResult(payUrl, deeplink, qrCodeUrl, resultCode, message);
     }
 
-    private String postJson(String endpoint, String  body) {
+    private String postJson(String endpoint, String body) {
         HttpURLConnection conn = null;
         try {
             URL url = new URL(endpoint);
@@ -145,7 +145,7 @@ public class MomoSandboxService {
         }
     }
 
-    private String hmacSha256(String secretKey, String data) {
+    public String hmacSha256(String secretKey, String data) {
         try {
             Mac hmac = Mac.getInstance("HmacSHA256");
             SecretKeySpec key = new SecretKeySpec(secretKey.getBytes(StandardCharsets.UTF_8), "HmacSHA256");
@@ -159,5 +159,41 @@ public class MomoSandboxService {
         } catch (Exception e) {
             throw new RuntimeException("Khong tao duoc chu ky MoMo", e);
         }
+    }
+
+    public boolean verifySignature(
+            String signatureReceived,
+            String amount,
+            String extraData,
+            String message,
+            String orderId,
+            String orderInfo,
+            String orderType,
+            String partnerCode,
+            String payType,
+            String requestId,
+            String responseTime,
+            String resultCode,
+            String transId
+    ) {
+        String accessKey = MomoConfig.getAccessKey();
+        String secretKey = MomoConfig.getSecretKey();
+
+        String rawSignature = "accessKey=" + accessKey
+                + "&amount=" + amount
+                + "&extraData=" + (extraData != null ? extraData : "")
+                + "&message=" + (message != null ? message : "")
+                + "&orderId=" + orderId
+                + "&orderInfo=" + (orderInfo != null ? orderInfo : "")
+                + "&orderType=" + (orderType != null ? orderType : "")
+                + "&partnerCode=" + partnerCode
+                + "&payType=" + (payType != null ? payType : "")
+                + "&requestId=" + requestId
+                + "&responseTime=" + responseTime
+                + "&resultCode=" + resultCode
+                + "&transId=" + transId;
+
+        String calculatedSignature = hmacSha256(secretKey, rawSignature);
+        return calculatedSignature.equalsIgnoreCase(signatureReceived);
     }
 }

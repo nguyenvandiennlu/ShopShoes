@@ -65,11 +65,31 @@ public class GoogleLoginController extends HttpServlet {
             session.setMaxInactiveInterval(30 * 60);
             JsonObject jsonResponse = new JsonObject();
             jsonResponse.addProperty("success", true);
-            if (Role.ADMIN.equals(user.getRole())) {
-                jsonResponse.addProperty("redirect", req.getContextPath() + "/admin/adminHome.jsp");
+            Role role = user.getRole();
+            String redirectUrl;
+
+            if (role == null || role == Role.USER) {
+                redirectUrl = req.getContextPath() + "/menu";
+            } else if (role == Role.SUPER_ADMIN) {
+                redirectUrl = req.getContextPath() + "/admin/adminHome.jsp";
             } else {
-                jsonResponse.addProperty("redirect", req.getContextPath() + "/menu");
+                dao.user.RolePermissionDao rpDao = new dao.user.RolePermissionDao();
+                java.util.Map<String, Integer> perms = rpDao.getPermissionsForRole(role.name());
+                session.setAttribute("userPermissions", perms);
+
+                if (perms.getOrDefault("dashboard", 0) > 0) {
+                    redirectUrl = req.getContextPath() + "/admin/adminHome.jsp";
+                } else if (perms.getOrDefault("orders", 0) > 0) {
+                    redirectUrl = req.getContextPath() + "/admin/quanlydonhang.jsp";
+                } else if (perms.getOrDefault("products", 0) > 0) {
+                    redirectUrl = req.getContextPath() + "/admin/quanlykhohang.jsp";
+                } else if (perms.getOrDefault("users", 0) > 0) {
+                    redirectUrl = req.getContextPath() + "/admin/users";
+                } else {
+                    redirectUrl = req.getContextPath() + "/menu";
+                }
             }
+            jsonResponse.addProperty("redirect", redirectUrl);
             resp.getWriter().write(gson.toJson(jsonResponse));
         } catch (Exception e) {
             e.printStackTrace();

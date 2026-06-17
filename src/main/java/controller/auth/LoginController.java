@@ -135,16 +135,25 @@ public class LoginController extends HttpServlet {
             Role role = user.getRole();
             String redirectUrl;
 
-            if (role == null) {
+            if (role == null || role == Role.USER) {
                 redirectUrl = req.getContextPath() + "/menu";
+            } else if (role == Role.SUPER_ADMIN) {
+                redirectUrl = req.getContextPath() + "/admin/adminHome.jsp";
             } else {
-                switch (role) {
-                    case ADMIN:
-                        redirectUrl = req.getContextPath() + "/admin/adminHome.jsp";
-                        break;
-                    default:
-                        redirectUrl = req.getContextPath() + "/menu";
-                        break;
+                dao.user.RolePermissionDao rpDao = new dao.user.RolePermissionDao();
+                java.util.Map<String, Integer> perms = rpDao.getPermissionsForRole(role.name());
+                req.getSession(true).setAttribute("userPermissions", perms);
+
+                if (perms.getOrDefault("dashboard", 0) > 0) {
+                    redirectUrl = req.getContextPath() + "/admin/adminHome.jsp";
+                } else if (perms.getOrDefault("orders", 0) > 0) {
+                    redirectUrl = req.getContextPath() + "/admin/quanlydonhang.jsp";
+                } else if (perms.getOrDefault("products", 0) > 0) {
+                    redirectUrl = req.getContextPath() + "/admin/quanlykhohang.jsp";
+                } else if (perms.getOrDefault("users", 0) > 0) {
+                    redirectUrl = req.getContextPath() + "/admin/users";
+                } else {
+                    redirectUrl = req.getContextPath() + "/menu";
                 }
             }
             if (isAjax) {

@@ -1,7 +1,9 @@
 <%@ page contentType="text/html;charset=UTF-8" pageEncoding="UTF-8" language="java" %>
 <%@ page import="utils.EmailConfigLoader" %>
+<%@ page import="model.user.User" %>
 <%
     request.setAttribute("adminActive", "settings");
+    User currentUser = (User) session.getAttribute("currentUser");
 %>
 <!DOCTYPE html>
 <html lang="vi">
@@ -60,6 +62,20 @@
         background-color: var(--bittersweet-hover);
         border-color: var(--bittersweet-hover);
         color: white;
+    }
+
+    #permission-roles-list .list-group-item.active {
+        background-color: var(--bittersweet) !important;
+        border-color: var(--bittersweet) !important;
+        color: white !important;
+    }
+    #permissions-matrix-table .form-check-input:checked {
+        background-color: var(--bittersweet) !important;
+        border-color: var(--bittersweet) !important;
+    }
+    #permissions-matrix-table .form-check-input:focus {
+        border-color: var(--bittersweet-hover) !important;
+        box-shadow: 0 0 0 0.25rem rgba(255, 103, 92, 0.25) !important;
     }
 
     /* Layout */
@@ -621,41 +637,51 @@
                         <span class="material-symbols-outlined text-bittersweet">lock</span>
                         Đổi mật khẩu tài khoản Admin
                     </h3>
-                    <form id="changePasswordForm" class="row g-4">
-                        <div class="col-12">
-                            <label class="form-label">Mật khẩu hiện tại <span class="text-error">*</span></label>
-                            <div class="password-input-group">
-                                <input class="form-control pe-5" name="oldPassword" type="password" placeholder="Nhập mật khẩu hiện tại..." required>
-                                <button class="toggle-password" type="button">
-                                    <span class="material-symbols-outlined" style="font-size: 20px;">visibility_off</span>
-                                </button>
+                    <% if (currentUser != null && currentUser.getFirebaseUID() != null && !currentUser.getFirebaseUID().isBlank()) { %>
+                        <div class="alert alert-info d-flex align-items-center gap-3 mt-4" role="alert" style="background-color: #e8f4fd; border: 1px solid #b3d7f7; color: #1d548f; border-radius: 8px;">
+                            <span class="material-symbols-outlined text-info" style="font-size: 32px; color: #1d548f !important;">info</span>
+                            <div>
+                                <h5 class="alert-heading font-heading mb-1" style="font-weight: 600; color: #1d548f;">Tài khoản đăng nhập bằng Google</h5>
+                                <p class="mb-0" style="font-size: 13px;">Tài khoản quản trị của bạn hiện đang liên kết và đăng nhập thông qua Google OAuth2. Bạn không có mật khẩu cục bộ trên hệ thống này và không thể đổi mật khẩu tại đây.</p>
                             </div>
                         </div>
-                        <div class="col-md-6">
-                            <label class="form-label">Mật khẩu mới <span class="text-error">*</span></label>
-                            <div class="password-input-group">
-                                <input class="form-control pe-5" name="newPassword" id="newPassword" type="password" placeholder="Tối thiểu 6 ký tự..." required>
-                                <button class="toggle-password" type="button">
-                                    <span class="material-symbols-outlined" style="font-size: 20px;">visibility_off</span>
+                    <% } else { %>
+                        <form id="changePasswordForm" class="row g-4">
+                            <div class="col-12">
+                                <label class="form-label">Mật khẩu hiện tại <span class="text-error">*</span></label>
+                                <div class="password-input-group">
+                                    <input class="form-control pe-5" name="oldPassword" type="password" placeholder="Nhập mật khẩu hiện tại..." required>
+                                    <button class="toggle-password" type="button">
+                                        <span class="material-symbols-outlined" style="font-size: 20px;">visibility_off</span>
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Mật khẩu mới <span class="text-error">*</span></label>
+                                <div class="password-input-group">
+                                    <input class="form-control pe-5" name="newPassword" id="newPassword" type="password" placeholder="Tối thiểu 6 ký tự..." required>
+                                    <button class="toggle-password" type="button">
+                                        <span class="material-symbols-outlined" style="font-size: 20px;">visibility_off</span>
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Xác nhận mật khẩu mới <span class="text-error">*</span></label>
+                                <div class="password-input-group">
+                                    <input class="form-control pe-5" name="confirmPassword" id="confirmPassword" type="password" placeholder="Nhập lại mật khẩu mới..." required>
+                                    <button class="toggle-password" type="button">
+                                        <span class="material-symbols-outlined" style="font-size: 20px;">visibility_off</span>
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="col-12 d-flex justify-content-end mt-4">
+                                <button class="btn btn-bittersweet px-4 py-2 d-flex align-items-center gap-2 shadow-sm" type="submit">
+                                    <span class="material-symbols-outlined" style="font-size: 20px;">vpn_key</span>
+                                    Thay đổi mật khẩu
                                 </button>
                             </div>
-                        </div>
-                        <div class="col-md-6">
-                            <label class="form-label">Xác nhận mật khẩu mới <span class="text-error">*</span></label>
-                            <div class="password-input-group">
-                                <input class="form-control pe-5" name="confirmPassword" id="confirmPassword" type="password" placeholder="Nhập lại mật khẩu mới..." required>
-                                <button class="toggle-password" type="button">
-                                    <span class="material-symbols-outlined" style="font-size: 20px;">visibility_off</span>
-                                </button>
-                            </div>
-                        </div>
-                        <div class="col-12 d-flex justify-content-end mt-4">
-                            <button class="btn btn-bittersweet px-4 py-2 d-flex align-items-center gap-2 shadow-sm" type="submit">
-                                <span class="material-symbols-outlined" style="font-size: 20px;">vpn_key</span>
-                                Thay đổi mật khẩu
-                            </button>
-                        </div>
-                    </form>
+                        </form>
+                    <% } %>
                 </div>
 
                 <!-- Permissions Management Card -->
@@ -666,166 +692,175 @@
                     </h3>
                     <p class="text-secondary mb-4" style="font-size: 13px;">Thiết lập và phân quyền chi tiết cho từng nhóm vai trò truy cập hệ thống quản trị.</p>
                     
-                    <div class="table-responsive">
-                        <table class="table table-bordered table-hover align-middle" style="border-color: var(--gainsboro);">
-                            <thead class="table-light">
-                                <tr class="text-center text-secondary">
-                                    <th class="text-start" width="32%">Quyền hạn</th>
-                                    <th width="17%">SUPER_ADMIN</th>
-                                    <th width="17%">CSKH/BÁN HÀNG</th>
-                                    <th width="17%">THỦ KHO</th>
-                                    <th width="17%">KHÁCH HÀNG</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr>
-                                    <td class="fw-semibold">
-                                        <div class="d-flex align-items-center gap-2">
-                                            <span class="material-symbols-outlined text-bittersweet" style="font-size: 18px;">bar_chart</span>
-                                            Xem báo cáo thống kê
-                                        </div>
-                                    </td>
-                                    <td class="text-center">
-                                        <div class="form-check form-switch d-inline-block">
-                                            <input class="form-check-input" type="checkbox" checked disabled>
-                                        </div>
-                                    </td>
-                                    <td class="text-center">
-                                        <div class="form-check form-switch d-inline-block">
-                                            <input class="form-check-input" type="checkbox">
-                                        </div>
-                                    </td>
-                                    <td class="text-center">
-                                        <div class="form-check form-switch d-inline-block">
-                                            <input class="form-check-input" type="checkbox">
-                                        </div>
-                                    </td>
-                                    <td class="text-center">
-                                        <div class="form-check form-switch d-inline-block">
-                                            <input class="form-check-input" type="checkbox" disabled>
-                                        </div>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td class="fw-semibold">
-                                        <div class="d-flex align-items-center gap-2">
-                                            <span class="material-symbols-outlined text-bittersweet" style="font-size: 18px;">shopping_cart</span>
-                                            Quản lý đơn hàng
-                                        </div>
-                                    </td>
-                                    <td class="text-center">
-                                        <div class="form-check form-switch d-inline-block">
-                                            <input class="form-check-input" type="checkbox" checked disabled>
-                                        </div>
-                                    </td>
-                                    <td class="text-center">
-                                        <div class="form-check form-switch d-inline-block">
-                                            <input class="form-check-input" type="checkbox" checked>
-                                        </div>
-                                    </td>
-                                    <td class="text-center">
-                                        <div class="form-check form-switch d-inline-block">
-                                            <input class="form-check-input" type="checkbox">
-                                        </div>
-                                    </td>
-                                    <td class="text-center">
-                                        <div class="form-check form-switch d-inline-block">
-                                            <input class="form-check-input" type="checkbox" disabled>
-                                        </div>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td class="fw-semibold">
-                                        <div class="d-flex align-items-center gap-2">
-                                            <span class="material-symbols-outlined text-bittersweet" style="font-size: 18px;">inventory_2</span>
-                                            Quản lý kho hàng & sản phẩm
-                                        </div>
-                                    </td>
-                                    <td class="text-center">
-                                        <div class="form-check form-switch d-inline-block">
-                                            <input class="form-check-input" type="checkbox" checked disabled>
-                                        </div>
-                                    </td>
-                                    <td class="text-center">
-                                        <div class="form-check form-switch d-inline-block">
-                                            <input class="form-check-input" type="checkbox">
-                                        </div>
-                                    </td>
-                                    <td class="text-center">
-                                        <div class="form-check form-switch d-inline-block">
-                                            <input class="form-check-input" type="checkbox" checked>
-                                        </div>
-                                    </td>
-                                    <td class="text-center">
-                                        <div class="form-check form-switch d-inline-block">
-                                            <input class="form-check-input" type="checkbox" disabled>
-                                        </div>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td class="fw-semibold">
-                                        <div class="d-flex align-items-center gap-2">
-                                            <span class="material-symbols-outlined text-bittersweet" style="font-size: 18px;">group</span>
-                                            Quản lý tài khoản khách hàng
-                                        </div>
-                                    </td>
-                                    <td class="text-center">
-                                        <div class="form-check form-switch d-inline-block">
-                                            <input class="form-check-input" type="checkbox" checked disabled>
-                                        </div>
-                                    </td>
-                                    <td class="text-center">
-                                        <div class="form-check form-switch d-inline-block">
-                                            <input class="form-check-input" type="checkbox" checked>
-                                        </div>
-                                    </td>
-                                    <td class="text-center">
-                                        <div class="form-check form-switch d-inline-block">
-                                            <input class="form-check-input" type="checkbox">
-                                        </div>
-                                    </td>
-                                    <td class="text-center">
-                                        <div class="form-check form-switch d-inline-block">
-                                            <input class="form-check-input" type="checkbox" disabled>
-                                        </div>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td class="fw-semibold">
-                                        <div class="d-flex align-items-center gap-2">
-                                            <span class="material-symbols-outlined text-bittersweet" style="font-size: 18px;">settings</span>
-                                            Cài đặt hệ thống
-                                        </div>
-                                    </td>
-                                    <td class="text-center">
-                                        <div class="form-check form-switch d-inline-block">
-                                            <input class="form-check-input" type="checkbox" checked disabled>
-                                        </div>
-                                    </td>
-                                    <td class="text-center">
-                                        <div class="form-check form-switch d-inline-block">
-                                            <input class="form-check-input" type="checkbox">
-                                        </div>
-                                    </td>
-                                    <td class="text-center">
-                                        <div class="form-check form-switch d-inline-block">
-                                            <input class="form-check-input" type="checkbox">
-                                        </div>
-                                    </td>
-                                    <td class="text-center">
-                                        <div class="form-check form-switch d-inline-block">
-                                            <input class="form-check-input" type="checkbox" disabled>
-                                        </div>
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                    <div class="col-12 d-flex justify-content-end mt-4">
-                        <button class="btn btn-bittersweet px-4 py-2 d-flex align-items-center gap-2 shadow-sm" type="button" id="btnSavePermissions">
-                            <span class="material-symbols-outlined" style="font-size: 20px;">save</span>
-                            Lưu phân quyền
-                        </button>
+                    <div class="row g-4">
+                        <!-- Left Column: Role List Selector -->
+                        <div class="col-md-4 col-lg-3">
+                            <div class="list-group" id="permission-roles-list">
+                                <button type="button" class="list-group-item list-group-item-action disabled bg-light text-muted py-2" style="cursor: not-allowed;" title="Chủ cửa hàng - Toàn quyền hệ thống">
+                                    <small class="text-uppercase fw-bold d-block text-secondary" style="font-size: 9px; letter-spacing: 0.5px;">Hệ thống (Toàn quyền)</small>
+                                    Super Admin
+                                </button>
+                                <button type="button" class="list-group-item list-group-item-action disabled bg-light text-muted py-2" style="cursor: not-allowed;" title="Quản trị viên vận hành - Full quyền trừ Cài đặt">
+                                    <small class="text-uppercase fw-bold d-block text-secondary" style="font-size: 9px; letter-spacing: 0.5px;">Hệ thống (Quản lý vận hành)</small>
+                                    Admin
+                                </button>
+                                <button type="button" class="list-group-item list-group-item-action active fw-semibold" data-role="SALES_STAFF">
+                                    Nhân viên đơn hàng
+                                </button>
+                                <button type="button" class="list-group-item list-group-item-action fw-semibold" data-role="WAREHOUSE_STAFF">
+                                    Nhân viên kho
+                                </button>
+                                <button type="button" class="list-group-item list-group-item-action disabled bg-light text-muted py-2" style="cursor: not-allowed;" title="Khách hàng mua sắm - Không được phép truy cập Admin">
+                                    <small class="text-uppercase fw-bold d-block text-secondary" style="font-size: 9px; letter-spacing: 0.5px;">Client-side (Không có quyền)</small>
+                                    Khách hàng (User)
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Right Column: Checkbox Matrix -->
+                        <div class="col-md-8 col-lg-9">
+                            <div class="p-3 border rounded bg-white shadow-sm">
+                                <h4 class="fs-6 fw-bold mb-3 text-dark border-bottom pb-2" id="selected-role-title">
+                                    Cấu hình quyền: Nhân viên đơn hàng
+                                </h4>
+                                
+                                <div class="table-responsive">
+                                    <table class="table align-middle table-hover" id="permissions-matrix-table" style="font-size:14px;">
+                                        <thead class="table-light">
+                                            <tr>
+                                                <th width="35%">Danh mục quản lý</th>
+                                                <th width="65%">Hành động cho phép</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <!-- Row: Dashboard -->
+                                            <tr data-module="dashboard">
+                                                <td class="fw-semibold">Tổng quan</td>
+                                                <td>
+                                                    <div class="form-check form-check-inline">
+                                                        <input class="form-check-input perm-cb" type="checkbox" data-mask="1" id="db_view">
+                                                        <label class="form-check-label" for="db_view">Xem</label>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                            <!-- Row: Statistics -->
+                                            <tr data-module="statistics">
+                                                <td class="fw-semibold">Thống kê / Báo cáo</td>
+                                                <td>
+                                                    <div class="form-check form-check-inline">
+                                                        <input class="form-check-input perm-cb" type="checkbox" data-mask="1" id="stats_view">
+                                                        <label class="form-check-label" for="stats_view">Xem</label>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                            <!-- Row: Orders -->
+                                            <tr data-module="orders">
+                                                <td class="fw-semibold">Quản lý đơn hàng</td>
+                                                <td>
+                                                    <div class="d-flex flex-wrap gap-3">
+                                                        <div class="form-check">
+                                                            <input class="form-check-input perm-cb" type="checkbox" data-mask="1" id="ord_view">
+                                                            <label class="form-check-label" for="ord_view">Xem</label>
+                                                        </div>
+                                                        <div class="form-check">
+                                                            <input class="form-check-input perm-cb" type="checkbox" data-mask="2" id="ord_add">
+                                                            <label class="form-check-label" for="ord_add">Thêm</label>
+                                                        </div>
+                                                        <div class="form-check">
+                                                            <input class="form-check-input perm-cb" type="checkbox" data-mask="4" id="ord_edit">
+                                                            <label class="form-check-label" for="ord_edit">Sửa</label>
+                                                        </div>
+                                                        <div class="form-check">
+                                                            <input class="form-check-input perm-cb" type="checkbox" data-mask="8" id="ord_delete">
+                                                            <label class="form-check-label" for="ord_delete">Khóa/Xóa</label>
+                                                        </div>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                            <!-- Row: Products -->
+                                            <tr data-module="products">
+                                                <td class="fw-semibold">Quản lý sản phẩm & Kho</td>
+                                                <td>
+                                                    <div class="d-flex flex-wrap gap-3">
+                                                        <div class="form-check">
+                                                            <input class="form-check-input perm-cb" type="checkbox" data-mask="1" id="prod_view">
+                                                            <label class="form-check-label" for="prod_view">Xem</label>
+                                                        </div>
+                                                        <div class="form-check">
+                                                            <input class="form-check-input perm-cb" type="checkbox" data-mask="2" id="prod_add">
+                                                            <label class="form-check-label" for="prod_add">Thêm</label>
+                                                        </div>
+                                                        <div class="form-check">
+                                                            <input class="form-check-input perm-cb" type="checkbox" data-mask="4" id="prod_edit">
+                                                            <label class="form-check-label" for="prod_edit">Sửa</label>
+                                                        </div>
+                                                        <div class="form-check">
+                                                            <input class="form-check-input perm-cb" type="checkbox" data-mask="8" id="prod_delete">
+                                                            <label class="form-check-label" for="prod_delete">Khóa/Xóa</label>
+                                                        </div>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                            <!-- Row: Users -->
+                                            <tr data-module="users">
+                                                <td class="fw-semibold">Quản lý khách hàng & nhân viên</td>
+                                                <td>
+                                                    <div class="d-flex flex-wrap gap-3">
+                                                        <div class="form-check">
+                                                            <input class="form-check-input perm-cb" type="checkbox" data-mask="1" id="usr_view">
+                                                            <label class="form-check-label" for="usr_view">Xem</label>
+                                                        </div>
+                                                        <div class="form-check">
+                                                            <input class="form-check-input perm-cb" type="checkbox" data-mask="2" id="usr_add">
+                                                            <label class="form-check-label" for="usr_add">Thêm</label>
+                                                        </div>
+                                                        <div class="form-check">
+                                                            <input class="form-check-input perm-cb" type="checkbox" data-mask="4" id="usr_edit">
+                                                            <label class="form-check-label" for="usr_edit">Sửa</label>
+                                                        </div>
+                                                        <div class="form-check">
+                                                            <input class="form-check-input perm-cb" type="checkbox" data-mask="8" id="usr_delete">
+                                                            <label class="form-check-label" for="usr_delete">Khóa/Xóa</label>
+                                                        </div>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                            <!-- Row: Settings -->
+                                            <tr data-module="settings">
+                                                <td class="fw-semibold">Cài đặt hệ thống</td>
+                                                <td>
+                                                    <div class="d-flex flex-wrap gap-3">
+                                                        <div class="form-check">
+                                                            <input class="form-check-input perm-cb" type="checkbox" data-mask="1" id="set_view">
+                                                            <label class="form-check-label" for="set_view">Xem</label>
+                                                        </div>
+                                                        <div class="form-check">
+                                                            <input class="form-check-input perm-cb" type="checkbox" data-mask="2" id="set_add">
+                                                            <label class="form-check-label" for="set_add">Thêm</label>
+                                                        </div>
+                                                        <div class="form-check">
+                                                            <input class="form-check-input perm-cb" type="checkbox" data-mask="4" id="set_edit">
+                                                            <label class="form-check-label" for="set_edit">Sửa</label>
+                                                        </div>
+                                                        <div class="form-check">
+                                                            <input class="form-check-input perm-cb" type="checkbox" data-mask="8" id="set_delete">
+                                                            <label class="form-check-label" for="set_delete">Khóa/Xóa</label>
+                                                        </div>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+
+                                <div class="d-flex justify-content-end mt-3 border-top pt-3">
+                                    <button class="btn btn-bittersweet px-4 py-2 d-flex align-items-center gap-2 shadow-sm" type="button" id="btnSavePermissions">
+                                        <span class="material-symbols-outlined" style="font-size: 20px;">save</span>
+                                        Lưu phân quyền
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -1057,18 +1092,141 @@
         });
     });
 
-    // ============================================================
-    // AJAX: SAVE PERMISSIONS
-    // ============================================================
+    let activePermissionRole = "SALES_STAFF";
+
+    const rolePermissionsData = {
+        "SALES_STAFF": {
+            "dashboard": <%= request.getAttribute("salesPermissions") != null ? ((java.util.Map<String, Integer>)request.getAttribute("salesPermissions")).getOrDefault("dashboard", 0) : 0 %>,
+            "statistics": <%= request.getAttribute("salesPermissions") != null ? ((java.util.Map<String, Integer>)request.getAttribute("salesPermissions")).getOrDefault("statistics", 0) : 0 %>,
+            "orders": <%= request.getAttribute("salesPermissions") != null ? ((java.util.Map<String, Integer>)request.getAttribute("salesPermissions")).getOrDefault("orders", 0) : 0 %>,
+            "products": <%= request.getAttribute("salesPermissions") != null ? ((java.util.Map<String, Integer>)request.getAttribute("salesPermissions")).getOrDefault("products", 0) : 0 %>,
+            "users": <%= request.getAttribute("salesPermissions") != null ? ((java.util.Map<String, Integer>)request.getAttribute("salesPermissions")).getOrDefault("users", 0) : 0 %>,
+            "settings": <%= request.getAttribute("salesPermissions") != null ? ((java.util.Map<String, Integer>)request.getAttribute("salesPermissions")).getOrDefault("settings", 0) : 0 %>
+        },
+        "WAREHOUSE_STAFF": {
+            "dashboard": <%= request.getAttribute("warehousePermissions") != null ? ((java.util.Map<String, Integer>)request.getAttribute("warehousePermissions")).getOrDefault("dashboard", 0) : 0 %>,
+            "statistics": <%= request.getAttribute("warehousePermissions") != null ? ((java.util.Map<String, Integer>)request.getAttribute("warehousePermissions")).getOrDefault("statistics", 0) : 0 %>,
+            "orders": <%= request.getAttribute("warehousePermissions") != null ? ((java.util.Map<String, Integer>)request.getAttribute("warehousePermissions")).getOrDefault("orders", 0) : 0 %>,
+            "products": <%= request.getAttribute("warehousePermissions") != null ? ((java.util.Map<String, Integer>)request.getAttribute("warehousePermissions")).getOrDefault("products", 0) : 0 %>,
+            "users": <%= request.getAttribute("warehousePermissions") != null ? ((java.util.Map<String, Integer>)request.getAttribute("warehousePermissions")).getOrDefault("users", 0) : 0 %>,
+            "settings": <%= request.getAttribute("warehousePermissions") != null ? ((java.util.Map<String, Integer>)request.getAttribute("warehousePermissions")).getOrDefault("settings", 0) : 0 %>
+        }
+    };
+
+    function renderPermissions(role) {
+        activePermissionRole = role;
+        const perms = rolePermissionsData[role] || {};
+        
+        const roleTitles = {
+            "SALES_STAFF": "Nhân viên đơn hàng (CSKH)",
+            "WAREHOUSE_STAFF": "Nhân viên kho"
+        };
+        document.getElementById("selected-role-title").textContent = "Cấu hình quyền: " + (roleTitles[role] || role);
+
+        document.querySelectorAll("#permissions-matrix-table tbody tr").forEach(function(row) {
+            const moduleName = row.getAttribute("data-module");
+            const bitmask = perms[moduleName] || 0;
+
+            row.querySelectorAll(".perm-cb").forEach(function(cb) {
+                const mask = parseInt(cb.getAttribute("data-mask"));
+                cb.checked = (bitmask & mask) === mask;
+            });
+        });
+    }
+
+    document.querySelectorAll("#permission-roles-list button").forEach(function(btn) {
+        btn.addEventListener("click", function(e) {
+            e.preventDefault();
+            
+            document.querySelectorAll("#permission-roles-list button").forEach(function(b) {
+                b.classList.remove("active");
+            });
+            btn.classList.add("active");
+            
+            const role = btn.getAttribute("data-role");
+            renderPermissions(role);
+        });
+    });
+
+    renderPermissions("SALES_STAFF");
+
     document.getElementById('btnSavePermissions').addEventListener('click', function(e) {
         e.preventDefault();
         
+        const dataToSave = {
+            action: "save-permissions",
+            role: activePermissionRole
+        };
+
+        document.querySelectorAll("#permissions-matrix-table tbody tr").forEach(function(row) {
+            const moduleName = row.getAttribute("data-module");
+            let moduleBitmaskSum = 0;
+
+            row.querySelectorAll(".perm-cb").forEach(function(cb) {
+                if (cb.checked) {
+                    moduleBitmaskSum += parseInt(cb.getAttribute("data-mask"));
+                }
+            });
+            dataToSave[moduleName] = moduleBitmaskSum;
+        });
+
+        const params = new URLSearchParams();
+        for (const key in dataToSave) {
+            params.append(key, dataToSave[key]);
+        }
+
         Swal.fire({
-            icon: 'success',
-            title: 'Thành công!',
-            text: 'Cập nhật phân quyền vai trò (RBAC) thành công!',
-            timer: 1800,
-            showConfirmButton: false
+            title: 'Đang xử lý...',
+            html: 'Đang lưu phân quyền vào cơ sở dữ liệu.',
+            allowOutsideClick: false,
+            didOpen: () => {
+                Swal.showLoading();
+            }
+        });
+
+        fetch('${pageContext.request.contextPath}/admin/settings', {
+            method: 'POST',
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest',
+                'Content-Type': 'application/x-www-form-urlencoded'
+            },
+            body: params.toString()
+        })
+        .then(function(res) { return res.json(); })
+        .then(function(data) {
+            Swal.close();
+            if (data.success) {
+                rolePermissionsData[activePermissionRole] = {
+                    dashboard: dataToSave.dashboard,
+                    statistics: dataToSave.statistics,
+                    orders: dataToSave.orders,
+                    products: dataToSave.products,
+                    users: dataToSave.users,
+                    settings: dataToSave.settings
+                };
+
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Thành công!',
+                    text: data.message,
+                    timer: 1800,
+                    showConfirmButton: false
+                });
+            } else {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Thất bại!',
+                    text: data.message
+                });
+            }
+        })
+        .catch(function(err) {
+            Swal.close();
+            Swal.fire({
+                icon: 'error',
+                title: 'Lỗi hệ thống!',
+                text: err.message
+            });
         });
     });
 </script>
