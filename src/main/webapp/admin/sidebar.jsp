@@ -90,7 +90,7 @@
     boolean isSuperAdmin = (role == Role.SUPER_ADMIN);
 
     Map<String, Integer> permissions = null;
-    if (!isSuperAdmin && session != null) {
+    if (session != null) {
         permissions = (Map<String, Integer>) session.getAttribute("userPermissions");
         if (permissions == null && role != null) {
             dao.user.RolePermissionDao rpDao = new dao.user.RolePermissionDao();
@@ -131,6 +131,8 @@
                     Kho hàng
                 </a>
             </li>
+            <% } %>
+            <% if (isSuperAdmin || (permissions != null && permissions.getOrDefault("promotions", 0) > 0)) { %>
             <li class="nav-item">
                 <a class="admin-nav-link <%= "promotions".equals(adminActive) ? "active" : "" %>" href="${pageContext.request.contextPath}/admin/promotions">
                     <span class="material-symbols-outlined">sell</span>

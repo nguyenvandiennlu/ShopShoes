@@ -20,7 +20,7 @@ public class JDBIConnector {
             String user = Config.get("db.username", "root");
             String pass = Config.get("db.pass", "root");
             String url = String.format(
-                "jdbc:mysql://%s:%d/%s?useSSL=false&serverTimezone=Asia/Ho_Chi_Minh&characterEncoding=UTF-8",
+                "jdbc:mysql://%s:%d/%s?useSSL=false&serverTimezone=Asia/Ho_Chi_Minh&forceConnectionTimeZoneToSession=true&characterEncoding=UTF-8",
                 host, port, dbName
             );
             dataSource.setUrl(url);

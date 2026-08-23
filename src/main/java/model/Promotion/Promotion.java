@@ -1,5 +1,6 @@
 package model.Promotion;
 
+import org.jdbi.v3.core.mapper.reflect.ColumnName;
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -8,11 +9,21 @@ public class Promotion implements Serializable {
     private int id;
     private String name;
     private String slug;
-    private String discount_type;
-    private BigDecimal discount_value;
-    private LocalDateTime start_date;
-    private LocalDateTime end_date;
-    private boolean is_active;
+
+    @ColumnName("discount_type")
+    private String discountType;
+
+    @ColumnName("discount_value")
+    private BigDecimal discountValue;
+
+    @ColumnName("start_date")
+    private LocalDateTime startDate;
+
+    @ColumnName("end_date")
+    private LocalDateTime endDate;
+
+    @ColumnName("is_active")
+    private boolean isActive;
 
     public Promotion() {
     }
@@ -21,11 +32,11 @@ public class Promotion implements Serializable {
         this.id = id;
         this.name = name;
         this.slug = slug;
-        this.discount_type = discount_type;
-        this.discount_value = discount_value;
-        this.start_date = start_date;
-        this.end_date = end_date;
-        this.is_active = is_active;
+        this.discountType = discount_type;
+        this.discountValue = discount_value;
+        this.startDate = start_date;
+        this.endDate = end_date;
+        this.isActive = is_active;
     }
 
     public int getId() {
@@ -53,42 +64,46 @@ public class Promotion implements Serializable {
     }
 
     public String getDiscountType() {
-        return discount_type;
+        return discountType;
     }
 
-    public void setDiscountType(String discount_type) {
-        this.discount_type = discount_type;
+    public void setDiscountType(String discountType) {
+        this.discountType = discountType;
     }
 
     public BigDecimal getDiscountValue() {
-        return discount_value;
+        return discountValue;
     }
 
-    public void setDiscountValue(BigDecimal discount_value) {
-        this.discount_value = discount_value;
+    public void setDiscountValue(BigDecimal discountValue) {
+        this.discountValue = discountValue;
     }
 
     public LocalDateTime getStartDate() {
-        return start_date;
+        return startDate;
     }
 
-    public void setStartDate(LocalDateTime start_date) {
-        this.start_date = start_date;
+    public void setStartDate(LocalDateTime startDate) {
+        this.startDate = startDate;
     }
 
     public LocalDateTime getEndDate() {
-        return end_date;
+        return endDate;
     }
 
-    public void setEndDate(LocalDateTime end_date) {
-        this.end_date = end_date;
+    public void setEndDate(LocalDateTime endDate) {
+        this.endDate = endDate;
     }
 
     public boolean isActive() {
-        return is_active;
+        return isActive;
     }
 
-    public void setActive(boolean is_active) {
-        this.is_active = is_active;
+    public void setIsActive(boolean isActive) {
+        this.isActive = isActive;
+    }
+
+    public void setActive(boolean isActive) {
+        this.isActive = isActive;
     }
 }

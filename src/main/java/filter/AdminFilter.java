@@ -1,5 +1,8 @@
 package filter;
 
+import java.io.IOException;
+import java.util.Map;
+
 import enums.Role;
 import jakarta.servlet.Filter;
 import jakarta.servlet.FilterChain;
@@ -13,9 +16,6 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import model.user.User;
 import utils.Permission;
-
-import java.io.IOException;
-import java.util.Map;
 
 @WebFilter(urlPatterns = {"/admin/*"})
 public class AdminFilter implements Filter {
@@ -33,6 +33,17 @@ public class AdminFilter implements Filter {
 
         if (currentUser == null) {
             httpResponse.sendRedirect(httpRequest.getContextPath() + "/login");
+            return;
+        }
+
+        String path = httpRequest.getServletPath();
+        if (path == null) {
+            path = "";
+        }
+        path = path.toLowerCase().trim();
+
+        if (path.contains("quanlykhachhang.jsp") && httpRequest.getDispatcherType() == jakarta.servlet.DispatcherType.REQUEST) {
+            httpResponse.sendRedirect(httpRequest.getContextPath() + "/admin/users");
             return;
         }
 
@@ -57,11 +68,6 @@ public class AdminFilter implements Filter {
             }
         }
 
-        String path = httpRequest.getServletPath();
-        if (path == null) {
-            path = "";
-        }
-        path = path.toLowerCase().trim();
         int requiredAction = "GET".equalsIgnoreCase(httpRequest.getMethod()) ? Permission.VIEW : Permission.EDIT;
         boolean isAllowed = false;
         if (path.equals("/admin") || path.equals("/admin/") || path.contains("adminhome.jsp")) {
@@ -78,7 +84,8 @@ public class AdminFilter implements Filter {
         else if (path.contains("chart-statistics") || path.contains("api/statistics")) {
             isAllowed = hasPerm(permissions, "statistics", Permission.VIEW) || hasPerm(permissions, "dashboard", Permission.VIEW);
         }
-        else if (path.contains("quanlydonhang.jsp") || path.contains("api/orders") || path.endsWith("/orders")) {
+        else if (path.contains("quanlydonhang.jsp") || path.contains("api/orders")
+                || path.contains("/orders") || path.endsWith("/orders")) {
             isAllowed = hasPerm(permissions, "orders", requiredAction);
         }
         else if (path.contains("urgent-orders") || path.contains("recent-reviews")) {
@@ -91,6 +98,20 @@ public class AdminFilter implements Filter {
                 action = Permission.ADD;
             }
             isAllowed = hasPerm(permissions, "products", action);
+        }
+        else if (path.contains("promotions") || path.contains("quanlykhuyenmai.jsp")) {
+            int action = requiredAction;
+            if ("POST".equalsIgnoreCase(httpRequest.getMethod())) {
+                String actionParam = httpRequest.getParameter("action");
+                if ("add".equalsIgnoreCase(actionParam)) {
+                    action = Permission.ADD;
+                } else if ("delete".equalsIgnoreCase(actionParam)) {
+                    action = Permission.DELETE;
+                } else if ("edit".equalsIgnoreCase(actionParam) || "toggle".equalsIgnoreCase(actionParam)) {
+                    action = Permission.EDIT;
+                }
+            }
+            isAllowed = hasPerm(permissions, "promotions", action);
         }
         else if (path.contains("product-stats")) {
             isAllowed = hasPerm(permissions, "products", Permission.VIEW) || hasPerm(permissions, "dashboard", Permission.VIEW);

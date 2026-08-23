@@ -8,7 +8,7 @@
     request.setAttribute("adminActive", "customers");
     User currentUser = (session != null) ? (User) session.getAttribute("currentUser") : null;
     Role role = (currentUser != null) ? currentUser.getRole() : null;
-    boolean isSuperAdmin = (role == Role.SUPER_ADMIN);
+    boolean isSuperAdmin = (role == Role.SUPER_ADMIN || role == Role.ADMIN);
     
     Map<String, Integer> permissions = null;
     if (!isSuperAdmin && session != null) {

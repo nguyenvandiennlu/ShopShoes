@@ -127,7 +127,7 @@ public class PromotionDao {
                         .bind("discount_value", promo.getDiscountValue())
                         .bind("start_date", promo.getStartDate())
                         .bind("end_date", promo.getEndDate())
-                        .bind("is_active", promo.isActive())
+                        .bind("is_active", promo.isActive() ? 1 : 0)
                         .executeAndReturnGeneratedKeys("id")
                         .mapTo(int.class)
                         .one();
@@ -182,7 +182,7 @@ public class PromotionDao {
                         .bind("discount_value", promo.getDiscountValue())
                         .bind("start_date", promo.getStartDate())
                         .bind("end_date", promo.getEndDate())
-                        .bind("is_active", promo.isActive())
+                        .bind("is_active", promo.isActive() ? 1 : 0)
                         .execute();
 
                 handle.createUpdate(deletePromoProductsSql)
@@ -244,7 +244,7 @@ public class PromotionDao {
             int updated = jdbi.withHandle(handle ->
                     handle.createUpdate(sql)
                             .bind("id", promotionId)
-                            .bind("is_active", isActive)
+                            .bind("is_active", isActive ? 1 : 0)
                             .execute()
             );
             return updated > 0;

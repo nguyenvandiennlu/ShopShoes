@@ -34,6 +34,25 @@ public class RolePermissionDao {
                         permMap.put(module.toLowerCase().trim(), value.intValue());
                     }
                 }
+
+                if ("ADMIN".equalsIgnoreCase(roleName)) {
+                    permMap.putIfAbsent("dashboard", 1);
+                    permMap.putIfAbsent("statistics", 1);
+                    permMap.putIfAbsent("orders", 15);
+                    permMap.putIfAbsent("products", 15);
+                    permMap.putIfAbsent("promotions", 15);
+                    permMap.putIfAbsent("users", 15);
+                    permMap.putIfAbsent("settings", 0);
+                } else if ("SUPER_ADMIN".equalsIgnoreCase(roleName)) {
+                    permMap.putIfAbsent("dashboard", 1);
+                    permMap.putIfAbsent("statistics", 1);
+                    permMap.putIfAbsent("orders", 15);
+                    permMap.putIfAbsent("products", 15);
+                    permMap.putIfAbsent("promotions", 15);
+                    permMap.putIfAbsent("users", 15);
+                    permMap.putIfAbsent("settings", 15);
+                }
+
                 return permMap;
             });
         } catch (Exception e) {
