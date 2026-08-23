@@ -12,29 +12,37 @@ public class StatisticsService {
     public StatisticsDTO getDashboardSummary(LocalDateTime start, LocalDateTime end) {
         StatisticsDTO dto = new StatisticsDTO();
 
-        int currentOrders = statisticsDao.getTotalOrders(start, end);
-        double currentRevenue = statisticsDao.getTotalRevenue(start, end);
-        int currentUsers = statisticsDao.getNewUsers(start, end);
+        try {
+            int currentOrders = statisticsDao.getTotalOrders(start, end);
+            double currentRevenue = statisticsDao.getTotalRevenue(start, end);
+            int currentUsers = statisticsDao.getNewUsers(start, end);
 
-        long daysBetween = ChronoUnit.DAYS.between(start.toLocalDate(), end.toLocalDate()) + 1;
-        LocalDateTime prevEnd = start.minusNanos(1);
-        LocalDateTime prevStart = start.minusDays(daysBetween);
+            long daysBetween = ChronoUnit.DAYS.between(start.toLocalDate(), end.toLocalDate()) + 1;
+            LocalDateTime prevEnd = start.minusNanos(1);
+            LocalDateTime prevStart = start.minusDays(daysBetween);
 
-        int prevOrders = statisticsDao.getTotalOrders(prevStart, prevEnd);
-        double prevRevenue = statisticsDao.getTotalRevenue(prevStart, prevEnd);
-        int prevUsers = statisticsDao.getNewUsers(prevStart, prevEnd);
+            int prevOrders = statisticsDao.getTotalOrders(prevStart, prevEnd);
+            double prevRevenue = statisticsDao.getTotalRevenue(prevStart, prevEnd);
+            int prevUsers = statisticsDao.getNewUsers(prevStart, prevEnd);
 
-        dto.setTotalOrders(currentOrders);
-        dto.setOrdersGrowth(calculateGrowth(currentOrders, prevOrders));
+            dto.setTotalOrders(currentOrders);
+            dto.setOrdersGrowth(calculateGrowth(currentOrders, prevOrders));
 
-        dto.setTotalRevenue(currentRevenue);
-        dto.setRevenueGrowth(calculateGrowth(currentRevenue, prevRevenue));
+            dto.setTotalRevenue(currentRevenue);
+            dto.setRevenueGrowth(calculateGrowth(currentRevenue, prevRevenue));
 
-        dto.setNewUsers(currentUsers);
-        dto.setUsersGrowth(calculateGrowth(currentUsers, prevUsers));
+            dto.setNewUsers(currentUsers);
+            dto.setUsersGrowth(calculateGrowth(currentUsers, prevUsers));
 
-        dto.setTotalProducts(statisticsDao.getTotalProducts());
-        dto.setLowStockProducts(statisticsDao.getLowStockCount());
+            dto.setTotalProducts(statisticsDao.getTotalProducts());
+            dto.setLowStockProducts(statisticsDao.getLowStockCount());
+
+            dto.setEstimatedProfit(statisticsDao.getEstimatedProfit(start, end));
+            dto.setTopProducts(statisticsDao.getTopProducts(5));
+            dto.setCategorySales(statisticsDao.getBrandSales(start, end));
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
 
         return dto;
     }

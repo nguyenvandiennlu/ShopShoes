@@ -13,6 +13,11 @@ public class StatisticsDTO {
     private int totalProducts;
     private int lowStockProducts;
 
+    private double estimatedProfit;
+
+    private java.util.List<java.util.Map<String, Object>> topProducts;
+    private java.util.List<java.util.Map<String, Object>> categorySales;
+
     public StatisticsDTO() {}
 
     public StatisticsDTO(int totalOrders, double totalRevenue, int newUsers, int lowStockProducts) {
@@ -41,4 +46,13 @@ public class StatisticsDTO {
     public void setLowStockProducts(int lowStockProducts) { this.lowStockProducts = lowStockProducts; }
     public int getTotalProducts() { return totalProducts; }
     public void setTotalProducts(int totalProducts) { this.totalProducts = totalProducts; }
+
+    public double getEstimatedProfit() { return estimatedProfit; }
+    public void setEstimatedProfit(double estimatedProfit) { this.estimatedProfit = estimatedProfit; }
+
+    public java.util.List<java.util.Map<String, Object>> getTopProducts() { return topProducts; }
+    public void setTopProducts(java.util.List<java.util.Map<String, Object>> topProducts) { this.topProducts = topProducts; }
+
+    public java.util.List<java.util.Map<String, Object>> getCategorySales() { return categorySales; }
+    public void setCategorySales(java.util.List<java.util.Map<String, Object>> categorySales) { this.categorySales = categorySales; }
 }

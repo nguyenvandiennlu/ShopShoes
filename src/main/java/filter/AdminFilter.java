@@ -85,17 +85,17 @@ public class AdminFilter implements Filter {
             isAllowed = hasPerm(permissions, "statistics", Permission.VIEW) || hasPerm(permissions, "dashboard", Permission.VIEW);
         }
         else if (path.contains("quanlydonhang.jsp") || path.contains("/orders")) {
+        else if (path.contains("quanlydonhang.jsp") || path.contains("api/orders") || path.endsWith("/orders")) {
             isAllowed = hasPerm(permissions, "orders", requiredAction);
         }
         else if (path.contains("urgent-orders") || path.contains("recent-reviews")) {
             isAllowed = hasPerm(permissions, "orders", Permission.VIEW) || hasPerm(permissions, "dashboard", Permission.VIEW);
         }
-        else if (path.contains("quanlykhohang.jsp") || path.contains("addproduct.jsp") || path.contains("api/inventory") || path.contains("upload-image")) {
+        else if (path.contains("quanlykhohang.jsp") || path.contains("addproduct.jsp") || path.contains("api/inventory")
+                || path.contains("promotions") || path.contains("quanlykhuyenmai.jsp")) {
             int action = requiredAction;
-            if ("POST".equalsIgnoreCase(httpRequest.getMethod())) {
-                if (path.contains("addproduct.jsp")) {
-                    action = Permission.ADD;
-                }
+            if ("POST".equalsIgnoreCase(httpRequest.getMethod()) && path.contains("addproduct.jsp")) {
+                action = Permission.ADD;
             }
             isAllowed = hasPerm(permissions, "products", action);
         }

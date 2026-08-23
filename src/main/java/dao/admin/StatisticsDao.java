@@ -98,4 +98,78 @@ public class StatisticsDao {
                 .map((rs, ctx) -> new Object[]{rs.getString("m"), rs.getDouble("val")})
                 .collect(java.util.stream.Collectors.toMap(a -> (String)a[0], a -> (Double)a[1])));
     }
+
+    public java.util.List<java.util.Map<String, Object>> getTopProducts(int limit) {
+        try {
+            String sql = "SELECT p.id, p.name, " +
+                    "(SELECT img_url FROM product_main_img WHERE product_id = p.id LIMIT 1) as image_url, " +
+                    "COALESCE(b.name, 'Chưa có thương hiệu') as brand_name, " +
+                    "COALESCE(SUM(od.quantity), 0) as total_quantity, " +
+                    "COALESCE(SUM(od.subtotal), 0) as total_revenue " +
+                    "FROM product p " +
+                    "LEFT JOIN brand b ON p.brand_id = b.id " +
+                    "LEFT JOIN order_detail od ON p.id = od.product_id " +
+                    "LEFT JOIN orders o ON od.order_id = o.id " +
+                    "WHERE o.order_status != 'CANCELLED' " +
+                    "GROUP BY p.id, p.name, b.name " +
+                    "ORDER BY total_quantity DESC " +
+                    "LIMIT :limit";
+            return jdbi.withHandle(h -> h.createQuery(sql).bind("limit", limit)
+                    .map((rs, ctx) -> {
+                        java.util.Map<String, Object> row = new java.util.HashMap<>();
+                        row.put("id", rs.getInt("id"));
+                        row.put("name", rs.getString("name"));
+                        row.put("imageUrl", rs.getString("image_url"));
+                        row.put("brandName", rs.getString("brand_name"));
+                        row.put("totalQuantity", rs.getInt("total_quantity"));
+                        row.put("totalRevenue", rs.getDouble("total_revenue"));
+                        return row;
+                    }).list());
+        } catch (Exception e) {
+            e.printStackTrace();
+            return java.util.Collections.emptyList();
+        }
+    }
+
+    public java.util.List<java.util.Map<String, Object>> getBrandSales(LocalDateTime start, LocalDateTime end) {
+        try {
+            String sql = "SELECT COALESCE(b.name, 'Chưa có thương hiệu') as brand_name, " +
+                    "COUNT(DISTINCT od.product_id) as total_products, " +
+                    "COALESCE(SUM(od.quantity), 0) as total_quantity, " +
+                    "COALESCE(SUM(od.subtotal), 0) as total_revenue " +
+                    "FROM order_detail od " +
+                    "JOIN orders o ON od.order_id = o.id " +
+                    "LEFT JOIN product p ON od.product_id = p.id " +
+                    "LEFT JOIN brand b ON p.brand_id = b.id " +
+                    "WHERE o.order_status != 'CANCELLED' AND o.created_at BETWEEN :start AND :end " +
+                    "GROUP BY b.name " +
+                    "ORDER BY total_quantity DESC";
+            return jdbi.withHandle(h -> h.createQuery(sql).bind("start", start).bind("end", end)
+                    .map((rs, ctx) -> {
+                        java.util.Map<String, Object> row = new java.util.HashMap<>();
+                        row.put("brandName", rs.getString("brand_name"));
+                        row.put("totalProducts", rs.getInt("total_products"));
+                        row.put("totalQuantity", rs.getInt("total_quantity"));
+                        row.put("totalRevenue", rs.getDouble("total_revenue"));
+                        return row;
+                    }).list());
+        } catch (Exception e) {
+            e.printStackTrace();
+            return java.util.Collections.emptyList();
+        }
+    }
+
+    public double getEstimatedProfit(LocalDateTime start, LocalDateTime end) {
+        try {
+            String sql = "SELECT COALESCE(SUM(od.subtotal), 0) * 0.3 as profit " +
+                    "FROM order_detail od " +
+                    "JOIN orders o ON od.order_id = o.id " +
+                    "WHERE o.order_status != 'CANCELLED' AND o.created_at BETWEEN :start AND :end";
+            return jdbi.withHandle(h -> h.createQuery(sql).bind("start", start).bind("end", end)
+                    .mapTo(Double.class).one());
+        } catch (Exception e) {
+            e.printStackTrace();
+            return 0.0;
+        }
+    }
 }

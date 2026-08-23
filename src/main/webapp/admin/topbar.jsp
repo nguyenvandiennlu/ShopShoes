@@ -195,6 +195,11 @@
 
 <header class="admin-topbar">
   <div class="admin-topbar-actions">
+    <!-- Home -->
+    <a href="${pageContext.request.contextPath}/menu" class="admin-topbar-icon" title="Về trang chủ" style="text-decoration:none;">
+      <span class="material-symbols-outlined">home</span>
+    </a>
+
     <!-- Notifications -->
     <div style="position:relative;">
       <button class="admin-topbar-icon" type="button" id="notifToggle" onclick="toggleNotifications()">
