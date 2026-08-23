@@ -1,5 +1,8 @@
 package filter;
 
+import java.io.IOException;
+import java.util.Map;
+
 import enums.Role;
 import jakarta.servlet.Filter;
 import jakarta.servlet.FilterChain;
@@ -13,9 +16,6 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import model.user.User;
 import utils.Permission;
-
-import java.io.IOException;
-import java.util.Map;
 
 @WebFilter(urlPatterns = {"/admin/*"})
 public class AdminFilter implements Filter {
@@ -84,8 +84,8 @@ public class AdminFilter implements Filter {
         else if (path.contains("chart-statistics") || path.contains("api/statistics")) {
             isAllowed = hasPerm(permissions, "statistics", Permission.VIEW) || hasPerm(permissions, "dashboard", Permission.VIEW);
         }
-        else if (path.contains("quanlydonhang.jsp") || path.contains("/orders")) {
-        else if (path.contains("quanlydonhang.jsp") || path.contains("api/orders") || path.endsWith("/orders")) {
+        else if (path.contains("quanlydonhang.jsp") || path.contains("api/orders")
+                || path.contains("/orders") || path.endsWith("/orders")) {
             isAllowed = hasPerm(permissions, "orders", requiredAction);
         }
         else if (path.contains("urgent-orders") || path.contains("recent-reviews")) {
